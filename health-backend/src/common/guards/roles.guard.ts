@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from 'src/common/roles.decorator';
+import { ROLES_KEY } from 'src/common/decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -20,7 +20,6 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
-    console.log('🚀 ~ RolesGuard ~ user:', user);
     if (!user) {
       throw new ForbiddenException('1Access denied, insufficient permissions');
     }

@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BlockApiGuard } from './guards/blockApi.guard';
+import { BlockApiGuard } from './common/guards/blockApi.guard';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -8,12 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
+  
   // const reflector = app.get(Reflector);
   // app.useGlobalGuards(new BlockApiGuard(reflector));
   await app.listen(3000);

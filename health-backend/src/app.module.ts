@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ProductModule } from './product/product.module';
-import { OrderModule } from './order/order.module';
-import { UsersModule } from './user/user.module';
-import { ChatModule } from './chat/chat.module';
-import { RecommendationModule } from './recommendation/recommendation.module';
-import { CategoryModule } from './category/category.module';
-import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
-import { JwtStrategy } from './guards/jwt/jwt.strategy';
-import { PassportModule } from '@nestjs/passport';
+import { CategoryModule } from './category/category.module';
+import { ChatModule } from './chat/chat.module';
+import { JwtStrategy } from './common/guards/jwt/jwt.strategy';
+import { CustomLogger } from './common/logger/custom.logger';
+import { OrderModule } from './order/order.module';
+import { ProductModule } from './product/product.module';
+import { RecommendationModule } from './recommendation/recommendation.module';
+import { UsersModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -46,7 +47,11 @@ import { PassportModule } from '@nestjs/passport';
     ProductModule,
     OrderModule,
   ],
-  providers: [AppService, JwtStrategy],
+  providers: [
+    AppService,
+    JwtStrategy,
+    { provide: 'LoggerService', useClass: CustomLogger },
+  ],
   controllers: [AppController],
 })
 export class AppModule {}

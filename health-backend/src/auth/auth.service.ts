@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   Injectable,
+  Logger,
   UnauthorizedException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +15,8 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
@@ -20,19 +24,21 @@ export class AuthService {
   ) {}
   async login(loginDto: LoginDto): Promise<any> {
     const { username, password } = loginDto;
-
+    this.logger.log(`Login attempt for username: ${username}`);
     // Tìm người dùng theo username
     const user = await this.userModel.findOne({ username: username });
     if (!user) {
+      this.logger.warn(`User not found: ${username}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Kiểm tra mật khẩu
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      this.logger.error(`Invalid password attempt for username: ${username}`);
       throw new UnauthorizedException('Invalid credentials');
     }
-
+    this.logger.log(`Login successful for username: ${username}`);
     // Tạo Access Token và Refresh Token
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
@@ -46,20 +52,22 @@ export class AuthService {
   }
   // Tạo mới một người dùng
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // Tạo một bản sao của createUserDto để không thay đổi đối tượng gốc
-    const userToCreate = { ...createUserDto };
-
-    // Mã hóa mật khẩu trước khi lưu vào DB
-    const salt = await bcrypt.genSalt(10); // Tạo "muối" để bảo vệ mã hóa
-    const hashedPassword = await bcrypt.hash(userToCreate.password, salt);  // Mã hóa mật khẩu
-
-    // Ghi đè mật khẩu gốc bằng mật khẩu đã mã hóa
-    userToCreate.password = hashedPassword;
-
-    // Tạo mới người dùng và lưu vào DB
-    const createdUser = new this.userModel(userToCreate);
+    // Kiểm tra mật khẩu trước khi mã hóa
+    if (!createUserDto.password) {
+      throw new BadRequestException('Password is required');
+    }
+  
+    const salt = await bcrypt.genSalt(10); // Tạo muối
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt); // Mã hóa mật khẩu
+  
+    const createdUser = new this.userModel({
+      ...createUserDto,
+      password: hashedPassword, // Lưu mật khẩu đã mã hóa
+    });
+  
     return createdUser.save();
   }
+  
 
   async generateAccessToken(user: any): Promise<string> {
     const payload = {
@@ -80,7 +88,7 @@ export class AuthService {
       role: user.role,
     };
     return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      secret: this.configService.get<string>('REFRESH_TOKEN'),
       expiresIn: '7d', // Refresh Token có thời hạn 7 ngày
     });
   }
@@ -89,7 +97,7 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string): Promise<string> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>('REFRESH_TOKEN'),
       });
       return this.generateAccessToken(payload); // Trả lại Access Token mới
     } catch (error) {
