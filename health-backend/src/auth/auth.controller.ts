@@ -5,12 +5,12 @@ import {
   Param,
   Post
 } from '@nestjs/common';
-import { Public } from 'src/common/public.decorator';
 import { User } from 'src/user/schema/user.schema';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {

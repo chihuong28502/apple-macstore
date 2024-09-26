@@ -12,25 +12,15 @@ services:
     environment:
       - NODE_ENV=production
     depends_on:
-      - database
+      - mongodb
 
-  frontend:
-    build:
-      context: ./health-frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      - backend
-
-  database:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+  mongodb:
+      image: mongo:latest
+      container_name: mongo
+      ports:
+        - "27017:27017" # MongoDB port
+      volumes:
+        - mongo-data:/data/db
 
 volumes:
   mongo-data:

@@ -7,7 +7,7 @@ import { User, UserSchema } from 'src/user/schema/user.schema';
 import { UsersModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from 'src/guards/jwt/jwt.strategy';
+import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
 
 @Module({
   imports: [

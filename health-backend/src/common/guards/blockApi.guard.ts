@@ -21,9 +21,7 @@ export class BlockApiGuard implements CanActivate {
 
     // Nếu không phải public API, thì chặn truy cập
     const request = context.switchToHttp().getRequest();
-    console.log("🚀 ~ BlockApiGuard ~ request:", request)
     const user = request.user; // Kiểm tra thông tin người dùng từ request (giả sử có xác thực)
-    console.log("🚀 ~ BlockApiGuard ~ user:", user)
 
     if (!user) {
       return false; // Chặn truy cập nếu không có thông tin người dùng
