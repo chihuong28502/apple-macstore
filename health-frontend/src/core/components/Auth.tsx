@@ -1,15 +1,14 @@
 "use client";
+import { isPrivateRouter } from "@/app/utils/units";
+import { CustomerActions } from "@/modules/customer/slice";
 import { isEmpty } from "lodash";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { pathPrivateRouter } from "../services/configPrivateRouter";
 import CONST from "../services/const";
 import { setConfigAxios } from "../services/fetch";
 import { useAppDispatch } from "../services/hook";
 import { AppAction } from "./AppSlice";
-import { CustomerActions } from "@/modules/customer/slice";
-import { isPrivateRouter } from "@/app/utils/units";
-import { pathPrivateRouter } from "../services/configPrivateRouter"
-import SysStorage from "../services/storage";
 
 function Auth(props: any) {
   const [initial, setInitial] = useState(false);
@@ -21,8 +20,7 @@ function Auth(props: any) {
     getSetting();
   }, [pathname]);
 
-  const getSetting = () => {
-  };
+  const getSetting = () => {};
 
   const getCustomer = () => {
     dispatch(AppAction.showLoading());
@@ -38,12 +36,12 @@ function Auth(props: any) {
       const accessToken = localStorage.getItem(CONST.STORAGE.ACCESS_TOKEN);
       // dispatch(AppAction.showLoading());
       if (isEmpty(accessToken)) {
-        if (SysStorage.get("USER_INFO")) {
+        if (localStorage.getItem("USER_INFO")) {
           localStorage.removeItem("USER_INFO");
         }
         const isPrivate = checkPrivateRouter(pathname);
         if (isPrivate) {
-          router.push("/statistic");
+          router.push("/404");
         } else {
           setInitial(true);
           dispatch(AppAction.hideLoading());
@@ -62,7 +60,7 @@ function Auth(props: any) {
     }
   };
 
-  return <div>{initial ? props?.children : <></>}</div>;
+  return <>{initial ? props?.children : <></>}</>;
 }
 
 export default Auth;

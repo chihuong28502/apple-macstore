@@ -27,7 +27,7 @@ export const useIsLogin = () => {
 };
 
 export const clearLocalUser = () => {
-  SysStorage.remove("USER_INFO");
-  SysStorage.remove("REFRESH_TOKEN");
-  SysStorage.remove("ACCESS_TOKEN");
+  localStorage.removeItem("USER_INFO");
+  localStorage.removeItem("REFRESH_TOKEN");
+  localStorage.removeItem("ACCESS_TOKEN");
 };
