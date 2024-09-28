@@ -4,7 +4,7 @@ interface StorageMethods {
   remove: () => void;
 }
 
-const SysStorage = (key: string): StorageMethods => {
+export const SysStorage = (key: string): StorageMethods => {
   return {
     get: () => localStorage.getItem(key),
     set: (value: string) => localStorage.setItem(key, value),

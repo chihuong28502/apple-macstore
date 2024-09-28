@@ -16,19 +16,11 @@ export const pathPrivateRouter = [
     ],
   },
   {
-    path: "payment",
-    isPrivate: true,
+    path: "/dashboard",
+    roles: ["customer"], // Chỉ cho phép admin truy cập
   },
   {
-    path: "config",
-    isPrivate: true,
-  },
-  {
-    path: "api",
-    isPrivate: true,
-  },
-  {
-    path: "balance-fluctuations",
-    isPrivate: true,
+    path: "/private",
+    roles: ["customer"], // Cho phép cả admin và customer truy cập
   },
 ];

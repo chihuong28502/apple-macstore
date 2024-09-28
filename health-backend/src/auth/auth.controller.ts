@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { User } from 'src/user/schema/user.schema';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
@@ -22,10 +16,12 @@ export class AuthController {
   // Endpoint để tạo người dùng mới
   @Public()
   @Post('register')
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ message: string; success: boolean; user: User }> {
     return this.authService.create(createUserDto);
   }
-  
+
   @Public()
   @Post('login')
   async login(@Body() loginDto: LoginDto) {

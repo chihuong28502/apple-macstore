@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Cabin, Orbitron } from "next/font/google";
 // import "./globals.css";
 import "@/app/globals.css";
+import 'antd/dist/reset.css';
 import ReduxProvider from "@/core/components/ReduxProvider";
 const inter = Cabin({ subsets: ["vietnamese"] });
 const orbitron = Orbitron({

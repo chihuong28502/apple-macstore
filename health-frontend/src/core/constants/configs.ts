@@ -1,7 +1,7 @@
 export const Config = {
   API_SERVER:
     process.env.NEXT_PUBLIC_API_SERVER ||
-    "https://dev-api.topclick.vn/frontend-api",
+    "http://localhost:3000",
   // "http://localhost:3001/frontend-api",
   // SOCKET_SERVER:
   //   process.env.NEXT_PUBLIC_SOCKET_SERVER || "http://localhost:3001",

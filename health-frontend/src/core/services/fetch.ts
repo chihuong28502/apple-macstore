@@ -25,9 +25,8 @@ const registerRequestInterceptor = (clientInstance: AxiosInstance) => {
   clientInstance.interceptors.request.use(
     (config: any) => {
       try {
-
         // Lấy accessToken nếu có
-        const accessToken = SysStorage(CONST.STORAGE.ACCESS_TOKEN).get();
+        const accessToken = localStorage.getItem(CONST.STORAGE.ACCESS_TOKEN);
         if (accessToken && accessToken !== "undefined") {
           config.headers.Authorization = `Bearer ${accessToken}`;
         } else {
@@ -88,7 +87,7 @@ const registerResponseInterceptor = (clientInstance: AxiosInstance) => {
         } catch (error) {
           tokenStorage.remove();
           refreshTokenStorage.remove();
-          window.location.href = "/login"; 
+          window.location.href = "/login";
         }
       }
       return Promise.reject(error);
@@ -121,10 +120,13 @@ export function setConfigAxios(accessToken: any) {
 }
 
 // Các phương thức HTTP chính (POST, GET, PUT, PATCH, DELETE)
-const post = (url: string, data?: any, config = {}) => AxiosClient.post(url, data, config);
+const post = (url: string, data?: any, config = {}) =>
+  AxiosClient.post(url, data, config);
 const get = (url: string, config = {}) => AxiosClient.get(url, config);
-const put = (url: string, data?: any, config = {}) => AxiosClient.put(url, data, config);
-const patch = (url: string, data?: any, config = {}) => AxiosClient.patch(url, data, config);
+const put = (url: string, data?: any, config = {}) =>
+  AxiosClient.put(url, data, config);
+const patch = (url: string, data?: any, config = {}) =>
+  AxiosClient.patch(url, data, config);
 const del = (url: string, config = {}) => AxiosClient.delete(url, config);
 
 // Tập hợp tất cả các phương thức thành một đối tượng duy nhất

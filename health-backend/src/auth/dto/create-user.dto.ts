@@ -8,7 +8,6 @@ export class CreateUserDto {
     lastName: string;
     phoneNumber: string;
     shoeSize: number;
-    footType: string;
     activityGoal: string;
   };
 }

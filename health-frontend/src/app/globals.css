@@ -35,7 +35,7 @@ body * {
 
 /* Custom scrollbar styling */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 0.4rem;
   height: 5px;
 }
 
@@ -50,7 +50,7 @@ body * {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: white;
+  background: #999;
 }
 
 /* Webkit-mask type */

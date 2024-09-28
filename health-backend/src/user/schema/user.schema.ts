@@ -23,7 +23,6 @@ export class User {
       lastName: { type: String },
       phoneNumber: { type: String },
       shoeSize: { type: Number },
-      footType: { type: String },
       activityGoal: { type: String }
     }
   })

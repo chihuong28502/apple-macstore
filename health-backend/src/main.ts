@@ -8,12 +8,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  
   // const reflector = app.get(Reflector);
   // app.useGlobalGuards(new BlockApiGuard(reflector));
-  await app.listen(3000);
+  app.enableCors({
+    origin: 'http://localhost:3001', // Cho phép nguồn này truy cập
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Các phương thức được phép
+    credentials: true, // Cho phép gửi cookie
+  });
+  await app.listen(configService.get<string>('PORT', '3000'));
+
   console.log(
-    `Listen heath_backend connect Db: ${configService.get<string>('MONGODB_URI', 'localhost:27017')} and RabbitMQ: ${configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672')}with env ${configService.get<string>('NODE_ENV', 'dev')}`,
+    `Listen heath_backend port ${configService.get<string>('PORT', '3000')}  connect Db: ${configService.get<string>('MONGODB_URI', 'localhost:27017')} with env ${configService.get<string>('NODE_ENV', 'dev')}`,
   );
 }
 bootstrap();
