@@ -2,7 +2,7 @@ import {
   BadRequestException,
   Injectable,
   Logger,
-  UnauthorizedException
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -23,51 +23,65 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
   async login(loginDto: LoginDto): Promise<any> {
-    const { username, password } = loginDto;
-    this.logger.log(`Login attempt for username: ${username}`);
-    // Tìm người dùng theo username
-    const user = await this.userModel.findOne({ username: username });
+    const { email, password } = loginDto;
+    this.logger.log(`Login attempt for email: ${email}`);
+    // Tìm người dùng theo email
+    const user = await this.userModel.findOne({ email: email });
     if (!user) {
-      this.logger.warn(`User not found: ${username}`);
+      this.logger.warn(`User not found: ${email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Kiểm tra mật khẩu
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      this.logger.error(`Invalid password attempt for username: ${username}`);
+      this.logger.error(`Invalid password attempt for email: ${email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
-    this.logger.log(`Login successful for username: ${username}`);
+    this.logger.log(`Login successful for email: ${email}`);
     // Tạo Access Token và Refresh Token
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
 
     return {
       message: 'Login success',
+      success: true,
       status: true,
-      accessToken,
-      refreshToken,
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          id: user._id,
+          username: user.username,
+          role: user.role,
+        },
+      },
     };
   }
   // Tạo mới một người dùng
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    // Kiểm tra mật khẩu trước khi mã hóa
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<{ message: string; success: boolean; user: User }> {
+    this.logger.debug(createUserDto);
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
     }
-  
     const salt = await bcrypt.genSalt(10); // Tạo muối
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt); // Mã hóa mật khẩu
-  
+
     const createdUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword, // Lưu mật khẩu đã mã hóa
     });
-  
-    return createdUser.save();
+
+    await createdUser.save();
+
+    return {
+      message: 'Register success',
+      success: true,
+      user: createdUser,
+    };
   }
-  
 
   async generateAccessToken(user: any): Promise<string> {
     const payload = {
