@@ -7,15 +7,25 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
-  constructor(@InjectModel(Category.name) private categoryModel: Model<CategoryDocument>) {}
+  constructor(
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+  ) {}
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
     const createdCategory = new this.categoryModel(createCategoryDto);
     return createdCategory.save();
   }
 
-  async findAll(): Promise<Category[]> {
-    return this.categoryModel.find().exec();
+  async findAll(): Promise<{
+    data: Category[];
+    success: boolean;
+  }> {
+    // Await the result of the database query
+    const categories = await this.categoryModel.find().exec();
+    return {
+      data: categories,
+      success: true,
+    };
   }
 
   async findOne(id: string): Promise<Category> {
@@ -26,8 +36,13 @@ export class CategoryService {
     return category;
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
-    const updatedCategory = await this.categoryModel.findByIdAndUpdate(id, updateCategoryDto, { new: true }).exec();
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<Category> {
+    const updatedCategory = await this.categoryModel
+      .findByIdAndUpdate(id, updateCategoryDto, { new: true })
+      .exec();
     if (!updatedCategory) {
       throw new NotFoundException(`Category with ID "${id}" not found`);
     }
@@ -35,7 +50,9 @@ export class CategoryService {
   }
 
   async remove(id: string): Promise<Category> {
-    const deletedCategory = await this.categoryModel.findByIdAndDelete(id).exec();
+    const deletedCategory = await this.categoryModel
+      .findByIdAndDelete(id)
+      .exec();
     if (!deletedCategory) {
       throw new NotFoundException(`Category with ID "${id}" not found`);
     }

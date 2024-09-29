@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './schema/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -6,6 +16,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { RulesGuard } from 'src/common/guards/auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('products')
 export class ProductController {
@@ -18,9 +29,18 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
+  @Public()
   @Get()
-  async findAll(): Promise<Product[]> {
-    return this.productService.findAll();
+  async getAllProducts(
+    @Query('categoryId') categoryId: string,
+    @Query('page') page: number = 1, // Mặc định là trang 1
+    @Query('limit') limit: number = 10, // Mặc định mỗi trang 10 sản phẩm
+  ): Promise<{ data: Product[]; total: number; success: boolean }> {
+    return await this.productService.getAll(
+      page,
+      categoryId,
+      limit,
+    );
   }
 
   @Get(':id')
@@ -29,7 +49,10 @@ export class ProductController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
     return this.productService.update(id, updateProductDto);
   }
 

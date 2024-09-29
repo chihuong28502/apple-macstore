@@ -11,14 +11,14 @@ export class Product {
   @Prop({ required: true })
   description: string;  // Mô tả sản phẩm
 
-  @Prop({ required: true })
+  @Prop({ required: true, min: 0 })
   basePrice: number;  // Giá nhập sản phẩm (giá gốc)
 
-  @Prop({ required: true })
+  @Prop({ required: true, min: 0 })
   price: number;  // Giá bán sản phẩm
 
-  @Prop({ type: String })
-  categoryId: string;  // Tham chiếu đến Category
+  @Prop({ type: String, required: true, ref: 'Category' }) 
+  categoryId: string;  // ID danh mục sản phẩm
 
   @Prop([String])
   images: string[];  // URL hình ảnh sản phẩm
@@ -28,31 +28,36 @@ export class Product {
 
   @Prop({
     type: {
-      colors: [String],  // Màu sắc sản phẩm
-      sizes: [Number],  // Kích cỡ sản phẩm
-      materials: [String],  // Chất liệu sản phẩm
+      colors: { type: [String], default: [] },  // Màu sắc sản phẩm
+      sizes: { type: [Number], default: [] },  // Kích cỡ sản phẩm
+      materials: { type: [String], default: [] },  // Chất liệu sản phẩm
       personalizationOptions: {
-        addName: { type: Boolean },  // Tùy chọn thêm tên cá nhân
-        addLogo: { type: Boolean }  // Tùy chọn thêm logo cá nhân
+        addName: { type: Boolean, default: false },  // Tùy chọn thêm tên cá nhân
+        addLogo: { type: Boolean, default: false }  // Tùy chọn thêm logo cá nhân
       }
-    }
+    },
+    default: {},
   })
-  customizations: Record<string, any>;
+  customizations: Record<string, any>;  // Tùy chọn cá nhân hóa
 
   @Prop({ default: 0 })
   reviewsCount: number;  // Số lượng đánh giá
 
-  @Prop({ default: 0 })
-  averageRating: number;  // Đánh giá trung bình
+  @Prop({ default: 0, min: 0, max: 5 })
+  averageRating: number;  // Đánh giá trung bình (0 đến 5 sao)
 
-  @Prop({ type: Object })
+  @Prop({
+    type: Map, // Sử dụng Map để quản lý tồn kho theo biến thể
+    of: Number,  // Giá trị là số lượng tồn kho
+    default: {},
+  })
   stock: Record<string, number>;  // Quản lý tồn kho theo biến thể
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date;  // Ngày tạo sản phẩm
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date;  // Ngày cập nhật sản phẩm
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
