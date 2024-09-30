@@ -22,26 +22,47 @@ const ProductSlice = createSlice({
   initialState,
   reducers: {
     createProduct: (state: ProductState, { payload }: PayloadAction<any>) => {},
-    fetchProductById: (state: ProductState, { payload }: PayloadAction<string>) => {},
-    
-    // Hàm lấy dữ liệu sản phẩm có phân trang và category
-    fetchPaginatedProducts: (state: ProductState, { payload }: PayloadAction<{ page: number; limit: number; categoryId?: string }>) => {},
-    
+    fetchProductById: (
+      state: ProductState,
+      {
+        payload,
+      }: PayloadAction<{
+        id: string;
+        onSuccess?: (rs: any) => void;
+        onFail?: (rs: any) => void;
+      }>
+    ) => {},
+
     setProduct: (state: ProductState, { payload }: PayloadAction<any>) => {
       state.product = payload;
     },
-    
-    setProductList: (state: ProductState, { payload }: PayloadAction<any[]>) => {
+    fetchPaginatedProducts: (
+      state: ProductState,
+      {
+        payload,
+      }: PayloadAction<{ page: number; limit: number; categoryId?: string }>
+    ) => {},
+
+    setProductList: (
+      state: ProductState,
+      { payload }: PayloadAction<any[]>
+    ) => {
       state.productList = payload;
     },
-    
-    setTotalProducts: (state: ProductState, { payload }: PayloadAction<number>) => {
+
+    setTotalProducts: (
+      state: ProductState,
+      { payload }: PayloadAction<number>
+    ) => {
       state.totalProducts = payload;
     },
-    
+
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => {},
-    deleteProduct: (state: ProductState, { payload }: PayloadAction<string>) => {},
-    
+    deleteProduct: (
+      state: ProductState,
+      { payload }: PayloadAction<string>
+    ) => {},
+
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
     },

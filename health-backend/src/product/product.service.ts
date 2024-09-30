@@ -42,12 +42,14 @@ async getAll(
 }
 
 
-  async findOne(id: string): Promise<Product> {
+  async findOne(id: string): Promise<{data:Product,success:boolean}> {
     const product = await this.productModel.findById(id).exec();
     if (!product) {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
-    return product;
+    return {
+      data:product,success: true
+    };
   }
 
   async update(

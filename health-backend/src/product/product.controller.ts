@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Post,
   Put,
-  UseGuards,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ProductService } from './product.service';
-import { Product } from './schema/product.schema';
+import { Public } from 'src/common/decorators/public.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RulesGuard } from 'src/common/guards/auth.guard';
+import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { RulesGuard } from 'src/common/guards/auth.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
-import { Public } from 'src/common/decorators/public.decorator';
+import { ProductService } from './product.service';
+import { Product } from './schema/product.schema';
 
 @Controller('products')
 export class ProductController {
@@ -36,18 +36,16 @@ export class ProductController {
     @Query('page') page: number = 1, // Mặc định là trang 1
     @Query('limit') limit: number = 10, // Mặc định mỗi trang 10 sản phẩm
   ): Promise<{ data: Product[]; total: number; success: boolean }> {
-    return await this.productService.getAll(
-      page,
-      categoryId,
-      limit,
-    );
+    return await this.productService.getAll(page, categoryId, limit);
   }
 
+  @Public()
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Product> {
+  async findOne(@Param('id') id: string): Promise<{data:Product,success:boolean}> {
     return this.productService.findOne(id);
   }
 
+  @Roles('admin', 'support')
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -56,6 +54,7 @@ export class ProductController {
     return this.productService.update(id, updateProductDto);
   }
 
+  @Roles('admin', 'support')
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Product> {
     return this.productService.remove(id);

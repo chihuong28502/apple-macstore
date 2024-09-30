@@ -23,9 +23,8 @@ const ProductPage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // Fetch products for the active tab (All or by category)
     const categoryId = activeTab === "1" ? undefined : activeTab;
-    setLoadingTab(true); // Set loading state when fetching new data
+    setLoadingTab(true);
     dispatch(
       ProductActions.fetchPaginatedProducts({
         page: currentPage,
@@ -35,7 +34,6 @@ const ProductPage = () => {
     );
   }, [dispatch, currentPage, pageSize, activeTab]);
 
-  // Phân loại danh mục cha và con
   const parentCategories = categories.filter(
     (category: any) => !category.parentId
   );
@@ -43,16 +41,15 @@ const ProductPage = () => {
     (category: any) => category.parentId
   );
 
-  // Lấy các danh mục con theo parentId
   const getChildCategories = (parentId: string) => {
     return childCategories.filter((cat) => cat.parentId === parentId);
   };
 
-  // Filter products by category
   const filterByCategory = (categoryId: string) =>
-    allProducts?.filter((product: any) => product.categoryId._id === categoryId);
+    allProducts?.filter(
+      (product: any) => product.categoryId._id === categoryId
+    );
 
-  // Tạo menu con
   const renderSubCategories = (parentId: string) => {
     const subCategories = getChildCategories(parentId);
     if (subCategories.length === 0) return <></>;
@@ -63,8 +60,8 @@ const ProductPage = () => {
           <Menu.Item
             key={subCategory._id}
             onClick={() => {
-              setActiveTab(subCategory._id); // Set the subcategory as active
-              setCurrentPage(1); // Reset page
+              setActiveTab(subCategory._id); 
+              setCurrentPage(1); 
             }}
           >
             {subCategory.name}
@@ -74,7 +71,6 @@ const ProductPage = () => {
     );
   };
 
-  // Generate tab items based on parent categories
   const tabItems = [
     {
       key: "1",
@@ -86,6 +82,7 @@ const ProductPage = () => {
               <Card
                 key={index}
                 name={product.name}
+                id={product._id}
                 description={product.description}
                 basePrice={product.basePrice}
                 price={product.price}
@@ -128,6 +125,7 @@ const ProductPage = () => {
               (product: any, index: number) => (
                 <Card
                   key={index}
+                  id={product._id}
                   name={product.name}
                   description={product.description}
                   basePrice={product.basePrice}
