@@ -11,9 +11,9 @@ async function bootstrap() {
   // const reflector = app.get(Reflector);
   // app.useGlobalGuards(new BlockApiGuard(reflector));
   app.enableCors({
-    origin: '*', // Cho phép nguồn này truy cập
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Các phương thức được phép
-    credentials: true, // Cho phép gửi cookie
+    origin: 'http://localhost:3001',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, 
   });
   await app.listen(configService.get<string>('PORT', '3000'));
 
