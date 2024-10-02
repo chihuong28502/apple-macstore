@@ -22,6 +22,33 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
+
+  async createAdmin(): Promise<void> {
+    const adminEmail = 'admin@gmail.com';
+
+    // Kiểm tra xem admin có tồn tại chưa
+    const existingAdmin = await this.userModel.findOne({ email: adminEmail });
+    if (!existingAdmin) {
+      // Hash password
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash('12345678', salt);
+
+      // Tạo tài khoản admin mới
+      const adminUser = {
+        username: 'admin',
+        password: hashedPassword,
+        email: adminEmail,
+        role: 'admin',
+      };
+
+      // Lưu vào database
+      await this.userModel.create(adminUser);
+      console.log('Admin account created');
+    } else {
+      console.log('Admin account already exists');
+    }
+  }
+
   async login(loginDto: LoginDto): Promise<any> {
     const { email, password } = loginDto;
     this.logger.log(`Login attempt for email: ${email}`);

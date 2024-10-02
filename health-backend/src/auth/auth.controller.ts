@@ -13,6 +13,10 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
+
+  async onModuleInit() {
+    await this.authService.createAdmin();
+  }
   // Endpoint để tạo người dùng mới
   @Public()
   @Post('register')
