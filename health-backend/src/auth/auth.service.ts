@@ -12,7 +12,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/user/schema/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-
+import { Response } from 'express';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -22,9 +22,37 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
-  async login(loginDto: LoginDto): Promise<any> {
+
+  async createAdmin(): Promise<void> {
+    const adminEmail = 'admin@gmail.com';
+
+    // Kiểm tra xem admin có tồn tại chưa
+    const existingAdmin = await this.userModel.findOne({ email: adminEmail });
+    if (!existingAdmin) {
+      // Hash password
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash('12345678', salt);
+
+      // Tạo tài khoản admin mới
+      const adminUser = {
+        username: 'admin',
+        password: hashedPassword,
+        email: adminEmail,
+        role: 'admin',
+      };
+
+      // Lưu vào database
+      await this.userModel.create(adminUser);
+      console.log('Admin account created');
+    } else {
+      console.log('Admin account already exists');
+    }
+  }
+
+  async login(loginDto: LoginDto, res: Response): Promise<any> {
     const { email, password } = loginDto;
     this.logger.log(`Login attempt for email: ${email}`);
+
     // Tìm người dùng theo email
     const user = await this.userModel.findOne({ email: email });
     if (!user) {
@@ -38,25 +66,47 @@ export class AuthService {
       this.logger.error(`Invalid password attempt for email: ${email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
+
     this.logger.log(`Login successful for email: ${email}`);
+
     // Tạo Access Token và Refresh Token
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
 
-    return {
+    // Lưu Access Token và Refresh Token vào cookies
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true, // Nên dùng HTTPS khi deploy để đảm bảo an toàn
+      sameSite: 'strict',
+      maxAge: 3600 * 1000, // 1 giờ
+    });
+    res.cookie('loggedin', true, {
+      httpOnly: true,
+      secure: true, // Nên dùng HTTPS khi deploy để đảm bảo an toàn
+      sameSite: 'strict',
+      maxAge: 3600 * 1000, // 1 giờ
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 3600 * 1000, // 7 ngày
+    });
+
+    // Trả về phản hồi JSON
+    return res.json({
       message: 'Login success',
       success: true,
       status: true,
       data: {
-        accessToken,
-        refreshToken,
         user: {
           id: user._id,
           username: user.username,
           role: user.role,
         },
       },
-    };
+    });
   }
   // Tạo mới một người dùng
   async create(

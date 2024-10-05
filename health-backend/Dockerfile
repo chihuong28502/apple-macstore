@@ -16,7 +16,6 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Expose necessary port (optional for RabbitMQ, but useful if you want to test it locally)
 EXPOSE 3001
 
 # Command to run the application
