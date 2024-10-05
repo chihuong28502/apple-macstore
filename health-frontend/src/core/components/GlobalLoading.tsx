@@ -32,15 +32,12 @@ function GlobalLoading() {
         height={200}
         priority
       /> */}
-          <div className={styles.container}>
-            <div className={styles.cube}>
-              <div className={styles.cube__inner}></div>
-            </div>
-            <div className={styles.cube}>
-              <div className={styles.cube__inner}></div>
-            </div>
-            <div className={styles.cube}>
-              <div className={styles.cube__inner}></div>
+          <p className=" text-4xl font-black bg-gradient-to-r from-darkTextDiscoverService via-darkTextTitleBlue to-darkTextTitlePink bg-clip-text text-transparent uppercase">
+            TopClick
+          </p>
+          <div className="w-full max-w-[200px]">
+            <div className={styles.progressContainer}>
+              <div className={styles.progressBar}></div>
             </div>
           </div>
         </div>
