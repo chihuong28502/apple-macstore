@@ -11,7 +11,7 @@ async function bootstrap() {
   // const reflector = app.get(Reflector);
   // app.useGlobalGuards(new BlockApiGuard(reflector));
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'https://health-sand-alpha.vercel.app',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, 
   });
