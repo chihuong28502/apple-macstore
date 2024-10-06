@@ -14,9 +14,12 @@ import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
 import { UsersModule } from './user/user.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './taskSchedule/tasks.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
       isGlobal: true, // Đảm bảo biến môi trường có thể sử dụng trong toàn bộ ứng dụng
@@ -39,6 +42,7 @@ import { UsersModule } from './user/user.module';
         },
       }),
     }),
+    TasksModule,
     UsersModule,
     ChatModule,
     AuthModule,
