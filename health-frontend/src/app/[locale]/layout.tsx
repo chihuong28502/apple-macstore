@@ -1,5 +1,7 @@
 import { Providers } from "@/providers/providers";
 import type { Metadata } from "next";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import localFont from "next/font/local";
 import "@/app/globals.css";
 
@@ -31,7 +33,10 @@ export default function RootLayout({
       <body
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ToastContainer />
+          </Providers>
       </body>
     </html>
   );

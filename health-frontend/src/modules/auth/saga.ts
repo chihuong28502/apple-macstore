@@ -6,7 +6,7 @@ import { AuthActions } from "./slice";
 import CONST from "@/core/services/const";
 import { get } from "lodash";
 import { setConfigAxios } from "@/core/services/fetch";
-import { SysStorage } from "@/core/services/storage";
+import SysStorage from "@/core/services/storage";
 
 function* login({ payload }: PayloadAction<any>) {
   const {

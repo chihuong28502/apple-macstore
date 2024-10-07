@@ -3,22 +3,28 @@ import React from "react";
 
 interface Props {
   item: {
+    _id: number,
     title: string;
-    isSelect: boolean;
+    
   };
+  onSelect: any,
+  isSelect: any
 }
 
-const TopCard: React.FC<Props> = ({ item }) => {
-  const { title, isSelect } = item;
+const TopCard: React.FC<Props> = ({ item, onSelect, isSelect }) => {
+  const { title, _id } = item;
   return (
-    <span
+    <p
+      onClick={() => onSelect(_id)}
       className={cn(
-        "px-[10px] py-[6px] rounded-sm mr-2 cursor-pointer",
-        isSelect ? "bg-white" : "text-white bg-white-20"
+        "p-2 rounded-sm mr-2 cursor-pointer",
+        isSelect === _id
+          ? "bg-bgTopicCardSelected text-textTopicCardSelected"
+          : "text-textTopicCardWithoutSelect bg-bgTopicCardWithoutSelect shadow-bgComponentSelect "
       )}
     >
       {title}
-    </span>
+    </p>
   );
 };
 

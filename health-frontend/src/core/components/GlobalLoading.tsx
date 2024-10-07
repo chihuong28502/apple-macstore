@@ -33,7 +33,7 @@ function GlobalLoading() {
         priority
       /> */}
           <p className=" text-4xl font-black bg-gradient-to-r from-darkTextDiscoverService via-darkTextTitleBlue to-darkTextTitlePink bg-clip-text text-transparent uppercase">
-            TopClick
+            Health
           </p>
           <div className="w-full max-w-[200px]">
             <div className={styles.progressContainer}>

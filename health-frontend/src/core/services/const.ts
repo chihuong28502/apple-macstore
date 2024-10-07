@@ -10,7 +10,7 @@ const CONST = {
     REFRESH_TOKEN: "REFRESH_TOKEN",
     USER: "USER",
   },
-  REMAINING_TIME: 120, // in seconds, keep it here if it's being used elsewhere in the project
+  REMAINING_TIME: 120,
 };
 
 export default CONST;

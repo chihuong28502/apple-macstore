@@ -1,13 +1,15 @@
-interface StorageMethods {
-  get: () => string | null;
-  set: (value: string) => void;
-  remove: () => void;
-}
-
-export const SysStorage = (key: string): StorageMethods => {
+const SysStorage = (name: string) => {
   return {
-    get: () => localStorage.getItem(key),
-    set: (value: string) => localStorage.setItem(key, value),
-    remove: () => localStorage.removeItem(key),
+    get() {
+      return localStorage.getItem(name);
+    },
+    set(value: string) {
+      localStorage.setItem(name, value);
+    },
+    remove() {
+      localStorage.removeItem(name);
+    },
   };
 };
+
+export default SysStorage;

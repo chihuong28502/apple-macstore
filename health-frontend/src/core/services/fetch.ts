@@ -3,7 +3,7 @@
 import axios, { AxiosInstance } from "axios";
 import { AuthRequest } from "./auth";
 import CONST from "./const";
-import { SysStorage } from "./storage";
+import SysStorage from "./storage";
 
 export interface SysResponse {
   success: boolean;

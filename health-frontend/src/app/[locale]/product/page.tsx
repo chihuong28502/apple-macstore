@@ -45,7 +45,7 @@ const ProductPage = () => {
 
   // Lấy các danh mục con theo parentId
   const getChildCategories = (parentId: string) => {
-    return childCategories.filter((cat) => cat.parentId === parentId);
+    return childCategories.filter((cat:any) => cat.parentId === parentId);
   };
 
   // Filter products by category
@@ -82,7 +82,7 @@ const ProductPage = () => {
       children: (
         <div>
           <div className="p-8 flex flex-wrap justify-center gap-8 mx-auto mt-8 max-w-6xl">
-            {allProducts?.map((product, index) => (
+            {allProducts?.map((product:any, index:any) => (
               <Card
                 key={index}
                 name={product.name}

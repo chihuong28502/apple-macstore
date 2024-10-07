@@ -13,6 +13,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        //Layout main
+        mainLayout: "var(--bgMainLayout)",
+
+        // Component Topic Card
+        textTopicCardWithoutSelect: "var(--textTopicCardWithoutSelect)",
+        bgTopicCardWithoutSelect: "var(--bgTopicCardWithoutSelect)",
+        textTopicCardSelected: "var(--textTopicCardSelected)",
+        bgTopicCardSelected: "var(--bgTopicCardSelected)",
+
+        // Component Category Card
+        textCategoryCardWithoutSelect: "var(--textCategoryCardWithoutSelect)",
+        textCategoryCardSelect: "var(--textCategoryCardSelect)",
+        bgCategoryCardWithoutSelect: "var(--bgCategoryCardWithoutSelect)",
+        bgCategoryCardSelect: "var(--bgCategoryCardSelect)",
+
         notification: "var(--noficationBg)",
         hoverBg: "var(--hoverBg)",
         divideColor: "var(--divideBg)",
@@ -22,7 +37,9 @@ const config: Config = {
         buttonText: "var(--textButton)",
         fontColor: "var(--fontColor)",
         layout: "var(--layout)",
+        popupLanguage: "var(--popupLanguage)",
         inputBackground: "var(--inputBackground)",
+        mainContent: "var(--mainContent)",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -89,6 +106,9 @@ const config: Config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      boxShadow: {
+        'bgComponentSelect': "0px 2px 12px 0px rgba(0, 0, 0, 0.08)"
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],
