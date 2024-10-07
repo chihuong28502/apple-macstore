@@ -8,7 +8,7 @@ const GoogleAuthButton = () => {
         xmlnsXlink="http://www.w3.org/1999/xlink"
         fill="#000000"
         width={20}
-        height={20}
+        height={20} 
       >
         <g id="SVGRepo_bgCarrier" strokeWidth={0} />
         <g
