@@ -5,7 +5,18 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["i.pinimg.com", "img.youtube.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+        pathname: "/**", // chấp nhận mọi đường dẫn con
+      },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+        pathname: "/**", // chấp nhận mọi đường dẫn con
+      },
+    ],
   },
 };
 
