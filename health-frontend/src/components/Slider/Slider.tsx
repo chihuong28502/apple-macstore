@@ -22,7 +22,7 @@ const TripleSlider = ({ slides }: Props) => {
 
           return (
             <motion.div
-              key={slide.id}
+              key={slide._id}
               className="absolute w-[45%] h-0 pb-[20%] cursor-pointer mt-12"
               initial={false}
               animate={{

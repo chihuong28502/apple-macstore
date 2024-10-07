@@ -40,9 +40,9 @@ const Header = ({
     }
   };
   return (
-    <div className="p-6 bg-layout z-10">
+    <div className="p-4 bg-layout z-20">
       <div className="h-12 flex justify-between">
-        <div className="h-full flex w-[78.2%] ">
+        <div className="h-full flex w-2/3 justify-between">
           <motion.div
             className="flex items-center p-3 bg-inputBackground rounded-lg cursor-pointer mr-3"
             onClick={toggleCollapsed}
@@ -56,7 +56,7 @@ const Header = ({
               <MdMenuOpen className="size-5 text-fontColor" />
             )}
           </motion.div>
-          <div className="flex items-center mr-11">
+          <div className="mx-2 flex items-center mr-11">
             <Image
               src={mstLogo.src}
               alt="MST Logo"
@@ -64,26 +64,23 @@ const Header = ({
               height={24}
               className="mr-3"
             />
-            <span className="text-center text-fontColor text-[12px] not-italic font-bold leading-normal tracking-[2.4px] uppercase mr-1">
+            <span className="text-center text-fontColor text-xs not-italic font-bold leading-normal tracking-[2.4px] uppercase mr-1">
               mst
             </span>
-            <span className="text-center text-fontColor text-[12px] not-italic font-normal leading-normal tracking-[2.4px] uppercase">
+            <span className="text-center text-fontColor text-xs not-italic font-normal leading-normal tracking-[2.4px] uppercase">
               keyword
             </span>
           </div>
-          <div className="flex items-center px-6 py-1 bg-inputBackground">
-            <div className="flex items-center h-[40px]">
+          <div className="flex items-center pl-6 bg-inputBackground rounded-lg w-4/5">
+            <div className="flex items-center w-full relative">
               <CiSearch className="w-7 h-7 mr-3 text-fontColor" />
               <input
-                className="border text-fontColor bg-transparent  border-none focus:border-transparent focus:ring-0 outline-none w-[300px]"
+                className="w-full border text-fontColor bg-transparent  border-none focus:border-transparent focus:ring-0 outline-none"
                 placeholder="Tìm kiếm chủ đề theo tên"
               />
-              <div className="w-[1px] h-2/3 bg-[#E3E5E5]  mx-3 !z-10"></div>
               <MultipleSelect
                 data={data}
-                selected={[]}
-                title="Chủ đề"
-                className="relative w-96 text-fontColor"
+                className="absolute top-0 left-0 w-full text-fontColor"
               />
             </div>
           </div>
