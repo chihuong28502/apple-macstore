@@ -21,8 +21,7 @@ import { TasksModule } from './taskSchedule/tasks.module';
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
-      isGlobal: true, // Đảm bảo biến môi trường có thể sử dụng trong toàn bộ ứng dụng
+      isGlobal: true,
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
