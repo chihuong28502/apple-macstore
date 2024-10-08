@@ -32,6 +32,7 @@ html.light {
 
   /* Layout Page */
   --bgMainLayout: rgba(210, 6, 6, 0.1);
+  --iconBlur:#979C9E;
 }
 
 html.dark {
@@ -59,6 +60,7 @@ html.dark {
   --noficationBg: #000000;
   --divideBg: #374151;
   --hoverBg: #4b5563;
+  --iconBlur:#fff;
 }
 /* @media (prefers-color-scheme: dark) {
   :root {
@@ -140,7 +142,7 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground; 
   }
 }
 ::-webkit-scrollbar {

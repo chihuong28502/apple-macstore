@@ -11,6 +11,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { TbLogout } from "react-icons/tb";
 import DarkModeSwitch from "../DarkModeSwitch";
+import SearchComponent from "../Search/Search";
+import SelectLanguage from "../Select/SelectLanguage";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -79,6 +81,9 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           Nguyễn Huy Tới
         </motion.p>
       </motion.div>
+      <div className="w-full mx-auto block lg:hidden my-3">
+        <SearchComponent />
+      </div>
       <ConfigProvider
         theme={{
           components: {
@@ -98,9 +103,12 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           items={items}
         />
       </ConfigProvider>
+      <div className="flex items-center justify-start z-20 md:hidden">
+        <SelectLanguage />
+      </div>
       <div
         className={cn(
-          "flex items-center h-10 my-0.5",
+          "flex items-center h-10 my-0.5 z-0",
           collapsed ? "justify-center" : "justify-start pl-6"
         )}
       >

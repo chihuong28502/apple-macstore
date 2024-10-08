@@ -115,7 +115,7 @@ export default function Home() {
       <div className="mb-8 flex flex-wrap gap-x-2 gap-y-2">
         {listTopic.map((item: any, index: number) => (
           <TopCard
-            key={item._id}
+            key={index}
             item={item}
             onSelect={setSelectTopcard}
             isSelect={selectTopCard}
@@ -127,7 +127,7 @@ export default function Home() {
       <div className="grid grid-cols-5 gap-6">
         {listCategoryCard.map((item: any, index: number) => (
           <CategoryCard
-            key={item._id}
+            key={index}
             item={item}
             onSelect={setSelectCategoryCard}
             isSelect={selectCategoryCard}

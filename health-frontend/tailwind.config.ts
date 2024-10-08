@@ -40,6 +40,7 @@ const config: Config = {
         popupLanguage: "var(--popupLanguage)",
         inputBackground: "var(--inputBackground)",
         mainContent: "var(--mainContent)",
+        iconBlur: "var(--iconBlur)",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -107,8 +108,8 @@ const config: Config = {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       boxShadow: {
-        'bgComponentSelect': "0px 2px 12px 0px rgba(0, 0, 0, 0.08)"
-      }
+        bgComponentSelect: "0px 2px 12px 0px rgba(0, 0, 0, 0.08)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

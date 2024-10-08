@@ -1,10 +1,7 @@
-"use client";
-
 import axios, { AxiosInstance } from "axios";
 import { AuthRequest } from "./auth";
 import CONST from "./const";
 import SysStorage from "./storage";
-
 export interface SysResponse {
   success: boolean;
   data?: any;
@@ -12,7 +9,6 @@ export interface SysResponse {
   error?: any;
 }
 
-// Tạo một Axios instance với cấu hình chung
 export let AxiosClient = axios.create({
   baseURL: CONST.REQUEST.API_ADDRESS,
   timeout: CONST.REQUEST.REQUEST_TIMEOUT,
@@ -21,73 +17,74 @@ export let AxiosClient = axios.create({
   },
 });
 
-// Hàm xử lý request interceptor, áp dụng cho mọi Axios instance
-const registerRequestInterceptor = (clientInstance: AxiosInstance) => {
+const registerInterceptorsRequest = (clientInstance: AxiosInstance) => {
   clientInstance.interceptors.request.use(
-    (config: any) => {
+    async (config: any) => {
       try {
-        // Lấy accessToken nếu có
-        const accessToken = localStorage.getItem(CONST.STORAGE.ACCESS_TOKEN);
-        if (accessToken && accessToken !== "undefined") {
+        const atStore = SysStorage(CONST.STORAGE.ACCESS_TOKEN);
+        const accessToken = atStore.get();
+        if (accessToken && accessToken !== "underfined") {
           config.headers.Authorization = `Bearer ${accessToken}`;
         } else {
-          // Tạo và lưu customerIdVisit nếu chưa tồn tại
-          let customerIdVisit = localStorage.getItem("customerIdVisit");
-          if (!customerIdVisit) {
-            customerIdVisit =
-              Date.now().toString(36) + Math.random().toString(36).substring(2);
-            localStorage.setItem("customerIdVisit", customerIdVisit);
-          }
-          config.headers["x-customer-id-visit"] = customerIdVisit;
+          // Nếu không có token hợp lệ, kiểm tra customerIdVisit tồn tại để check lượt truy cập.
+          // let customerIdVisit = localStorage.getItem("customerIdVisit");
+          // if (!customerIdVisit) {
+          //   customerIdVisit =
+          //     Date.now().toString(36) + Math.random().toString(36).substring(2);
+          //   localStorage.setItem("customerIdVisit", customerIdVisit);
+          // }
+          // config.headers["x-customer-id-visit"] = customerIdVisit;
+          // Nếu không có token hợp lệ, xóa header Authorization nếu nó đã tồn tại
           delete config.headers.Authorization;
         }
-      } catch (error) {
-        console.error("Error in request interceptor:", error);
-      }
+        await new Promise((resolve: any) => setTimeout(resolve, 1));
+      } catch (error) {}
       return config;
     },
-    (error) => Promise.reject(error)
+    (error: any) => {
+      return Promise.reject(error);
+    }
   );
 };
 
-// Đăng ký request interceptor cho AxiosClient
-registerRequestInterceptor(AxiosClient);
+registerInterceptorsRequest(AxiosClient);
 
-// Hàm xử lý response interceptor, áp dụng cho mọi Axios instance
-const registerResponseInterceptor = (clientInstance: AxiosInstance) => {
+const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
   clientInstance.interceptors.response.use(
     (response: any) => {
       const res = response?.data || response;
+      if (res?.status && res?.message) {
+        if (res?.status === "error") {
+        } else if (res?.status === "success") {
+        }
+      }
       return res;
     },
-    async (error) => {
+    async function (error: any) {
       const originalRequest = error?.config;
-
-      // Xử lý lỗi 401 và tự động refresh token
       if (error?.response?.status === 401 && !originalRequest?._retry) {
         originalRequest._retry = true;
         const tokenStorage = SysStorage(CONST.STORAGE.ACCESS_TOKEN);
         const refreshTokenStorage = SysStorage(CONST.STORAGE.REFRESH_TOKEN);
         try {
-          const currentRefreshToken: string = refreshTokenStorage.get() || "";
-          const { success, data }: any = await AuthRequest.refreshToken({
-            currentRefreshToken,
-          });
-
+          const currentRefreshToken: string =
+            (await refreshTokenStorage.get()) || "";
+          const { success, message, data }: any =
+            await AuthRequest.refreshToken({
+              currentRefreshToken: currentRefreshToken,
+            });
           if (success) {
-            // Lưu lại token mới
             refreshTokenStorage.set(data?.refreshToken);
-            tokenStorage.set(data?.accessToken);
-            setConfigAxios(data?.accessToken);
-            return clientInstance(originalRequest);
+            await tokenStorage.set(data?.accessToken);
+            await setConfigAxios(data?.accessToken);
           } else {
-            // Xóa token nếu refresh không thành công
-            tokenStorage.remove();
-            refreshTokenStorage.remove();
+            await tokenStorage.remove();
+            await refreshTokenStorage.remove();
           }
+          return clientInstance(originalRequest);
         } catch (error) {
-          tokenStorage.remove();
-          refreshTokenStorage.remove();
+          await tokenStorage.remove();
+          await refreshTokenStorage.remove();
           window.location.href = "/login";
         }
       }
@@ -95,11 +92,8 @@ const registerResponseInterceptor = (clientInstance: AxiosInstance) => {
     }
   );
 };
+registerInterceptorResponse(AxiosClient);
 
-// Đăng ký response interceptor cho AxiosClient
-registerResponseInterceptor(AxiosClient);
-
-// Cấu hình lại headers cho Axios client khi có accessToken
 const setConfigAxiosClient = (
   accessToken: any,
   clientAxiosInstance: AxiosInstance
@@ -115,22 +109,29 @@ const setConfigAxiosClient = (
   }
 };
 
-// Hàm để cấu hình lại Axios client với accessToken
 export function setConfigAxios(accessToken: any) {
   setConfigAxiosClient(accessToken, AxiosClient);
 }
 
-// Các phương thức HTTP chính (POST, GET, PUT, PATCH, DELETE)
-const post = (url: string, data?: any, config = {}) =>
-  AxiosClient.post(url, data, config);
-const get = (url: string, config = {}) => AxiosClient.get(url, config);
-const put = (url: string, data?: any, config = {}) =>
-  AxiosClient.put(url, data, config);
-const patch = (url: string, data?: any, config = {}) =>
-  AxiosClient.patch(url, data, config);
-const del = (url: string, config = {}) => AxiosClient.delete(url, config);
+const post = (url: string, data?: any, config = {}) => {
+  return AxiosClient.post(url, data, config);
+};
 
-// Tập hợp tất cả các phương thức thành một đối tượng duy nhất
+const get = (url: string, config = {}) => {
+  return AxiosClient.get(url, config);
+};
+
+const put = (url: string, data?: any, config = {}) => {
+  return AxiosClient.put(url, data, config);
+};
+
+const patch = (url: string, data?: any, config = {}) => {
+  return AxiosClient.patch(url, data, config);
+};
+
+const del = (url: string, config = {}) => {
+  return AxiosClient.delete(url, config);
+};
 const MSTFetch = {
   post,
   get,

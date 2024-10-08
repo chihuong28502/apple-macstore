@@ -1,6 +1,6 @@
-import { SVGIconRedDot } from "@/asset/svg";
 import { Link } from "@/i18n/routing";
-import { Popover } from "antd";
+import { Badge, ConfigProvider, Popover } from "antd";
+import { useTheme } from "next-themes";
 import { FaRegBell } from "react-icons/fa";
 import { FiFileText } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";
@@ -47,9 +47,10 @@ const NotificationList = () => (
 );
 
 const NotificationPopover = () => {
+  const { resolvedTheme } = useTheme();
   const content = (
-    <div className="w-80 bg-notification rounded-lg shadow-xl shadow-gray-300/50 dark:shadow-gray-800/50  overflow-hidden cursor-pointer">
-      <div className="px-4 py-3 border-b border-gray-700 flex justify-between items-center bg-notification">
+    <div className="w-80 bg-inputBackground rounded-lg shadow-xl shadow-gray-300/50 dark:shadow-gray-800/50  overflow-hidden cursor-pointer">
+      <div className="px-4 py-3 border-b border-gray-700 flex justify-between items-center bg-inputBackground">
         <h3 className="text-fontColor font-semibold text-lg">
           Thông báo mới nhận
         </h3>
@@ -72,9 +73,24 @@ const NotificationPopover = () => {
       trigger="click"
       placement="bottomRight"
       overlayInnerStyle={{ padding: 0 }}
+      className=""
+      color={resolvedTheme === "dark" ? "#4b4b4b" : "#fff"}
     >
-      <IoNotificationsOutline className="text-fontColor size-8" />
-      <SVGIconRedDot className="absolute top-[9px] right-[11px]" />
+      <div className="flex items-center p-3 bg-inputBackground rounded-lg cursor-pointer ">
+        <ConfigProvider
+          theme={{
+            components: {
+              Badge: {
+                dotSize: 8,
+              },
+            },
+          }}
+        >
+          <Badge dot={true} size="default" title="Thông báo" offset={[-3, 2]}>
+            <IoNotificationsOutline className="size-5 text-fontColor" />
+          </Badge>
+        </ConfigProvider>
+      </div>
     </Popover>
   );
 };

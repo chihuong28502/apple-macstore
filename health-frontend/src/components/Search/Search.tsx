@@ -1,85 +1,68 @@
 import React, { useState } from "react";
-import { FaSearch, FaTimes, FaChevronDown } from "react-icons/fa";
-
+import { FaSearch, FaTimes } from "react-icons/fa";
+import MultiSelectDropdown from "../MultipleSelect/MultipleSelectDropDown";
 const SearchComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOption, setSelectedOption] = useState("");
-  const [showOptions, setShowOptions] = useState(false);
-
+  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const options = [
-    "Mưa tháng sáu, Tiếng mưa rơi lofi cực chill, ...",
-    "Option 2",
-    "Option 3",
-    // Add more options as needed
+    { _id: 1, name: "Mưa tháng sáu" },
+    { _id: 2, name: "Tiếng mưa rơi lofi cực chill" },
+    { _id: 3, name: "Mưa tháng sáu Văn Mai Hương" },
+    { _id: 4, name: "Video mưa đẹp" },
+    { _id: 5, name: "Cảnh mưa tâm trạng" },
   ];
-
-  const handleInputChange = (e:any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  const handleOptionSelect = (option:any) => {
-    setSelectedOption(option);
-    setShowOptions(false);
+  const toggleOption = (optionId: number) => {
+    setSelectedOptions((prev) =>
+      prev.includes(optionId)
+        ? prev.filter((id) => id !== optionId)
+        : [...prev, optionId]
+    );
   };
 
-  const clearSearch = () => {
-    setSearchTerm("");
-    setSelectedOption("");
+  const clearSelection = () => {
+    setSelectedOptions([]);
+  };
+
+  const getSelectedOptionsText = () => {
+    const selectedNames = options
+      .filter((option) => selectedOptions.includes(option._id))
+      .map((option) => option.name);
+
+    if (selectedNames.length === 0) return "Chủ đề";
+    return selectedNames.join(", ");
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      <div className="relative flex items-center w-full">
-        <FaSearch className="absolute left-3 w-5 h-5 text-gray-400" />
+    <div className="flex items-center w-full bg-inputBackground rounded">
+      <div className="relative w-1/2">
+        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2  size-3 lg:size-5 text-iconBlur" />
         <input
           type="text"
           value={searchTerm}
           onChange={handleInputChange}
           placeholder="Mưa tháng sáu"
-          className="w-full py-2 pl-10 pr-20 text-sm bg-white border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full py-2 pl-10 pr-8 text-xs lg:text-sm  text-iconBlur focus:outline-none bg-transparent border-r-2 border-iconBlur"
         />
-        <div className="relative inline-block text-left">
-          <div>
-            <button
-              type="button"
-              className="inline-flex justify-between items-center w-40 rounded-r-full border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500"
-              onClick={() => setShowOptions(!showOptions)}
-            >
-              <span className="truncate">{selectedOption || "Chủ đề"}</span>
-              <FaChevronDown className="ml-2 h-4 w-4" />
-            </button>
-          </div>
-          {showOptions && (
-            <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-              <div
-                className="py-1"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="options-menu"
-              >
-                {options.map((option, index) => (
-                  <a
-                    key={index}
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                    onClick={() => handleOptionSelect(option)}
-                  >
-                    {option}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        {(searchTerm || selectedOption) && (
+        {searchTerm && (
           <button
-            onClick={clearSearch}
-            className="absolute right-44 p-1 rounded-full text-gray-400 hover:text-gray-600"
+            onClick={() => setSearchTerm("")}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-full text-iconBlur"
           >
-            <FaTimes className="h-5 w-5" />
+            <FaTimes className="size-4 text-iconBlur" />
           </button>
         )}
       </div>
+      <MultiSelectDropdown
+        options={options}
+        selectedOptions={selectedOptions}
+        toggleOption={toggleOption}
+        clearSelection={clearSelection}
+        getSelectedOptionsText={getSelectedOptionsText}
+      />
     </div>
   );
 };

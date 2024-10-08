@@ -7,22 +7,21 @@ import { NextRequest, NextResponse } from "next/server";
 //   defaultLocale,
 // });
 
-
 const privatePaths = [
   "/vi/private",
-  "/en/private",
+  "/en/private"
 ];
 
 export function middleware(request: NextRequest) {
   const handleI18nRouting = createMiddleware({
     locales,
     defaultLocale,
+    localePrefix: "always",
   });
 
   const response = handleI18nRouting(request);
 
   const { pathname } = request.nextUrl;
-
 
   const accessToken = request.cookies.get("access_token")?.value;
   const refreshToken = request.cookies.get("refresh_token")?.value;
@@ -42,6 +41,9 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match only /en and /vi
-  matcher: ["/", "/(en|vi)/:path*"],
+  matcher: [
+    "/((?!api|_next|_vercel|.*\\..*).*)",
+    // However, match all pathnames within `/users`, optionally with a locale prefix
+    "/([\\w-]+)?/users/(.+)",
+  ],
 };

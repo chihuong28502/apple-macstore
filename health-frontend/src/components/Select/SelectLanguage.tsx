@@ -1,10 +1,16 @@
-import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import UnitedStatesIcon from "./images/UnitedStates.webp";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import VietNamIcon from "./images/VietNam.webp";
+import UnitedStatesIcon from "./images/UnitedStates.webp";
+// import IndiaIcon from "./images/India.webp";
+// import SpainIcon from "./images/Spain.webp";
+// import KoreaIcon from "./images/Korea.webp";
+// import IndonesiaIcon from "./images/Indonesia.webp";
+// import PakistanIcon from "./images/Pakistan.webp";
+// import SaudiArabiaIcon from "./images/SaudiArabia.webp";
+import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 
 const dataList = [
   {
@@ -19,6 +25,42 @@ const dataList = [
     rate: "USD",
     image: UnitedStatesIcon,
   },
+  // {
+  //   value: "hi",
+  //   title: "Việt Nam",
+  //   rate: "INR",
+  //   image: IndiaIcon,
+  // },
+  // {
+  //   value: "es",
+  //    title: "Việt Nam",
+  //   rate: "EUR",
+  //   image: SpainIcon,
+  // },
+  // {
+  //   value: "ko",
+  //   title: "Việt Nam",
+  //   rate: "KRW",
+  //   image: KoreaIcon,
+  // },
+  // {
+  //   value: "id",
+  //   title: "Việt Nam",
+  //   rate: "IDR",
+  //   image: IndonesiaIcon,
+  // },
+  // {
+  //   value: "ur",
+  //   title: "Việt Nam",
+  //   rate: "PKR",
+  //   image: PakistanIcon,
+  // },
+  // {
+  //   value: "ar",
+  //   title: "Việt Nam",
+  //   rate: "AED",
+  //   image: SaudiArabiaIcon,
+  // },
 ];
 
 export default function SelectLanguage({ textColor }: { textColor?: string }) {
@@ -74,7 +116,7 @@ export default function SelectLanguage({ textColor }: { textColor?: string }) {
                 <Image
                   alt={item?.title}
                   width={32}
-                  height={32}
+                  // height={32}
                   src={item?.image}
                   className="object-cover"
                 />
@@ -87,38 +129,40 @@ export default function SelectLanguage({ textColor }: { textColor?: string }) {
           }
         })}
       </div>
-      {dropDown && (
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="flex absolute right-0 top-3/4 left-0 mt-2 flex-col border-solid border-1 shadow-2xl z-20 rounded-md bg-popupLanguage"
-          >
-            {dataList.map((item: any, index: number) => {
-              return (
-                <div
-                  key={index}
-                  className="px-2 py-3 flex justify-around hover:bg-[#e5e5e5] place-items-center cursor-pointer gap-0.5 text-sm rounded"
-                  onClick={() => handlePickLanguage(item)}
-                >
-                  <Image
-                    alt={item?.title}
-                    width={32}
-                    // height={32}
-                    src={item?.image}
-                    className="object-cover col-span-2 self-center"
-                  />
-                  <p className="text-fontColor text-nowrap col-span-3 font-semibold">
-                    {item?.title}
-                  </p>
-                </div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
-      )}
+      <div className="flex justify-center z-10">
+        {dropDown && (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="w-[150px] flex p-[12px] px-1 absolute right-0 top-full mt-2 flex-col border-solid border-1 shadow-2xl z-100 rounded-md gap-[8px] bg-popupLanguage"
+            >
+              {dataList.map((item: any, index: number) => {
+                return (
+                  <div
+                    key={index}
+                    className="grid hover:bg-[#e5e5e5] place-items-center grid-cols-5 cursor-pointer gap-[2px] text-[16px]  py-0.5 rounded px-1.5"
+                    onClick={() => handlePickLanguage(item)}
+                  >
+                    <Image
+                      alt={item?.title}
+                      width={32}
+                      // height={32}
+                      src={item?.image}
+                      className="object-cover col-span-2 self-center"
+                    />
+                    <p className="text-fontColor text-nowrap col-span-3">
+                      {item?.title}
+                    </p>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </AnimatePresence>
+        )}
+      </div>
     </div>
   );
 }

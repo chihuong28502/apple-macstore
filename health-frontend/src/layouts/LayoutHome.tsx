@@ -12,7 +12,7 @@ const LayoutHome = ({ children }: { children: ReactNode }) => {
   const [isOpenMenuMobile, setIsOpenMenuMobile] = useState(false);
   const { width } = useWindowSize();
   useEffect(() => {
-    setIsMobile(width <= 820);
+    setIsMobile(width <= 1024);
   }, [width]);
   return (
     <div className="h-screen flex flex-col">

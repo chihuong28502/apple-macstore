@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface Props {
   slides: any[];
@@ -26,7 +27,7 @@ const TripleSlider = ({ slides }: Props) => {
               className="absolute w-[45%] h-0 pb-[20%] cursor-pointer mt-12"
               initial={false}
               animate={{
-                x: isActive ? 0 : isPrev ? '-80%' : '80%',
+                x: isActive ? 0 : isPrev ? "-80%" : "80%",
                 y: isActive ? "-70px" : "0px",
                 z: isActive ? 50 : -100,
                 rotateY: isActive ? 0 : isPrev ? 15 : -15,
@@ -44,7 +45,8 @@ const TripleSlider = ({ slides }: Props) => {
                   !isActive ? "grayscale" : ""
                 } overflow-hidden rounded-lg shadow-lg`}
               >
-                <img
+                <Image
+                  layout="fill"
                   src={slide.image}
                   alt={slide.title}
                   className="w-full h-full object-cover"

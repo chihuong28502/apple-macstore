@@ -1,11 +1,13 @@
 import AuthReducer from "@/modules/auth/slice";
 import CustomerReducer from "@/modules/customer/slice";
-import ProductReducer from "@/modules/product/slice";
 import AppReducer from "../components/AppSlice";
+import aiKeywordReducer from "@/modules/ai.keyword/slice";
+import ProductReducer from "@/modules/product/slice";
 
 export const reducers = {
   app: AppReducer,
-  customer: CustomerReducer,
+  product: ProductReducer,
   auth: AuthReducer,
-  product: ProductReducer
+  customer: CustomerReducer,
+  aiKeyword: aiKeywordReducer,
 };

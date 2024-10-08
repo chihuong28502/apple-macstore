@@ -8,7 +8,7 @@ import ReduxProvider from "@/core/components/ReduxProvider";
 export async function Providers({ children }: { children: ReactNode }) {
   const message = await getMessages();
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <RootStyleRegistry>
         <NextIntlClientProvider messages={message}>
           <LayoutHome>
