@@ -11,8 +11,6 @@ export class Category {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ type: String, ref: 'Category' })
-  parentId: string; // Optional parent category
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

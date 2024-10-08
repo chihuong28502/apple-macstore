@@ -22,30 +22,49 @@ const ProductSlice = createSlice({
   initialState,
   reducers: {
     createProduct: (state: ProductState, { payload }: PayloadAction<any>) => {},
-    fetchProductById: (state: ProductState, { payload }: PayloadAction<string>) => {},
-    
+    fetchProductById: (
+      state: ProductState,
+      { payload }: PayloadAction<string>
+    ) => {state.isLoading = true;},
+
     // Hàm lấy dữ liệu sản phẩm có phân trang và category
-    fetchPaginatedProducts: (state: ProductState, { payload }: PayloadAction<{ page: number; limit: number; categoryId?: string }>) => {},
-    
+    fetchPaginatedProducts: (
+      state: ProductState,
+      {
+        payload,
+      }: PayloadAction<{ page: number; limit: number; categoryId?: string }>
+    ) => {
+      state.isLoading = true;
+    },
+
     setProduct: (state: ProductState, { payload }: PayloadAction<any>) => {
       state.product = payload;
     },
-    
-    setProductList: (state: ProductState, { payload }: PayloadAction<any[]>) => {
+
+    setProductList: (
+      state: ProductState,
+      { payload }: PayloadAction<any[]>
+    ) => {
       state.productList = payload;
     },
-    
-    setTotalProducts: (state: ProductState, { payload }: PayloadAction<number>) => {
+
+    setTotalProducts: (
+      state: ProductState,
+      { payload }: PayloadAction<number>
+    ) => {
       state.totalProducts = payload;
     },
-    
+
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => {},
-    deleteProduct: (state: ProductState, { payload }: PayloadAction<string>) => {},
-    
+    deleteProduct: (
+      state: ProductState,
+      { payload }: PayloadAction<string>
+    ) => {},
+
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
     },
-    fetchCategories: (state: ProductState) => {},
+    fetchCategories: (state: ProductState) => {state.isLoading = true;},
     setCategories: (state: ProductState, { payload }: PayloadAction<any[]>) => {
       state.categories = payload;
     },
