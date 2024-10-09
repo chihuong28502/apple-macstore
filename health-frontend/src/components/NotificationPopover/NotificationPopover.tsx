@@ -61,7 +61,7 @@ const NotificationPopover = () => {
           Xem tất cả
         </Link>
       </div>
-      <div className="py-2 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+      <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
         <NotificationList />
       </div>
     </div>

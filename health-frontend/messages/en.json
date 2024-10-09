@@ -1,6 +1,14 @@
 {
-  "HomePage": {
+  "home": {
     "title": "Hello world!",
-    "about": "Go to the about page"
+    "about": "Go to the about page",
+    "home": "Home"
+  },
+  "product": {
+    "title": "Sản phẩm"
+  },
+  "filter": {
+    "all": "All",
+    "title":"All Products"
   }
 }

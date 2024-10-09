@@ -2,10 +2,12 @@
 import Loading from "@/core/components/Loading";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { Pagination, Tabs } from "antd";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const ProductPage = () => {
+  const translations = useTranslations("filter");
   const dispatch = useDispatch();
 
   // Select data from Redux store
@@ -44,16 +46,15 @@ const ProductPage = () => {
     allProducts?.filter(
       (product: any) => product.categoryId._id === categoryId
     );
-
   // Tạo các tab cho mỗi danh mục
   const tabItems = [
     {
       key: "1",
-      label: "All",
+      label: translations("all"),
       children: (
         <div className="font-sans py-4 mx-auto lg:max-w-6xl md:max-w-4xl max-sm:max-w-md">
           <h2 className="text-4xl font-extrabold text-gray-800 text-center mb-12">
-            All Products
+          {translations("title")}
           </h2>
           {loading || initialLoading ? (
             <Loading />

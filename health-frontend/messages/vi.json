@@ -1,6 +1,14 @@
 {
-  "HomePage": {
+  "home": {
     "title": "Xin chào thế giới!",
-    "about": "Đi tới trang giới thiệu"
+    "about": "Đi tới trang giới thiệu",
+    "home": "Trang chủ"
+  },
+  "product": {
+    "title": "Product"
+  },
+  "filter": {
+    "all": "Tất cả",
+    "title": "Tất cả sản phẩm"
   }
 }

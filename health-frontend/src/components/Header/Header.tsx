@@ -2,12 +2,15 @@
 
 import { SVGLogo } from "@/asset/svg";
 import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
+import { FaRegUserCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import React from "react";
 import { HiOutlineQueueList } from "react-icons/hi2";
 import { MdMenuOpen } from "react-icons/md";
 import SearchComponent from "../Search/Search";
 import SelectLanguage from "../Select/SelectLanguage";
+import BtnAuth from "../headerBtnAuth/BtnAuth";
+
 type Props = {
   isMobile: boolean;
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,6 +18,7 @@ type Props = {
   collapsed: boolean;
   isOpenMenuMobile: boolean;
 };
+
 const Header = ({
   setCollapsed,
   setIsOpenMenuMobile,
@@ -36,9 +40,9 @@ const Header = ({
           <motion.div
             className="flex items-center p-3 bg-inputBackground rounded-lg cursor-pointer mr-3"
             onClick={toggleCollapsed}
-            whileHover={{ scale: 1.05 }} // Tăng kích thước khi hover
-            whileTap={{ scale: 0.95 }} // Giảm kích thước khi click
-            transition={{ type: "spring", stiffness: 300 }} // Hiệu ứng chuyển động
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300 }}
           >
             {collapsed || isOpenMenuMobile ? (
               <HiOutlineQueueList className="size-5 text-fontColor" />
@@ -57,7 +61,8 @@ const Header = ({
               <div className="hidden md:block ">
                 <SelectLanguage />
               </div>
-              <NotificationPopover />
+              <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />
+              {/* <NotificationPopover /> */}
             </div>
           </div>
         </div>
