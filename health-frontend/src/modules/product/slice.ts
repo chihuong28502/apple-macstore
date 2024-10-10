@@ -21,18 +21,18 @@ const ProductSlice = createSlice({
   name: "product",
   initialState,
   reducers: {
-    createProduct: (state: ProductState, { payload }: PayloadAction<any>) => {},
+    createProduct: (state: ProductState, { payload }: PayloadAction<any>) => { },
     fetchProductById: (
       state: ProductState,
       { payload }: PayloadAction<string>
-    ) => {state.isLoading = true;},
+    ) => { state.isLoading = true; },
 
     // Hàm lấy dữ liệu sản phẩm có phân trang và category
     fetchPaginatedProducts: (
       state: ProductState,
       {
         payload,
-      }: PayloadAction<{ page: number; limit: number; categoryId?: string }>
+      }: PayloadAction<{ page: number; limit: number; categoryId?: string, minPrice?: number, maxPrice?: number }>
     ) => {
       state.isLoading = true;
     },
@@ -55,16 +55,16 @@ const ProductSlice = createSlice({
       state.totalProducts = payload;
     },
 
-    updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => {},
+    updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => { },
     deleteProduct: (
       state: ProductState,
       { payload }: PayloadAction<string>
-    ) => {},
+    ) => { },
 
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
     },
-    fetchCategories: (state: ProductState) => {state.isLoading = true;},
+    fetchCategories: (state: ProductState) => { state.isLoading = true; },
     setCategories: (state: ProductState, { payload }: PayloadAction<any[]>) => {
       state.categories = payload;
     },

@@ -4,7 +4,7 @@ import { ProductRequest } from "./request";
 import { ProductActions } from "./slice";
 
 function* createProduct({ payload }: PayloadAction<any>) {
-  const { data, onSuccess = (rs: any) => {}, onFail = (rs: any) => {} } = payload;
+  const { data, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(ProductActions.setLoading(true));
     const response: { success: boolean; data: any } = yield ProductRequest.createProduct(data);
@@ -22,7 +22,7 @@ function* createProduct({ payload }: PayloadAction<any>) {
 }
 
 function* fetchProductById({ payload }: PayloadAction<any>) {
-  const { id, onSuccess = (rs: any) => {}, onFail = (rs: any) => {} } = payload;
+  const { id, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(ProductActions.setLoading(true));
     const response: { success: boolean; data: any } = yield ProductRequest.getProductById(id);
@@ -40,12 +40,12 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
 }
 
 // Gộp phân trang và category vào một hàm duy nhất
-function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limit: number; categoryId?: string }>) {
-  const { page, limit, categoryId } = payload;
+function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limit: number; categoryId?: string; minPrice?: number, maxPrice?: number }>) {
+  const { page, limit, categoryId, minPrice, maxPrice } = payload;
   try {
     yield put(ProductActions.setLoading(true));
-    
-    const response: { success: boolean; data: any[]; total: number } = yield ProductRequest.getAllProducts({ page, limit, categoryId });
+
+    const response: { success: boolean; data: any[]; total: number } = yield ProductRequest.getAllProducts({ page, limit, categoryId, minPrice, maxPrice });
     yield put(ProductActions.setLoading(false));
 
     if (response.success) {
@@ -56,14 +56,15 @@ function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limi
     console.error("Error fetching products:", e);
   }
 }
+
 function* fetchCategories() {
   try {
     yield put(ProductActions.setLoading(true));
-    
+
     const response: { success: boolean; data: any[] } = yield ProductRequest.getAllCategories();
-    
+
     yield put(ProductActions.setLoading(false));
-    
+
     if (response.success) {
       yield put(ProductActions.setCategories(response.data)); // Store categories in Redux state
     }

@@ -17,30 +17,44 @@ export class ProductService {
   }
 
 
-async getAll(
-  page: number,
-  categoryId: string,
-  limit: number,
-): Promise<{ data: Product[]; total: number; success: boolean }> {
-  const skip = (page - 1) * limit; 
-
-  // Tạo điều kiện lọc nếu có categoryId
-  const filter = categoryId ? { categoryId } : {};
-
-  // Lấy tổng số sản phẩm để tính tổng số trang, dựa trên filter
-  const total = await this.productModel.countDocuments(filter).exec();
-
-  // Lấy danh sách sản phẩm với phân trang
-  const products = await this.productModel
-    .find(filter) // Lọc theo categoryId nếu có, ngược lại lấy tất cả
-    .populate('categoryId', 'name description') // Liên kết với collection Category
-    .limit(limit) // Giới hạn số lượng sản phẩm trả về
-    .skip(skip) // Bỏ qua sản phẩm đã lấy ở trang trước đó
-    .exec();
-
-  return { data: products, total, success: true };
-}
-
+  async getAll(
+    page: number,
+    categoryId: string,
+    limit: number,
+    minPrice?: number, // Giá tối thiểu (optional)
+    maxPrice?: number, // Giá tối đa (optional)
+  ): Promise<{ data: Product[]; total: number; success: boolean }> {
+    const skip = (page - 1) * limit; 
+  
+    // Xây dựng bộ lọc: categoryId, minPrice, maxPrice
+    const filter: any = {};
+    
+    if (categoryId) {
+      filter.categoryId = categoryId;
+    }
+  
+    // Nếu có khoảng giá, thêm điều kiện vào bộ lọc
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      filter.price = { $gte: minPrice, $lte: maxPrice };
+    } else if (minPrice !== undefined) {
+      filter.price = { $gte: minPrice };
+    } else if (maxPrice !== undefined) {
+      filter.price = { $lte: maxPrice };
+    }
+  
+    // Lấy tổng số sản phẩm để tính tổng số trang, dựa trên filter
+    const total = await this.productModel.countDocuments(filter).exec();
+  
+    // Lấy danh sách sản phẩm với phân trang
+    const products = await this.productModel
+      .find(filter) // Lọc theo categoryId và khoảng giá nếu có
+      .populate('categoryId', 'name description') // Liên kết với collection Category
+      .limit(limit) // Giới hạn số lượng sản phẩm trả về
+      .skip(skip) // Bỏ qua sản phẩm đã lấy ở trang trước đó
+      .exec();
+  
+    return { data: products, total, success: true };
+  }
 
   async findOne(id: string): Promise<{data:Product,success:boolean}> {
     const product = await this.productModel.findById(id).exec();

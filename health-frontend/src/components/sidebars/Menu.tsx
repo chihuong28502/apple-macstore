@@ -1,20 +1,21 @@
 "use client";
-import { useGetCurrentLanguage } from "@/hooks/translation";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import type { MenuProps } from "antd";
 import { ConfigProvider, Menu } from "antd";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import Link from "next/link";
+import { useEffect } from "react";
+import { FaShirt } from "react-icons/fa6";
 import { LuHome } from "react-icons/lu";
-import { TbLockSearch } from "react-icons/tb";
+import { useDispatch, useSelector } from "react-redux";
 import DarkModeSwitch from "../DarkModeSwitch";
 import SearchComponent from "../Search/Search";
 import SelectLanguage from "../Select/SelectLanguage";
 type MenuItem = Required<MenuProps>["items"][number];
-import { FaShirt } from "react-icons/fa6";
 
 type Props = {
   collapsed?: boolean;
@@ -22,26 +23,31 @@ type Props = {
 
 const MenuSidebar = ({ collapsed = false }: Props) => {
   const { resolvedTheme } = useTheme();
+  const dispatch = useDispatch();
+  const allCategory = useSelector(ProductSelectors.categories);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      dispatch(ProductActions.fetchCategories());
+    };
+    fetchData();
+  }, [dispatch]);
   const translations = useTranslations("product");
   const translationsHome = useTranslations("home");
-  const { currentLanguage } = useGetCurrentLanguage();
-  console.log("🚀 ~ currentLanguage:", currentLanguage);
   const items: MenuItem[] = [
     {
       key: "home",
       icon: <LuHome />,
-      label: currentLanguage ? (
-        <Link href={`/${currentLanguage}/`}>{translationsHome("home")}</Link>
-      ) : null,
+      label: <Link href={`/`}>{translationsHome("home")}</Link>,
     },
     {
       key: "product",
       icon: <FaShirt />,
-      label: currentLanguage ? (
-        <Link href={`/${currentLanguage}/product`}>
-          {translations("title")}
-        </Link>
-      ) : null,
+      label: <Link href={`/product`}> {translations("title")} </Link>,
+      children: allCategory?.map((cat) => ({
+        key: cat._id,
+        label: <Link href={`/product/${cat.name}`}> {cat.name} </Link>,
+      })),
     },
   ];
 
@@ -80,8 +86,8 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           components: {
             Menu: {
               itemSelectedColor: "#FF8900", // Màu khi được chọn
-              itemSelectedBg: resolvedTheme === "dark" ? "#4b4b4b" : "#fff", 
-              itemHoverBg: resolvedTheme === "dark" ? "#333" : "#fdfdfd", 
+              itemSelectedBg: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+              itemHoverBg: resolvedTheme === "dark" ? "#333" : "#fdfdfd",
               itemActiveBg: " #139dffa6", // Màu khi đang active
               itemColor: resolvedTheme === "dark" ? "#fff" : "#000",
               itemHoverColor: resolvedTheme === "dark" ? "#fff" : "#000",
