@@ -8,14 +8,14 @@ import ReduxProvider from "@/core/components/ReduxProvider";
 export async function Providers({ children }: { children: ReactNode }) {
   const message = await getMessages();
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <RootStyleRegistry>
-        <NextIntlClientProvider messages={message}>
-          <LayoutHome>
-            <ReduxProvider>{children}</ReduxProvider>
-          </LayoutHome>
-        </NextIntlClientProvider>
-      </RootStyleRegistry>
-    </ThemeProvider>
+    <ReduxProvider>
+      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <RootStyleRegistry>
+          <NextIntlClientProvider messages={message}>
+            <LayoutHome>{children}</LayoutHome>
+          </NextIntlClientProvider>
+        </RootStyleRegistry>
+      </ThemeProvider>
+    </ReduxProvider>
   );
 }

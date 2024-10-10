@@ -1,59 +1,56 @@
+"use client";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import {
-  AppstoreOutlined,
-  DesktopOutlined,
-  MailOutlined,
-  PieChartOutlined,
-} from "@ant-design/icons";
+import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import type { MenuProps } from "antd";
 import { ConfigProvider, Menu } from "antd";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import Image from "next/image";
-import { TbLogout } from "react-icons/tb";
+import { useEffect } from "react";
+import { FaShirt } from "react-icons/fa6";
+import { LuHome } from "react-icons/lu";
+import { useDispatch, useSelector } from "react-redux";
 import DarkModeSwitch from "../DarkModeSwitch";
 import SearchComponent from "../Search/Search";
 import SelectLanguage from "../Select/SelectLanguage";
-
 type MenuItem = Required<MenuProps>["items"][number];
 
 type Props = {
   collapsed?: boolean;
 };
+
 const MenuSidebar = ({ collapsed = false }: Props) => {
+  const { resolvedTheme } = useTheme();
+  const dispatch = useDispatch();
+  const allCategory = useSelector(ProductSelectors.categories);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      dispatch(ProductActions.fetchCategories());
+    };
+    fetchData();
+  }, [dispatch]);
+  const translations = useTranslations("product");
+  const translationsHome = useTranslations("home");
   const items: MenuItem[] = [
-    { key: "user", icon: <PieChartOutlined />, label: "Trang chủ" },
-    { key: "1", icon: <PieChartOutlined />, label: "Option 1" },
-    { key: "2", icon: <DesktopOutlined />, label: "Option 2" },
-    { key: "3", icon: <TbLogout />, label: "Đăng xuất" },
     {
-      key: "sub1",
-      label: "Navigation One",
-      icon: <MailOutlined />,
-      children: [
-        { key: "5", label: "Option 5" },
-        { key: "6", label: "Option 6" },
-        { key: "7", label: "Option 7" },
-        { key: "8", label: "Option 8" },
-      ],
+      key: "home",
+      icon: <LuHome />,
+      label: <Link href={`/`}>{translationsHome("home")}</Link>,
     },
     {
-      key: "sub2",
-      label: "Navigation Two",
-      icon: <AppstoreOutlined />,
-      children: [
-        { key: "9", label: "Option 9" },
-        { key: "10", label: "Option 10" },
-        {
-          key: "sub3",
-          label: "Submenu",
-          children: [
-            { key: "11", label: "Option 11" },
-            { key: "12", label: "Option 12" },
-          ],
-        },
-      ],
+      key: "product",
+      icon: <FaShirt />,
+      label: <Link href={`/product`}> {translations("title")} </Link>,
+      children: allCategory?.map((cat) => ({
+        key: cat._id,
+        label: <Link href={`/product/${cat.name}`}> {cat.name} </Link>,
+      })),
     },
   ];
+
   return (
     <>
       <motion.div
@@ -78,7 +75,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           }}
           className={cn("text-fontColor truncate ", collapsed && "hidden")}
         >
-          Nguyễn Huy Tới
+          Nguyễn Chí Hưởng
         </motion.p>
       </motion.div>
       <div className="w-full mx-auto block lg:hidden my-3">
@@ -88,8 +85,12 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
         theme={{
           components: {
             Menu: {
-              itemSelectedColor: "#FF8900",
-              itemSelectedBg: "transparent",
+              itemSelectedColor: "#FF8900", // Màu khi được chọn
+              itemSelectedBg: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+              itemHoverBg: resolvedTheme === "dark" ? "#333" : "#fdfdfd",
+              itemActiveBg: " #139dffa6", // Màu khi đang active
+              itemColor: resolvedTheme === "dark" ? "#fff" : "#000",
+              itemHoverColor: resolvedTheme === "dark" ? "#fff" : "#000",
             },
           },
         }}
@@ -98,7 +99,7 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           defaultSelectedKeys={["1"]}
           defaultOpenKeys={["sub1"]}
           mode="inline"
-          className="bg-transparent [&>li]:text-fontColor [&>li>div]:text-fontColor [&>li>ul>li]:text-fontColor"
+          className="bg-transparent "
           inlineCollapsed={collapsed}
           items={items}
         />

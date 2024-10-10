@@ -46,7 +46,7 @@ const TripleSlider = ({ slides }: Props) => {
                 } overflow-hidden rounded-lg shadow-lg`}
               >
                 <Image
-                  layout="fill"
+                  fill
                   src={slide.image}
                   alt={slide.title}
                   className="w-full h-full object-cover"

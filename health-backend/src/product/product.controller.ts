@@ -35,9 +35,12 @@ export class ProductController {
     @Query('categoryId') categoryId: string,
     @Query('page') page: number = 1, // Mặc định là trang 1
     @Query('limit') limit: number = 10, // Mặc định mỗi trang 10 sản phẩm
+    @Query('minPrice') minPrice: number, // Thêm lọc giá tối thiểu
+    @Query('maxPrice') maxPrice: number, // Thêm lọc giá tối đa
   ): Promise<{ data: Product[]; total: number; success: boolean }> {
-    return await this.productService.getAll(page, categoryId, limit);
+    return await this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
   }
+  
 
   @Public()
   @Get(':id')
