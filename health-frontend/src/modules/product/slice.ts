@@ -25,7 +25,11 @@ const ProductSlice = createSlice({
     fetchProductById: (
       state: ProductState,
       { payload }: PayloadAction<string>
-    ) => { state.isLoading = true; },
+    ) => {
+      state.isLoading = true;
+
+
+    },
 
     // Hàm lấy dữ liệu sản phẩm có phân trang và category
     fetchPaginatedProducts: (
