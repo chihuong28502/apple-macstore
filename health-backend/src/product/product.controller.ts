@@ -17,26 +17,30 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductService } from './product.service';
 import { Product } from './schema/product.schema';
+import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @UseGuards(JwtAuthGuard, RulesGuard) // Sử dụng RulesGuard để kiểm tra vai trò
-  @Roles('admin', 'support')
+  // @UseGuards(JwtAuthGuard, RulesGuard) // Sử dụng RulesGuard để kiểm tra vai trò
+  // @Roles('admin', 'support')
   @Post()
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
   }
-
+  @Post('create-multiple')
+  async createMultiple(@Body() createMultipleProductsDto: CreateMultipleProductsDto): Promise<Product[]> {
+    return this.productService.createMultiple(createMultipleProductsDto);
+  }
   @Public()
   @Get()
   async getAllProducts(
     @Query('categoryId') categoryId: string,
-    @Query('page') page: number = 1, // Mặc định là trang 1
-    @Query('limit') limit: number = 10, // Mặc định mỗi trang 10 sản phẩm
-    @Query('minPrice') minPrice: number, // Thêm lọc giá tối thiểu
-    @Query('maxPrice') maxPrice: number, // Thêm lọc giá tối đa
+    @Query('page') page: number = 1, 
+    @Query('limit') limit: number = 10, 
+    @Query('minPrice') minPrice: number, 
+    @Query('maxPrice') maxPrice: number, 
   ): Promise<{ data: Product[]; total: number; success: boolean }> {
     return await this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
   }
