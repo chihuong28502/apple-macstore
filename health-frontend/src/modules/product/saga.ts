@@ -25,9 +25,8 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
   const { id, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(ProductActions.setLoading(true));
-    const response: { success: boolean; data: any } = yield ProductRequest.getProductById(id);
+    const response: { success: boolean; data: any } = yield ProductRequest.getProductById(payload);
     yield put(ProductActions.setLoading(false));
-
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
       onSuccess(response.data);
