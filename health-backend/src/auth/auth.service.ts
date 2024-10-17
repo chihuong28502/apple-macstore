@@ -54,46 +54,46 @@ export class AuthService {
   async login(loginDto: LoginDto, res: Response): Promise<any> {
     const { email, password } = loginDto;
     this.logger.log(`Login attempt for email: ${email}`);
-  
+
     try {
       const user = await this.userModel.findOne({ email });
       if (!user) {
         this.logger.warn(`User not found: ${email}`);
         throw new UnauthorizedException('Invalid credentials');
       }
-  
+
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         this.logger.error(`Invalid password attempt for email: ${email}`);
         throw new UnauthorizedException('Invalid credentials');
       }
-  
+
       this.logger.log(`Login successful for email: ${email}`);
-  
+
       const accessToken = await this.generateAccessToken(user);
       const refreshToken = await this.generateRefreshToken(user);
-  
+
       res.cookie('accessToken', accessToken, {
         httpOnly: false,
         secure: false,
         sameSite: 'lax',
-        maxAge: 3600 * 1000, 
+        maxAge: 3600 * 1000,
       });
-      
+
       res.cookie('loggedin', true, {
-        httpOnly: false, 
+        httpOnly: false,
         secure: false,
         sameSite: 'lax',
         maxAge: 3600 * 1000,
       });
-  
+
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
+        httpOnly: false,
+        secure: false,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 3600 * 1000, 
+        maxAge: 7 * 24 * 3600 * 1000,
       });
-  
+
       return res.json({
         message: 'Login success',
         success: true,
@@ -102,6 +102,7 @@ export class AuthService {
             id: user._id,
             username: user.username,
             role: user.role,
+            refreshToken: refreshToken
           },
         },
       });
@@ -173,5 +174,26 @@ export class AuthService {
     } catch (error) {
       throw new Error('Invalid refresh token');
     }
+  }
+  
+  async logout(response: Response) {
+    response.clearCookie('accessToken', {
+      httpOnly: false, 
+      secure: false,  
+      sameSite: 'lax',
+      path: '/',      
+    });
+  
+    response.clearCookie('refreshToken', {
+      httpOnly: false, 
+      secure: false,   
+      sameSite: 'lax',
+      path: '/',       
+    });
+  
+    return response.status(200).json({
+      success: true,
+      message: 'Logout success',
+    });
   }
 }

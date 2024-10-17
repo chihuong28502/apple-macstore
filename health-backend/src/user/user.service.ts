@@ -15,9 +15,8 @@ export class UserService {
   }
   
 
-  // Tìm người dùng theo ID
   async findOne(id: string): Promise<ResponseDto> {
-    const user = await this.userModel.findById(id).select('-password -__v -createdAt').exec();
+    const user = await this.userModel.findById(id)
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }

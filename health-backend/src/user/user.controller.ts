@@ -29,6 +29,7 @@ export class UserController {
   // Endpoint để tìm người dùng theo ID
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ResponseDto> {
+    console.log("🚀 ~ UserController ~ id:", id)
     if (!id) {
       throw new Error('ID is required');
     }

@@ -32,7 +32,7 @@ export class AuthController {
     return this.authService.login(loginDto, res);
   }
 
-  @Get(':id')
+  @Get('user/:id')
   async findOne(@Param('id') id: string): Promise<ResponseDto> {
     if (!id) {
       throw new Error('ID is required');
@@ -48,17 +48,22 @@ export class AuthController {
     }
     const newAccessToken = await this.authService.refreshAccessToken(refreshToken);
 
-    // Lưu lại access token mới vào cookie
     res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 3600 * 1000,
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 3600 * 1000, 
     });
 
     return res.json({
       message: 'Token refreshed successfully',
       accessToken: newAccessToken,
     });
+  }
+
+  @Public()
+  @Get('logout')
+  async logout(@Res() response: Response) {
+    return this.authService.logout(response);
   }
 }

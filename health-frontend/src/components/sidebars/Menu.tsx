@@ -43,41 +43,12 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
     {
       key: "product",
       icon: <FaShirt />,
-      label: <Link href={`/product`}> {translations("title")} </Link>,
-      children: allCategory?.map((cat) => ({
-        key: cat._id,
-        label: <Link href={`/product/${cat.name}`}> {cat.name} </Link>,
-      })),
+      label: <Link href={`/product`}> {translations("title")} </Link>
     },
   ];
 
   return (
     <>
-      <motion.div
-        className={cn("flex items-center gap-2")}
-        animate={{
-          justifyContent: collapsed ? "center" : "flex-start",
-          paddingLeft: collapsed ? 0 : "1.5rem",
-        }}
-      >
-        <Image
-          src={
-            "https://i.pinimg.com/564x/11/62/0b/11620baf1c1d5257215c83c033cc9496.jpg"
-          }
-          width={40}
-          height={40}
-          alt="Avatar"
-          className="rounded-full max-w-10 max-h-10 min-w-10 min-h-10"
-        />
-        <motion.p
-          animate={{
-            x: collapsed ? -10 : 4,
-          }}
-          className={cn("text-fontColor truncate ", collapsed && "hidden")}
-        >
-          Nguyễn Chí Hưởng
-        </motion.p>
-      </motion.div>
       <div className="w-full mx-auto block lg:hidden my-3">
         <SearchComponent />
       </div>

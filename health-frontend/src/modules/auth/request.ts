@@ -13,15 +13,20 @@ export const AuthRequest = {
     });
   },
   getUserInfo(id: string) {
-    return MSTFetch.get(`/auth/${id}`, {
+    return MSTFetch.get(`/auth/user/${id}`, {
       withCredentials: true,
     });
-  }, 
+  },
   refreshToken(refreshToken: string) {
     return MSTFetch.post('/auth/refresh', {
-      refreshToken, 
+      refreshToken,
     }, {
       withCredentials: true
+    });
+  }, 
+  logout() {
+    return MSTFetch.get("/auth/logout", {
+      withCredentials: true,
     });
   },
 };

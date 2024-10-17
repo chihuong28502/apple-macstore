@@ -1,87 +1,105 @@
 import { AppAction } from "@/core/components/AppSlice";
-import CONST from "@/core/services/const";
-import { setConfigAxios } from "@/core/services/fetch";
-import SysStorage from "@/core/services/storage";
 import { getCookie } from "@/hooks/Cookies";
 import { PayloadAction } from "@reduxjs/toolkit";
+import { AxiosError } from "axios";
 import jwt from 'jsonwebtoken';
-import { get } from "lodash";
+import { toast } from "react-toastify";
 import { call, delay, put, takeLeading } from "redux-saga/effects";
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
 
-function* login({ payload }: PayloadAction<any>) {
-  const {
-    email,
-    password,
-    onSuccess = (rs: any) => { },
-    onFail = (error: any) => { },
-  } = payload;
-  try {
-    yield delay(500);
-    const { success, message, data } = yield AuthRequest.login({
-      email,
-      password,
-    });
-    console.log("🚀 ~ data:", data)
+// Utility function to decode token and get userId
+const getUserIdFromToken = () => {
+  const accessToken = getCookie('accessToken');
+  if (accessToken) {
+    const decoded: any = jwt.decode(accessToken);
+    return decoded?._id || null;
+  }
+  return null;
+};
 
-    if (success) {
-      yield put(AuthActions.setLoginInfo(data?.user));
-      onSuccess && onSuccess(data?.user);
-    } else {
-      onFail && onFail(message, data);
-    }
-  } catch (e) { }
+// Utility function to handle API errors
+function* handleApiError(error: any, onFail: (error: any) => void) {
+  if (error instanceof AxiosError) {
+    toast.error(error?.response?.data?.error);
+  } else {
+    toast.error("An unexpected error occurred.");
+  }
+  onFail && onFail(error);
 }
 
-function* register({ payload }: PayloadAction<any>) {
-  const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { }, data } = payload;
+function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
+  try {
+    yield delay(500);
+    const { success, message, data } = yield call(AuthRequest.login, { email, password });
+
+    const userId = getUserIdFromToken();
+    if (userId) {
+      const response = yield call(AuthRequest.getUserInfo, userId);
+      yield put(AuthActions.setUser(response.data));
+      onSuccess && onSuccess(data?.user);
+    } else {
+      yield put(AuthActions.getInfoUser({}));
+    }
+
+    if (!success) {
+      onFail && onFail(message, data);
+    }
+  } catch (error) {
+    yield* handleApiError(error, onFail);
+  }
+}
+
+function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { onSuccess = () => { }, onFail = () => { }, data } = payload;
   try {
     yield put(AppAction.showLoading());
-    const res: { success: boolean; data: any } = yield AuthRequest.register(data);
+    const res: { success: boolean; data: any } = yield call(AuthRequest.register, data);
     yield put(AppAction.hideLoading());
 
     if (res.success) {
-      yield put(AuthActions.setUser(res.data));
       onSuccess && onSuccess(res);
     } else {
       onFail && onFail(res);
     }
-  } catch (e) {
-    onFail && onFail(e);
+  } catch (error: any) {
+    yield* handleApiError(error, onFail);
+    yield put(AppAction.hideLoading());
   }
 }
 
 function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { onSuccess, onError } = payload;
+  const { onSuccess = () => { }, onError = () => { } } = payload;
   try {
-    const accessToken = getCookie('accessToken');
-    if (accessToken) {
-      const decoded: any = jwt.decode(accessToken);
-      const userId = decoded?._id;
-      if (!userId) {
-        throw new Error('Invalid token');
-      }
+    const userId = getUserIdFromToken();
+    if (userId) {
       const response = yield call(AuthRequest.getUserInfo, userId);
-
-      if (accessToken) {
-        yield put(AuthActions.setUser(response.data));
-        onSuccess && onSuccess();
-      } else {
-        yield put(AuthActions.getInfoUser({}));
-      }
+      yield put(AuthActions.setUser(response.data));
+      onSuccess && onSuccess();
     } else {
       yield put(AuthActions.getInfoUser({}));
     }
-  } catch (error: any) {
+  } catch (error) {
     yield put(AuthActions.getInfoUser({}));
+    onError && onError(error);
   }
 }
+
+function* logout(): Generator<any, void, any> {
+  try {
+    const { success } = yield call(AuthRequest.logout);
+    if (success) {
+      yield put(AuthActions.logout({}));
+    }
+  } catch (error) {
+    yield* handleApiError(error, () => { });
+  }
+}
+
 export function* AuthSaga() {
   yield takeLeading(AuthActions.login, login);
   yield takeLeading(AuthActions.register, register);
-  yield takeLeading(
-    AuthActions.getInfoUser,
-    getInfoUser
-  );
+  yield takeLeading(AuthActions.getInfoUser, getInfoUser);
+  yield takeLeading(AuthActions.logout, logout);
 }

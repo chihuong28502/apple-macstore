@@ -16,18 +16,14 @@ const AuthSlice = createSlice({
     login: (state: AuthState, { payload }: PayloadAction<any>) => { },
     register: (state: AuthState, { payload }: PayloadAction<any>) => { },
     setUser: (state: AuthState, { payload }: PayloadAction<any>) => {
-      console.log("🚀 ~ payload:", payload)
-      state.user = payload;
-    },
-    setLoginInfo: (state: AuthState, { payload }: PayloadAction<any>) => {
       state.user = payload;
     },
     getInfoUser: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
-     },
-
-    logout: (state: AuthState) => {
+    },
+    logout: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
       state.user = null;
     },
+
   },
 });
 
