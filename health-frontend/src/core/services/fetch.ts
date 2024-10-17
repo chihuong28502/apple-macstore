@@ -15,6 +15,7 @@ export let AxiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 const registerInterceptorsRequest = (clientInstance: AxiosInstance) => {

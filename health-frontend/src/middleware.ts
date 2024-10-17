@@ -2,15 +2,11 @@ import createMiddleware from "next-intl/middleware";
 import { locales, defaultLocale } from "@/constants/i18n.config";
 import { NextRequest, NextResponse } from "next/server";
 
-// export default createMiddleware({
-//   locales,
-//   defaultLocale,
-// });
+const basePaths = ["private", "product"];
 
-const privatePaths = [
-  "/vi/private",
-  "/en/private"
-];
+const privatePaths = locales.flatMap((locale) =>
+  basePaths.map((path) => `/${locale}/${path}`)
+);
 
 export function middleware(request: NextRequest) {
   const handleI18nRouting = createMiddleware({
@@ -23,8 +19,8 @@ export function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const accessToken = request.cookies.get("access_token")?.value;
-  const refreshToken = request.cookies.get("refresh_token")?.value;
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
   const locale = request.cookies.get("NEXT_LOCALE")?.value ?? defaultLocale;
 
   //Chưa đăng nhập thì không cho vào trang private paths
@@ -33,7 +29,7 @@ export function middleware(request: NextRequest) {
     !refreshToken &&
     !accessToken
   ) {
-    const url = new URL(`/${locale}/login`, request.url);
+    const url = new URL(`/${locale}/auth/login`, request.url);
     return NextResponse.redirect(url);
   }
 
@@ -43,7 +39,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/((?!api|_next|_vercel|.*\\..*).*)",
-    // However, match all pathnames within `/users`, optionally with a locale prefix
     "/([\\w-]+)?/users/(.+)",
   ],
 };

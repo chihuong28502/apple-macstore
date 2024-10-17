@@ -14,12 +14,12 @@ const TripleSlider = ({ slides }: Props) => {
   }, []);
 
   return (
-    <div className="relative w-full h-[400px] overflow-hidden flex items-center justify-center ">
+    <div className="relative w-full h-[400px] overflow-hidden flex items-center justify-center">
       <div className="relative w-full max-w-[1200px] h-[300px] flex items-center justify-center perspective-1000">
-        {slides.map((slide: any, index: number) => {
+        {slides.map((slide, index) => {
           const offset = (index - currentIndex + slides.length) % slides.length;
           const isActive = offset === 0;
-          const isPrev = offset === -1 || offset === slides.length - 1;
+          const isPrev = offset === slides.length - 1; // Kiểm tra nếu slide trước đó là slide cuối cùng
 
           return (
             <motion.div
@@ -47,6 +47,8 @@ const TripleSlider = ({ slides }: Props) => {
               >
                 <Image
                   fill
+                  priority 
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   src={slide.image}
                   alt={slide.title}
                   className="w-full h-full object-cover"

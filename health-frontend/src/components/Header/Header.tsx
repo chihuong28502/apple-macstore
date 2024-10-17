@@ -61,7 +61,7 @@ const Header = ({
               <div className="hidden md:block ">
                 <SelectLanguage />
               </div>
-              <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />
+              <BtnAuth  title={"Đăng nhập"} icon={FaRegUserCircle} />
               {/* <NotificationPopover /> */}
             </div>
           </div>

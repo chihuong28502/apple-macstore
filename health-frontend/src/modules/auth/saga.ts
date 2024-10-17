@@ -1,12 +1,14 @@
 import { AppAction } from "@/core/components/AppSlice";
-import { PayloadAction } from "@reduxjs/toolkit";
-import { put, takeLeading,delay } from "redux-saga/effects";
-import { AuthRequest } from "./request";
-import { AuthActions } from "./slice";
 import CONST from "@/core/services/const";
-import { get } from "lodash";
 import { setConfigAxios } from "@/core/services/fetch";
 import SysStorage from "@/core/services/storage";
+import { getCookie } from "@/hooks/Cookies";
+import { PayloadAction } from "@reduxjs/toolkit";
+import jwt from 'jsonwebtoken';
+import { get } from "lodash";
+import { call, delay, put, takeLeading } from "redux-saga/effects";
+import { AuthRequest } from "./request";
+import { AuthActions } from "./slice";
 
 function* login({ payload }: PayloadAction<any>) {
   const {
@@ -16,33 +18,15 @@ function* login({ payload }: PayloadAction<any>) {
     onFail = (error: any) => { },
   } = payload;
   try {
-    // yield put(AppAction.showLoading());
     yield delay(500);
     const { success, message, data } = yield AuthRequest.login({
       email,
       password,
     });
-    // yield put(AppAction.hideLoading());
+    console.log("🚀 ~ data:", data)
+
     if (success) {
-      //login success
-      const atStorage = SysStorage(CONST.STORAGE.ACCESS_TOKEN);
-      const accessToken = get(data, "accessToken");
-      yield atStorage.set(accessToken);
-
-      //saved refresh token
-      const refreshTokenStorage = SysStorage(CONST.STORAGE.REFRESH_TOKEN);
-      const refreshToken = get(data, "refreshToken");
-      yield refreshTokenStorage.set(refreshToken);
-
-      const User = SysStorage(CONST.STORAGE.USER);
-      const setUser = get(data, "user.username");
-      yield User.set(setUser);
-
-      const UserInfo = SysStorage("USER_INFO");
-      yield UserInfo.set(JSON.stringify(get(data, "user") || {}));
-
       yield put(AuthActions.setLoginInfo(data?.user));
-      setConfigAxios(accessToken);
       onSuccess && onSuccess(data?.user);
     } else {
       onFail && onFail(message, data);
@@ -51,7 +35,7 @@ function* login({ payload }: PayloadAction<any>) {
 }
 
 function* register({ payload }: PayloadAction<any>) {
-  const { onSuccess = (rs: any) => {}, onFail = (rs: any) => {}, data } = payload;
+  const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { }, data } = payload;
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } = yield AuthRequest.register(data);
@@ -68,7 +52,36 @@ function* register({ payload }: PayloadAction<any>) {
   }
 }
 
+function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { onSuccess, onError } = payload;
+  try {
+    const accessToken = getCookie('accessToken');
+    if (accessToken) {
+      const decoded: any = jwt.decode(accessToken);
+      const userId = decoded?._id;
+      if (!userId) {
+        throw new Error('Invalid token');
+      }
+      const response = yield call(AuthRequest.getUserInfo, userId);
+
+      if (accessToken) {
+        yield put(AuthActions.setUser(response.data));
+        onSuccess && onSuccess();
+      } else {
+        yield put(AuthActions.getInfoUser({}));
+      }
+    } else {
+      yield put(AuthActions.getInfoUser({}));
+    }
+  } catch (error: any) {
+    yield put(AuthActions.getInfoUser({}));
+  }
+}
 export function* AuthSaga() {
   yield takeLeading(AuthActions.login, login);
   yield takeLeading(AuthActions.register, register);
+  yield takeLeading(
+    AuthActions.getInfoUser,
+    getInfoUser
+  );
 }

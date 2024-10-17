@@ -8,7 +8,6 @@ export const RootStyleRegistry = ({
 }: {
   children: React.ReactNode;
 }) => {
-  //Use ReactNode instead of PropsWithChildren
   const [cache] = useState(() => createCache());
 
   useServerInsertedHTML(() => {

@@ -1,17 +1,17 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res, UnauthorizedException } from '@nestjs/common';
 import { Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
-import { User } from 'src/user/schema/user.schema';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResponseDto } from 'src/dtoRequest/return.dto';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
 
   async onModuleInit() {
@@ -22,18 +22,43 @@ export class AuthController {
   @Post('register')
   async create(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<{ message: string; success: boolean; user: User }> {
+  ): Promise<ResponseDto> {
     return this.authService.create(createUserDto);
   }
 
   @Public()
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    return this.authService.login(loginDto,res);
+    return this.authService.login(loginDto, res);
   }
-  // Endpoint để tìm người dùng theo ID
+
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<User> {
+  async findOne(@Param('id') id: string): Promise<ResponseDto> {
+    if (!id) {
+      throw new Error('ID is required');
+    }
     return this.userService.findOne(id);
+  }
+
+  @Public()
+  @Post('refresh')
+  async refreshToken(@Body('refreshToken') refreshToken: string, @Res() res: Response) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token is required');
+    }
+    const newAccessToken = await this.authService.refreshAccessToken(refreshToken);
+
+    // Lưu lại access token mới vào cookie
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 3600 * 1000,
+    });
+
+    return res.json({
+      message: 'Token refreshed successfully',
+      accessToken: newAccessToken,
+    });
   }
 }

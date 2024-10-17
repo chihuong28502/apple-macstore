@@ -5,6 +5,7 @@ import { RootStyleRegistry } from "./RootStyleRegistry";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import ReduxProvider from "@/core/components/ReduxProvider";
+import AuthProvider from "./AuthProvider";
 export async function Providers({ children }: { children: ReactNode }) {
   const message = await getMessages();
   return (
@@ -12,7 +13,9 @@ export async function Providers({ children }: { children: ReactNode }) {
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <RootStyleRegistry>
           <NextIntlClientProvider messages={message}>
-            <LayoutHome>{children}</LayoutHome>
+            <AuthProvider>
+              <LayoutHome>{children}</LayoutHome>
+            </AuthProvider>
           </NextIntlClientProvider>
         </RootStyleRegistry>
       </ThemeProvider>
