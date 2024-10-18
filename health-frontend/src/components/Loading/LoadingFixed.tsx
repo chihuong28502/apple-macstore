@@ -1,6 +1,6 @@
 'use client'
 import { useAppSelector } from "@/core/services/hook";
-import styles from "./Loading.module.css"; // Import CSS Module
+import styles from "./loading.module.css"; // Import CSS Module
 import { LoadingGlobalSelectors } from "@/modules/loading-global/slice";
 import { cn } from "@/lib/utils";
 type Props = {
