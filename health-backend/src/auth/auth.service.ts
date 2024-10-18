@@ -74,23 +74,16 @@ export class AuthService {
       const refreshToken = await this.generateRefreshToken(user);
 
       res.cookie('accessToken', accessToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: 'lax',
-        maxAge: 3600 * 1000,
-      });
-
-      res.cookie('loggedin', true, {
-        httpOnly: false,
-        secure: false,
-        sameSite: 'lax',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
         maxAge: 3600 * 1000,
       });
 
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: 'lax',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 3600 * 1000,
       });
 
@@ -175,22 +168,22 @@ export class AuthService {
       throw new Error('Invalid refresh token');
     }
   }
-  
+
   async logout(response: Response) {
     response.clearCookie('accessToken', {
-      httpOnly: false, 
-      secure: false,  
-      sameSite: 'lax',
-      path: '/',      
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
     });
-  
+
     response.clearCookie('refreshToken', {
-      httpOnly: false, 
-      secure: false,   
-      sameSite: 'lax',
-      path: '/',       
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
     });
-  
+
     return response.status(200).json({
       success: true,
       message: 'Logout success',
