@@ -17,9 +17,7 @@ export class TasksService {
       const response = await firstValueFrom(
         this.httpService.get('https://health-yov6.onrender.com/categories'),
       );
-      console.log('API Response:', response.data);
     } catch (error) {
-      console.error('Error calling API:', error);
     }
   }
 }

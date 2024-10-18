@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { User, UserDocument } from 'src/user/schema/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
+import { ResponseDto } from 'src/dtoRequest/return.dto';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -21,7 +23,7 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async createAdmin(): Promise<void> {
     const adminEmail = 'admin@gmail.com';
@@ -53,65 +55,68 @@ export class AuthService {
     const { email, password } = loginDto;
     this.logger.log(`Login attempt for email: ${email}`);
 
-    // Tìm người dùng theo email
-    const user = await this.userModel.findOne({ email: email });
-    if (!user) {
-      this.logger.warn(`User not found: ${email}`);
-      throw new UnauthorizedException('Invalid credentials');
-    }
+    try {
+      const user = await this.userModel.findOne({ email });
+      if (!user) {
+        this.logger.warn(`User not found: ${email}`);
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    // Kiểm tra mật khẩu
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      this.logger.error(`Invalid password attempt for email: ${email}`);
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        this.logger.error(`Invalid password attempt for email: ${email}`);
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    this.logger.log(`Login successful for email: ${email}`);
+      this.logger.log(`Login successful for email: ${email}`);
 
-    // Tạo Access Token và Refresh Token
-    const accessToken = await this.generateAccessToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
+      const accessToken = await this.generateAccessToken(user);
+      const refreshToken = await this.generateRefreshToken(user);
 
-    // Lưu Access Token và Refresh Token vào cookies
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: true, // Nên dùng HTTPS khi deploy để đảm bảo an toàn
-      sameSite: 'strict',
-      maxAge: 3600 * 1000, // 1 giờ
-    });
-    res.cookie('loggedin', true, {
-      httpOnly: true,
-      secure: true, // Nên dùng HTTPS khi deploy để đảm bảo an toàn
-      sameSite: 'strict',
-      maxAge: 3600 * 1000, // 1 giờ
-    });
+      res.cookie('accessToken', accessToken, {
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 3600 * 1000,
+      });
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 3600 * 1000, // 7 ngày
-    });
+      res.cookie('loggedin', true, {
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 3600 * 1000,
+      });
 
-    // Trả về phản hồi JSON
-    return res.json({
-      message: 'Login success',
-      success: true,
-      status: true,
-      data: {
-        user: {
-          id: user._id,
-          username: user.username,
-          role: user.role,
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 3600 * 1000,
+      });
+
+      return res.json({
+        message: 'Login success',
+        success: true,
+        data: {
+          user: {
+            id: user._id,
+            username: user.username,
+            role: user.role,
+            refreshToken: refreshToken
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Login failed, please try again later.');
+    }
   }
   // Tạo mới một người dùng
   async create(
     createUserDto: CreateUserDto,
-  ): Promise<{ message: string; success: boolean; user: User }> {
+  ): Promise<ResponseDto> {
     this.logger.debug(createUserDto);
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
@@ -129,7 +134,9 @@ export class AuthService {
     return {
       message: 'Register success',
       success: true,
-      user: createdUser,
+      data: {
+        user: createdUser,
+      }
     };
   }
 
@@ -167,5 +174,26 @@ export class AuthService {
     } catch (error) {
       throw new Error('Invalid refresh token');
     }
+  }
+  
+  async logout(response: Response) {
+    response.clearCookie('accessToken', {
+      httpOnly: false, 
+      secure: false,  
+      sameSite: 'lax',
+      path: '/',      
+    });
+  
+    response.clearCookie('refreshToken', {
+      httpOnly: false, 
+      secure: false,   
+      sameSite: 'lax',
+      path: '/',       
+    });
+  
+    return response.status(200).json({
+      success: true,
+      message: 'Logout success',
+    });
   }
 }

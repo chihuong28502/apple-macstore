@@ -1,7 +1,10 @@
 import axios, { AxiosInstance } from "axios";
 import { AuthRequest } from "./auth";
 import CONST from "./const";
-import SysStorage from "./storage";
+import Cookies from "js-cookie";
+import { getCookie } from "@/hooks/Cookies";
+import { locales } from "@/constants/i18n.config";
+
 export interface SysResponse {
   success: boolean;
   data?: any;
@@ -15,30 +18,40 @@ export let AxiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 const registerInterceptorsRequest = (clientInstance: AxiosInstance) => {
   clientInstance.interceptors.request.use(
     async (config: any) => {
       try {
-        const atStore = SysStorage(CONST.STORAGE.ACCESS_TOKEN);
-        const accessToken = atStore.get();
-        if (accessToken && accessToken !== "underfined") {
+        let accessToken = Cookies.get("accessToken");
+        if (accessToken && accessToken !== "undefined") {
           config.headers.Authorization = `Bearer ${accessToken}`;
         } else {
-          // Nếu không có token hợp lệ, kiểm tra customerIdVisit tồn tại để check lượt truy cập.
-          // let customerIdVisit = localStorage.getItem("customerIdVisit");
-          // if (!customerIdVisit) {
-          //   customerIdVisit =
-          //     Date.now().toString(36) + Math.random().toString(36).substring(2);
-          //   localStorage.setItem("customerIdVisit", customerIdVisit);
-          // }
-          // config.headers["x-customer-id-visit"] = customerIdVisit;
-          // Nếu không có token hợp lệ, xóa header Authorization nếu nó đã tồn tại
-          delete config.headers.Authorization;
+          // Kiểm tra refreshToken trong cookies
+          const refreshToken = getCookie("refreshToken");
+          if (refreshToken && refreshToken !== "undefined") {
+            try {
+              await axios.post(
+                `${CONST.REQUEST.API_ADDRESS}/auth/refresh`,
+                { refreshToken: refreshToken }, { withCredentials: true },
+              )
+            } catch (err) {
+              console.error("Error refreshing token:", err);
+              Cookies.remove("accessToken");
+              Cookies.remove("refreshToken");
+              window.location.href = `${locales}/auth/login`;
+            }
+          } else {
+            // Xóa Authorization nếu không có token hợp lệ
+            delete config.headers.Authorization;
+          }
         }
         await new Promise((resolve: any) => setTimeout(resolve, 1));
-      } catch (error) {}
+      } catch (error) {
+        console.error("Error in request interceptor:", error);
+      }
       return config;
     },
     (error: any) => {
@@ -46,6 +59,7 @@ const registerInterceptorsRequest = (clientInstance: AxiosInstance) => {
     }
   );
 };
+
 
 registerInterceptorsRequest(AxiosClient);
 
@@ -55,7 +69,9 @@ const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
       const res = response?.data || response;
       if (res?.status && res?.message) {
         if (res?.status === "error") {
+          console.error(res.message);
         } else if (res?.status === "success") {
+          console.log(res.message);
         }
       }
       return res;
@@ -64,28 +80,18 @@ const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
       const originalRequest = error?.config;
       if (error?.response?.status === 401 && !originalRequest?._retry) {
         originalRequest._retry = true;
-        const tokenStorage = SysStorage(CONST.STORAGE.ACCESS_TOKEN);
-        const refreshTokenStorage = SysStorage(CONST.STORAGE.REFRESH_TOKEN);
-        try {
-          const currentRefreshToken: string =
-            (await refreshTokenStorage.get()) || "";
-          const { success, message, data }: any =
-            await AuthRequest.refreshToken({
-              currentRefreshToken: currentRefreshToken,
-            });
-          if (success) {
-            refreshTokenStorage.set(data?.refreshToken);
-            await tokenStorage.set(data?.accessToken);
-            await setConfigAxios(data?.accessToken);
-          } else {
-            await tokenStorage.remove();
-            await refreshTokenStorage.remove();
+        const refreshToken = getCookie("refreshToken");
+        if (refreshToken) {
+          try {
+            await axios.post(
+              `${CONST.REQUEST.API_ADDRESS}/auth/refresh`,
+              { refreshToken: refreshToken }, { withCredentials: true },
+            )
+          } catch (error) {
+            Cookies.remove("accessToken");
+            Cookies.remove("refreshToken");
+            window.location.href = `${locales}/auth/login`;
           }
-          return clientInstance(originalRequest);
-        } catch (error) {
-          await tokenStorage.remove();
-          await refreshTokenStorage.remove();
-          window.location.href = "/login";
         }
       }
       return Promise.reject(error);
@@ -132,6 +138,7 @@ const patch = (url: string, data?: any, config = {}) => {
 const del = (url: string, config = {}) => {
   return AxiosClient.delete(url, config);
 };
+
 const MSTFetch = {
   post,
   get,

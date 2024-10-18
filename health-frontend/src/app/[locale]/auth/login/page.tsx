@@ -31,11 +31,11 @@ function Page() {
           email,
           password,
           onSuccess: (rs: any) => {
-            toast.success("đăng nhập thành công");
-            route.push("/private");
+            toast.success("Đăng nhập thành công");
+            route.push("/");
           },
           onFail: (message: any, data: any) => {
-            toast.error("đăng nhập thất bại");
+            toast.error("Đăng nhập thất bại");
           },
         })
       );

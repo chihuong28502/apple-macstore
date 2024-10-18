@@ -4,6 +4,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import localFont from "next/font/local";
 import "@/app/globals.css";
+import LoadingFixed from "@/components/Loading/LoadingFixed";
 
 // const geistSans = localFont({
 //   src: "@/app/fonts/GeistVF.woff",
@@ -36,6 +37,8 @@ export default function RootLayout({
         <Providers>
           {children}
           <ToastContainer />
+          <LoadingFixed />
+
         </Providers>
       </body>
     </html>

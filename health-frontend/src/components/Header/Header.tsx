@@ -10,6 +10,12 @@ import { MdMenuOpen } from "react-icons/md";
 import SearchComponent from "../Search/Search";
 import SelectLanguage from "../Select/SelectLanguage";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
+import { cn } from "@/lib/utils";
+import _ from "lodash";
+import { useAppSelector } from "@/core/services/hook";
+import { AuthSelectors } from "@/modules/auth/slice";
+import User from "./User";
+import { Link } from "@/i18n/routing";
 
 type Props = {
   isMobile: boolean;
@@ -26,6 +32,7 @@ const Header = ({
   isMobile,
   isOpenMenuMobile,
 }: Props) => {
+  const auth = useAppSelector(AuthSelectors.user);
   const toggleCollapsed = () => {
     if (isMobile) {
       setIsOpenMenuMobile((prev: boolean) => !prev);
@@ -50,9 +57,9 @@ const Header = ({
               <MdMenuOpen className="size-5 text-fontColor" />
             )}
           </motion.div>
-          <div className="flex items-center mr-11">
-            <SVGLogo className="text-fontColor" width={150} />
-          </div>
+          <Link href={"/"} className="flex items-center mr-11">
+            <SVGLogo className="text-fontColor" />
+          </Link>
           <div className="flex flex-grow items-center justify-end lg:justify-between">
             <div className="w-full max-w-lg  xl:max-w-3xl mx-auto px-4 hidden lg:block">
               <SearchComponent />
@@ -61,8 +68,9 @@ const Header = ({
               <div className="hidden md:block ">
                 <SelectLanguage />
               </div>
-              <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />
-              {/* <NotificationPopover /> */}
+              {auth && <User />}
+              {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
+              {auth && <NotificationPopover />}
             </div>
           </div>
         </div>
