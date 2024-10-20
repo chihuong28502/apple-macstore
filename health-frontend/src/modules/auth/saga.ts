@@ -1,16 +1,16 @@
 import { AppAction } from "@/core/components/AppSlice";
-import { getCookie } from "@/hooks/Cookies";
+import { getCookie, } from "@/hooks/Cookies";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { toast } from "react-toastify";
 import { call, delay, put, takeLeading } from "redux-saga/effects";
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
 
-// Utility function to decode token and get userId
 const getUserIdFromToken = () => {
   const accessToken = getCookie('accessToken');
+  console.log("🚀 ~ accessToken:", accessToken)
   if (accessToken) {
     const decoded: any = jwt.decode(accessToken);
     return decoded?._id || null;
@@ -21,36 +21,39 @@ const getUserIdFromToken = () => {
 // Utility function to handle API errors
 function* handleApiError(error: any, onFail: (error: any) => void) {
   if (error instanceof AxiosError) {
-    toast.error(error?.response?.data?.error);
+    toast.error(error?.response?.data?.error || "API error occurred.");
   } else {
     toast.error("An unexpected error occurred.");
   }
   onFail && onFail(error);
 }
 
+// Saga for login
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
   try {
-    yield delay(500);
+    yield delay(500); // Simulate API delay
     const { success, message, data } = yield call(AuthRequest.login, { email, password });
 
-    const userId = getUserIdFromToken();
-    if (userId) {
-      const response = yield call(AuthRequest.getUserInfo, userId);
-      yield put(AuthActions.setUser(response.data));
-      onSuccess && onSuccess(data?.user);
+    if (success) {
+      const decoded: any = jwt.decode(data.user.accessToken);
+      if (decoded) {
+        const response = yield call(AuthRequest.getUserInfo, decoded._id);
+        yield put(AuthActions.setUser(response.data));
+        onSuccess(data?.user);
+      } else {
+        toast.error("Failed to retrieve user ID from token.");
+        yield put(AuthActions.getInfoUser({}));
+      }
     } else {
-      yield put(AuthActions.getInfoUser({}));
-    }
-
-    if (!success) {
-      onFail && onFail(message, data);
+      onFail(message, data);
     }
   } catch (error) {
     yield* handleApiError(error, onFail);
   }
 }
 
+// Saga for registration
 function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { onSuccess = () => { }, onFail = () => { }, data } = payload;
   try {
@@ -59,9 +62,9 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
     yield put(AppAction.hideLoading());
 
     if (res.success) {
-      onSuccess && onSuccess(res);
+      onSuccess(res);
     } else {
-      onFail && onFail(res);
+      onFail(res);
     }
   } catch (error: any) {
     yield* handleApiError(error, onFail);
@@ -69,23 +72,26 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
   }
 }
 
+// Saga for retrieving user info
 function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { onSuccess = () => { }, onError = () => { } } = payload;
   try {
     const userId = getUserIdFromToken();
+    console.log("🚀 ~ userId:", userId)
     if (userId) {
       const response = yield call(AuthRequest.getUserInfo, userId);
       yield put(AuthActions.setUser(response.data));
-      onSuccess && onSuccess();
+      onSuccess();
     } else {
       yield put(AuthActions.getInfoUser({}));
     }
   } catch (error) {
     yield put(AuthActions.getInfoUser({}));
-    onError && onError(error);
+    onError(error);
   }
 }
 
+// Saga for logout
 function* logout(): Generator<any, void, any> {
   try {
     const { success } = yield call(AuthRequest.logout);
@@ -96,8 +102,27 @@ function* logout(): Generator<any, void, any> {
     yield* handleApiError(error, () => { });
   }
 }
-
+function* refreshToken(): Generator<any, void, any> {
+  try {
+    const response: any = yield call(AuthRequest.refreshToken);
+    if (response && response.accessToken) {
+      const decoded: any = jwt.decode(response.accessToken);
+      if (decoded) {
+        const userResponse = yield call(AuthRequest.getUserInfo, decoded._id);
+        yield put(AuthActions.setUser(userResponse.data));
+      } else {
+        throw new Error("Unable to decode user ID from access token.");
+      }
+    } else {
+      throw new Error("Refresh token failed.");
+    }
+  } catch (error) {
+    toast.error("hãy đăng nhập");
+  }
+}
+// Root saga for authentication
 export function* AuthSaga() {
+  yield takeLeading(AuthActions.refreshToken, refreshToken);
   yield takeLeading(AuthActions.login, login);
   yield takeLeading(AuthActions.register, register);
   yield takeLeading(AuthActions.getInfoUser, getInfoUser);

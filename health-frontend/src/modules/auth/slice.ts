@@ -3,10 +3,13 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 type AuthState = {
   user?: any;
+  refreshToken?: any;
+
 };
 
 const initialState: AuthState = {
   user: null,
+  refreshToken: ""
 };
 
 const AuthSlice = createSlice({
@@ -17,6 +20,8 @@ const AuthSlice = createSlice({
     register: (state: AuthState, { payload }: PayloadAction<any>) => { },
     setUser: (state: AuthState, { payload }: PayloadAction<any>) => {
       state.user = payload;
+    },
+    refreshToken: () => {
     },
     getInfoUser: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
     },

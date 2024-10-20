@@ -12,17 +12,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
   
-  canActivate(context: ExecutionContext) {
-    console.log("error ở đây");
-    
-    // Add your custom authentication logic here
-    // for example, call super.logIn(request) to establish a session.
-    return super.canActivate(context);
+  async canActivate(context: ExecutionContext) {
+    // Đợi kết quả từ super.canActivate vì nó trả về một Promise
+    const result = await super.canActivate(context) as boolean;
+    console.log('canActivate success:', result);
+
+    // Thực hiện logic tùy chỉnh nếu cần
+    return result;
   }
 
   handleRequest(err, user, info) {
-    console.log("🚀 ~ JwtAuthGuard ~ user:", user)
-    // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
