@@ -3,10 +3,10 @@ import { AppModule } from './app.module';
 import { BlockApiGuard } from './common/guards/blockApi.guard';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
+  const app = await NestFactory.create(AppModule);  const configService = app.get(ConfigService);
 
   const corsOrigins = configService.get<string>('CORS_ORIGIN', '').split(',');
   // const reflector = app.get(Reflector);
@@ -16,10 +16,11 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, 
   });
+  app.use(cookieParser());
   await app.listen(configService.get<string>('PORT', '3000'));
 
   console.log(
-    `Listen heath_backend port ${configService.get<string>('PORT', '3000')}  connect Db: ${configService.get<string>('MONGODB_URI', 'localhost:27017')} with env ${configService.get<string>('NODE_ENV', 'dev')}`,
+    `Listen heath_backend port ${configService.get<string>('PORT', '3000')} connect Db: ${configService.get<string>('MONGODB_URI', 'localhost:27017')} with env ${configService.get<string>('NODE_ENV', 'dev')}`,
   );
 }
 bootstrap();

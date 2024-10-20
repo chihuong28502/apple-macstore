@@ -15,7 +15,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   async canActivate(context: ExecutionContext) {
     // Đợi kết quả từ super.canActivate vì nó trả về một Promise
     const result = await super.canActivate(context) as boolean;
-    console.log('canActivate success:', result);
 
     // Thực hiện logic tùy chỉnh nếu cần
     return result;

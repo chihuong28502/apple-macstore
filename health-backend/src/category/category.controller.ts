@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './schema/category.schema';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
 
 @Controller('categories')
 export class CategoryController {
@@ -13,6 +14,7 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<{data:Category[]; success: boolean}> {
     return this.categoryService.findAll();

@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     // Payload là dữ liệu giải mã từ JWT. Bạn có thể thêm logic tại đây nếu cần.
     return {
-      userId: payload._id,
+      _id: payload._id,
       username: payload.username,
       role: payload.role,
     };
