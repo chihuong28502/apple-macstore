@@ -17,10 +17,8 @@ export const AuthRequest = {
       withCredentials: true,
     });
   },
-  refreshToken(refreshToken: string) {
+  refreshToken() {
     return MSTFetch.post('/auth/refresh', {
-      refreshToken,
-    }, {
       withCredentials: true
     });
   }, 

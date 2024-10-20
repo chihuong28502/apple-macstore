@@ -20,23 +20,19 @@ import { ResponseDto } from 'src/dtoRequest/return.dto';
 @Controller('admin')
 export class UserController {
   constructor(private readonly userService: UserService) { }
-  // Endpoint để lấy danh sách tất cả người dùng
   @Get()
   async findAll(): Promise<any> {
     return this.userService.findAll();
   }
 
-  // Endpoint để tìm người dùng theo ID
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<ResponseDto> {
-    console.log("🚀 ~ UserController ~ id:", id)
     if (!id) {
       throw new Error('ID is required');
     }
     return this.userService.findOne(id);
   }
 
-  // Endpoint để cập nhật thông tin người dùng theo ID
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -48,7 +44,6 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  // Endpoint để xóa người dùng theo ID
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<ResponseDto> {
     if (!id) {

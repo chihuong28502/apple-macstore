@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UserService } from 'src/user/user.service';
@@ -6,6 +6,11 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResponseDto } from 'src/dtoRequest/return.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
+
+interface RequestWithCookies extends Request {
+  cookies: { [key: string]: string };
+}
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -32,6 +37,8 @@ export class AuthController {
     return this.authService.login(loginDto, res);
   }
 
+
+  @UseGuards(JwtAuthGuard)
   @Get('user/:id')
   async findOne(@Param('id') id: string): Promise<ResponseDto> {
     if (!id) {
@@ -42,16 +49,20 @@ export class AuthController {
 
   @Public()
   @Post('refresh')
-  async refreshToken(@Body('refreshToken') refreshToken: string, @Res() res: Response) {
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(@Req() req: RequestWithCookies, @Res() res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is required');
     }
     const newAccessToken = await this.authService.refreshAccessToken(refreshToken);
-
+    if (!newAccessToken) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
     res.cookie('accessToken', newAccessToken, {
       httpOnly: false,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 3600 * 1000, 
     });
 

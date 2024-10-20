@@ -74,10 +74,10 @@ export class AuthService {
       const refreshToken = await this.generateRefreshToken(user);
 
       res.cookie('accessToken', accessToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: true,
         sameSite: 'none',
-        maxAge: 3600 * 1000,
+        maxAge: 10 * 1000,
       });
 
       res.cookie('refreshToken', refreshToken, {
@@ -95,7 +95,8 @@ export class AuthService {
             id: user._id,
             username: user.username,
             role: user.role,
-            refreshToken: refreshToken
+            refreshToken: refreshToken,
+            accessToken: accessToken
           },
         },
       });
@@ -163,6 +164,7 @@ export class AuthService {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('REFRESH_TOKEN'),
       });
+      console.log("🚀 ~ AuthService ~ payload:", payload)
       return this.generateAccessToken(payload); // Trả lại Access Token mới
     } catch (error) {
       throw new Error('Invalid refresh token');
