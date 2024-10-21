@@ -2,19 +2,19 @@ import MSTFetch from "@/core/services/fetch";
 
 export const ProductRequest = {
   createProduct(data: any) {
-    return MSTFetch.post("/products", data,{ withCredentials: true });
+    return MSTFetch.post("/products", data);
   },
 
   getProductById(id: string) {
-    return MSTFetch.get(`/products/${id}`,{ withCredentials: true });
+    return MSTFetch.get(`/products/${id}`);
   },
 
   updateProduct(id: string, data: any) {
-    return MSTFetch.put(`/products/${id}`, data,{ withCredentials: true });
+    return MSTFetch.put(`/products/${id}`, data);
   },
 
   deleteProduct(id: string) {
-    return MSTFetch.delete(`/products/${id}`,{ withCredentials: true });
+    return MSTFetch.delete(`/products/${id}`);
   },
 
   getAllProducts({ page, limit, categoryId,minPrice,maxPrice }: { page: number; limit: number; categoryId?: string; minPrice?: number; maxPrice?: number }) {
@@ -22,9 +22,9 @@ export const ProductRequest = {
     if (categoryId) {
       url += `&categoryId=${categoryId}`;
     }
-    return MSTFetch.get(url,{ withCredentials: true });
+    return MSTFetch.get(url);
   },
   getAllCategories() {
-    return MSTFetch.get("/categories",{ withCredentials: true });  // Assuming this endpoint returns a list of categories
+    return MSTFetch.get("/categories");  // Assuming this endpoint returns a list of categories
   },
 };
