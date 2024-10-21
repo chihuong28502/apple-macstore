@@ -77,7 +77,6 @@ function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any
   const { onSuccess = () => { }, onError = () => { } } = payload;
   try {
     const userId = getUserIdFromToken();
-    console.log("🚀 ~ userId:", userId)
     if (userId) {
       const response = yield call(AuthRequest.getUserInfo, userId);
       yield put(AuthActions.setUser(response.data));
@@ -105,8 +104,8 @@ function* logout(): Generator<any, void, any> {
 function* refreshToken(): Generator<any, void, any> {
   try {
     const response: any = yield call(AuthRequest.refreshToken);
-    if (response && response.accessToken) {
-      const decoded: any = jwt.decode(response.accessToken);
+    if (response && response.data.accessToken) {
+      const decoded: any = jwt.decode(response.data.accessToken);
       if (decoded) {
         const userResponse = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(userResponse.data));
@@ -114,10 +113,10 @@ function* refreshToken(): Generator<any, void, any> {
         throw new Error("Unable to decode user ID from access token.");
       }
     } else {
-      throw new Error("Refresh token failed.");
+      toast.error("Hãy đăng nhập");
     }
   } catch (error) {
-    toast.error("hãy đăng nhập");
+    toast.error("Hãy đăng nhập");
   }
 }
 // Root saga for authentication

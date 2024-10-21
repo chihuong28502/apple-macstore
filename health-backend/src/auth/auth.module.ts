@@ -8,11 +8,17 @@ import { UsersModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
+import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
+import { CookiesService } from './cookies.service';
+import { CookieAge } from './utils/cookieAgeAuth.service';
 
 @Module({
   imports: [
     ConfigModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: RefreshToken.name, schema: RefreshTokenSchema }
+    ]), 
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -24,9 +30,9 @@ import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
     }),
     UsersModule,
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy,CookiesService,CookieAge],
   controllers: [AuthController],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }
 
