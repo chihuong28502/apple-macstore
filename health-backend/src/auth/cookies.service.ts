@@ -11,14 +11,14 @@ export class CookiesService {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: this.cookieAge.accessTokenExpirationMs,
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: this.cookieAge.refreshTokenExpirationMs,
     });
   }
@@ -26,7 +26,7 @@ export class CookiesService {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: this.cookieAge.accessTokenExpirationMs,
     });
   }
@@ -34,13 +34,13 @@ export class CookiesService {
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
     });
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
+      sameSite: 'none',
     });
   }
 }
