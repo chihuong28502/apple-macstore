@@ -10,7 +10,7 @@ import { AuthActions } from "./slice";
 
 const getUserIdFromToken = () => {
   const accessToken = getCookie('accessToken');
-  console.log("🚀 ~ accessToken:", accessToken)
+  console.log("🚀 [SAGA] accessToken:", accessToken)
   if (accessToken) {
     const decoded: any = jwt.decode(accessToken);
     return decoded?._id || null;
@@ -36,7 +36,8 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
     const { success, message, data } = yield call(AuthRequest.login, { email, password });
 
     if (success) {
-      const decoded: any = jwt.decode(data.user.accessToken);
+      const decoded: any = jwt.decode(data.accessToken);
+      console.log("🚀 [SAGA] decoded:", decoded)
       if (decoded) {
         const response = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(response.data));
@@ -104,8 +105,10 @@ function* logout(): Generator<any, void, any> {
 function* refreshToken(): Generator<any, void, any> {
   try {
     const response: any = yield call(AuthRequest.refreshToken);
+    console.log("🚀 ~ response:", response)
     if (response && response.data.accessToken) {
       const decoded: any = jwt.decode(response.data.accessToken);
+      console.log("🚀 ~ decoded:", decoded)
       if (decoded) {
         const userResponse = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(userResponse.data));

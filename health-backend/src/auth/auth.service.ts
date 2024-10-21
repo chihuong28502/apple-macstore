@@ -171,7 +171,8 @@ export class AuthService {
   }
 
   private async saveRefreshToken(userId: any, refreshToken: string, deviceInfo: string, ipAddress: string): Promise<void> {
-    const expiresAt = new Date(Date.now() + parseInt(this.configService.get<string>('REFRESHTOKEN_EXPIRATION')));
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
     const hashedRefreshToken = await this.hashPassword(refreshToken);
     const newRefreshToken = new this.refreshTokenModel({
       userId,
