@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
@@ -7,74 +7,63 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResponseDto } from 'src/dtoRequest/return.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
+import { CookiesService } from './cookies.service';
 
-interface RequestWithCookies extends Request {
-  cookies: { [key: string]: string };
-}
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly cookiesService: CookiesService,
   ) { }
 
-
-  async onModuleInit() {
-    await this.authService.createAdmin();
-  }
-  // Endpoint để tạo người dùng mới
   @Public()
   @Post('register')
-  async create(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<ResponseDto> {
-    return this.authService.create(createUserDto);
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() createUserDto: CreateUserDto): Promise<ResponseDto> {
+    return this.authService.register(createUserDto);
   }
 
   @Public()
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    return this.authService.login(loginDto, res);
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() loginDto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ResponseDto> {
+    const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
+    const ipAddress = req.ip || 'Unknown IP';
+    const result = await this.authService.login(loginDto, deviceInfo, ipAddress);
+    this.cookiesService.setAuthCookies(res, result.data.accessToken, result.data.refreshToken);
+    return result;
   }
-
 
   @UseGuards(JwtAuthGuard)
   @Get('user/:id')
-  async findOne(@Param('id') id: string): Promise<ResponseDto> {
-    if (!id) {
-      throw new Error('ID is required');
-    }
+  async getUser(@Param('id') id: string): Promise<ResponseDto> {
     return this.userService.findOne(id);
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Req() req: RequestWithCookies, @Res() res: Response) {
+  async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ResponseDto> {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token is required');
+      throw new UnauthorizedException('Token không được gửi lên');
     }
-    const newAccessToken = await this.authService.refreshAccessToken(refreshToken);
-    if (!newAccessToken) {
-      return res.status(401).json({ message: 'Invalid refresh token' });
-    }
-    res.cookie('accessToken', newAccessToken, {
-      httpOnly: false,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 3600 * 1000, 
-    });
-
-    return res.json({
-      message: 'Token refreshed successfully',
-      accessToken: newAccessToken,
-    });
+    const result = await this.authService.refreshAccessToken(refreshToken);
+    this.cookiesService.setAccessTokenCookie(res, result.data.accessToken);
+    return result;
   }
 
   @Public()
-  @Get('logout')
-  async logout(@Res() response: Response) {
-    return this.authService.logout(response);
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Res({ passthrough: true }) res: Response): Promise<ResponseDto> {
+    const result = await this.authService.logout();
+    this.cookiesService.clearAuthCookies(res);
+    return result;
   }
 }

@@ -61,9 +61,7 @@ export class ProductService {
   }
 
   async findOne(id: string): Promise<{ data: Product, success: boolean }> {
-    console.log("🚀 ~ ProductService ~ id:", id)
     const product = await this.productModel.findById(id)
-    console.log("🚀 ~ ProductService ~ product:", product)
     if (!product) {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }

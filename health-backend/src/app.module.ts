@@ -35,7 +35,7 @@ import { TasksModule } from './taskSchedule/tasks.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'), // Lấy giá trị từ biến môi trường
+        secret: configService.get<string>('JWT_SECRET'), 
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRATION', '1d'),
         },
