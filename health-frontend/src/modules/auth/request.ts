@@ -23,7 +23,7 @@ export const AuthRequest = {
     });
   }, 
   logout() {
-    return MSTFetch.get("/auth/logout", {
+    return MSTFetch.post("/auth/logout", {
       withCredentials: true,
     });
   },
