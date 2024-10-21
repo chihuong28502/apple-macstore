@@ -17,6 +17,19 @@ export let AxiosClient = axios.create({
   withCredentials: true
 });
 
+// Gắn token vào header cho mỗi yêu cầu
+AxiosClient.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get('accessToken'); // Hoặc lấy từ localStorage
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
   clientInstance.interceptors.response.use(
@@ -34,7 +47,7 @@ const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
               originalRequest._retry = true;
               try {
                 const dispatch = store.dispatch;
-                dispatch(AuthActions.refreshToken());
+                 dispatch(AuthActions.refreshToken());
               } catch (err) {
                 toast.error("Hết phiên làm việc, hãy thực hiện đăng nhập.");
               }
