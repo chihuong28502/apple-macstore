@@ -9,13 +9,15 @@ import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
 
 const getUserIdFromToken = () => {
-  const accessToken = getCookie('accessToken');
-  console.log("🚀 [SAGA] accessToken:", accessToken)
+  // Lấy accessToken từ localStorage
+  const accessToken = localStorage.getItem('accessToken');
+  
   if (accessToken) {
-    const decoded: any = jwt.decode(accessToken);
-    return decoded?._id || null;
+    const decoded: any = jwt.decode(accessToken); // Giải mã token
+    return decoded?._id || null; // Trả về userId hoặc null
   }
-  return null;
+  
+  return null; // Trả về null nếu không có accessToken
 };
 
 // Utility function to handle API errors
@@ -37,7 +39,7 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
 
     if (success) {
       const decoded: any = jwt.decode(data.accessToken);
-      console.log("🚀 [SAGA] decoded:", decoded)
+      localStorage.setItem('accessToken', data.accessToken)
       if (decoded) {
         const response = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(response.data));
@@ -105,8 +107,10 @@ function* logout(): Generator<any, void, any> {
 function* refreshToken(): Generator<any, void, any> {
   try {
     const response: any = yield call(AuthRequest.refreshToken);
+
     console.log("🚀 ~ response:", response)
     if (response && response.data.accessToken) {
+      localStorage.setItem('accessToken', response.data.accessToken)
       const decoded: any = jwt.decode(response.data.accessToken);
       console.log("🚀 ~ decoded:", decoded)
       if (decoded) {
