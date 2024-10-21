@@ -9,7 +9,7 @@ export class CookiesService {
 
   setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
     res.cookie('accessToken', accessToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: this.cookieAge.accessTokenExpirationMs,
@@ -24,7 +24,7 @@ export class CookiesService {
   }
   setAccessTokenCookie(res: Response, accessToken: string): void {
     res.cookie('accessToken', accessToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: this.cookieAge.accessTokenExpirationMs,
@@ -32,7 +32,7 @@ export class CookiesService {
   }
   clearAuthCookies(res: Response): void {
     res.clearCookie('accessToken', {
-      httpOnly: false,
+      httpOnly: true,
       secure: true,
       sameSite: 'none',
     });
