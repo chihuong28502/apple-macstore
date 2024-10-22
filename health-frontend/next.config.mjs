@@ -19,15 +19,12 @@ const nextConfig = {
     ],
   },
   async rewrites() {
-    if (!process.env.NEXT_PUBLIC_API_URL_LOCAL) {
-      return [];
-    }
     return [
       {
         source: '/api/:path*',
         destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
-      },
-    ];
+      }
+    ]
   }
 };
 
