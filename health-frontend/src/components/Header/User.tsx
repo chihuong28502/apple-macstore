@@ -40,7 +40,7 @@ const User = () => {
               {/* <div className="size-10 min-w-10 min-h-10 max-w-10 max-h-10">
                 <img src={auth?.snippet?.thumbnails?.default?.url} alt="" className="rounded-full w-full h-full object-cover" />
               </div> */}
-              <span>{auth?.user?.email}</span>
+              <span>{auth?.email}</span>
             </div>
           ),
           key: "0",

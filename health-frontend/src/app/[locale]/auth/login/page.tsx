@@ -1,5 +1,5 @@
 "use client";
-import CustomButton from "@/app/[locale]/components/Button"
+import CustomButton from "@/app/[locale]/components/Button";
 import { VALIDATE } from "@/core/validate/validate";
 import { AuthActions } from "@/modules/auth/slice";
 import Link from "next/link";
@@ -21,24 +21,29 @@ function Page() {
   const handleLogin = async () => {
     try {
       setErrors({ email: "", password: "" });
+
+      // Xác thực đầu vào
       await VALIDATE.loginSchema.validate(
         { email, password },
         { abortEarly: false }
       );
 
-      dispatch(
-        AuthActions.login({
-          email,
-          password,
-          onSuccess: (rs: any) => {
-            toast.success("Đăng nhập thành công");
-            window.location.replace('/')
-          },
-          onFail: (message: any, data: any) => {
-            toast.error("Đăng nhập thất bại");
-          },
-        })
-      );
+      // Kiểm tra nếu không có lỗi
+      if (!errors.email && !errors.password) {
+        dispatch(
+          AuthActions.login({
+            email,
+            password,
+            onSuccess: (rs: any) => {
+              toast.success("Đăng nhập thành công");
+              window.location.replace("/");
+            },
+            onFail: (message: any, data: any) => {
+              toast.error("Đăng nhập thất bại");
+            },
+          })
+        );
+      }
     } catch (validationError) {
       if (validationError instanceof Yup.ValidationError) {
         const newErrors: any = {};
@@ -81,7 +86,7 @@ function Page() {
             </div>
             <div className="mt-12 flex flex-col items-center bg-layout">
               <h1 className="text-2xl xl:text-3xl font-extrabold">Sign up</h1>
-              <div className="w-full flex-1 mt-8">
+              <div className="w-full flex-1 mt-8 ">
                 <InputField
                   type="email"
                   value={email}

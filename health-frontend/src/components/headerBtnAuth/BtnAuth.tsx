@@ -12,17 +12,19 @@ const BtnAuth: React.FC<BtnAuthProps> = ({ title, icon: Icon, onClick }) => {
   const router = useRouter();
 
   const handleClick = () => {
-      router.push("/auth/login");
+    router.push("/auth/login");
   };
 
   return (
     <button
-      className="flex cursor-pointer gap-2 items-center text-fontColor bg-background
-        hover:bg-button rounded-md duration-100 p-2"
-      onClick={handleClick} // Gắn sự kiện onClick vào button
+      className="group flex cursor-pointer gap-2 items-center text-fontColor bg-background
+    hover:bg-button rounded-md duration-100 p-2"
+      onClick={handleClick}
     >
-      {Icon && <Icon className="text-fontColor" />}
-      <span className="text-sm font-bold pr-1 text-fontColor">{title}</span>
+      {Icon && <Icon className="text-fontColor group-hover:text-[#000]"/>}
+      <span className="text-sm font-bold pr-1 text-fontColor group-hover:text-[#000]">
+        {title}
+      </span>
     </button>
   );
 };

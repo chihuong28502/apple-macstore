@@ -14,15 +14,19 @@ export const VALIDATE = {
       .min(6, "Mật khẩu ít nhất 6 kí tự"),
   }),
 
-  // Validation cho form đăng nhập
+
   loginSchema: Yup.object().shape({
     email: Yup.string()
-      .email("Email không hợp lệ")
-      .required("Email là bắt buộc"),
+      .required("Email là bắt buộc")
+      .matches(
+        /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/,
+        "Email ko hợp lệ"
+      ),
     password: Yup.string()
       .required("Mật khẩu là bắt buộc")
-      .min(6, "Mật khấu không hợp về vì quá ngắn"),
+      .min(6, "Mật khẩu không hợp lệ vì quá ngắn"),
   }),
+
 
   // Validation cho form đăng ký
   registerSchema: Yup.object().shape({

@@ -89,7 +89,6 @@ const ProductPage = () => {
       label: "All",
       children: (
         <div>
-          {/* Bộ lọc khoảng giá */}
           <div className="mb-6 flex justify-start items-center">
             <span className="mr-4">Filter by Price:</span>
             <Slider
@@ -118,11 +117,18 @@ const ProductPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-6 gap-12">
-            {allProducts?.map((product: any, index: any) => (
-              <Product product={product} key={index} />
-            ))}
-          </div>
+          {allProducts?.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-6 gap-12">
+              {allProducts.map(
+                (
+                  product: any,
+                  index: number 
+                ) => (
+                  <Product product={product} key={index} />
+                )
+              )}
+            </div>
+          )}
           <div className="mt-4 flex justify-center">
             <Pagination
               current={currentPage}
@@ -173,12 +179,19 @@ const ProductPage = () => {
               }
             />
           </div>
+          {allProducts?.length > 0 && ( // Kiểm tra xem mảng có chứa phần tử hay không
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-6 gap-12">
+              {allProducts.map(
+                (
+                  product: any,
+                  index: number // Không cần sử dụng `?.` ở đây vì đã kiểm tra length
+                ) => (
+                  <Product product={product} key={index} />
+                )
+              )}
+            </div>
+          )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-6 gap-12">
-            {allProducts?.map((product: any, index: number) => (
-              <Product product={product} key={index} />
-            ))}
-          </div>
           <div className="mt-4 flex justify-center">
             <Pagination
               current={currentPage}
