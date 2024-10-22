@@ -10,9 +10,6 @@ export class TasksService {
   // Cron job chạy mỗi 10 phút
   @Cron('*/11 * * * *')
   async handleCron() {
-    console.log('Cron job is running every 10 minutes.');
-
-    // Gọi API
     try {
       const response = await firstValueFrom(
         this.httpService.get('https://health-yov6.onrender.com/categories'),

@@ -80,8 +80,6 @@ function Page() {
           },
         })
       );
-      console.log("Dữ liệu gửi đi:", formattedData);
-      // Ví dụ: gọi hàm loginAPI(formattedData)
     } catch (validationError) {
       if (validationError instanceof Yup.ValidationError) {
         const newErrors: FormErrors = {}; // Xác định kiểu dữ liệu cho errors

@@ -32,7 +32,7 @@ function Page() {
           password,
           onSuccess: (rs: any) => {
             toast.success("Đăng nhập thành công");
-            route.push("/");
+            window.location.replace('/')
           },
           onFail: (message: any, data: any) => {
             toast.error("Đăng nhập thất bại");

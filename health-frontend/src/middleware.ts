@@ -11,7 +11,6 @@ interface JwtPayload {
 
 function decodeToken(token: string): JwtPayload | null {
   try {
-    // Decode token without verifying signature
     const decoded = jwt.decode(token) as JwtPayload;
     return decoded;
   } catch (error) {
@@ -45,32 +44,33 @@ export function middleware(request: NextRequest) {
   let userRole = null;
   if (accessToken) {
     const decodedToken = decodeToken(accessToken);
-    console.log("🚀 ~ decodedToken:", decodedToken)
     if (decodedToken) {
       userRole = decodedToken.role;
     }
   }
+  console.log("🚀 ~ userRole:", userRole);
 
   // Check private routes
-  if (
-    privatePaths.some((path) => pathname.startsWith(path)) &&
-    !refreshToken &&
-    !accessToken
-  ) {
+  if (privatePaths.some((path) => pathname.startsWith(path)) && !accessToken) {
     const url = new URL(`/${locale}/auth/login`, request.url);
     return NextResponse.redirect(url);
   }
 
-  // Check admin routes using decoded role
-  if (
-    adminPaths.some((path) => pathname.startsWith(path)) &&
-    userRole !== "admin"
-  ) {
-    const url = new URL(`/${locale}`, request.url);
+  // Handle access for admin
+  if (userRole === "admin") {
+    // If the admin is trying to access root (/) or any non-dashboard route, redirect to dashboard
+    if (pathname === '/' || !adminPaths.some((path) => pathname.startsWith(path))) {
+      const url = new URL(`/${locale}/dashboard`, request.url);
+      return NextResponse.redirect(url);
+    }
+  } else if (adminPaths.some((path) => pathname.startsWith(path))) {
+    // If user is not admin and is trying to access admin paths, redirect
+    const url = new URL(`/${locale}`, request.url); // Redirect to homepage or another route
     return NextResponse.redirect(url);
   }
 
-  return response;
+  // Allow access to public routes, including root (/)
+  return response; // Proceed as usual for all other routes
 }
 
 export const config = {

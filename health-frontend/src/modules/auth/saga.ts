@@ -107,12 +107,9 @@ function* logout(): Generator<any, void, any> {
 function* refreshToken(): Generator<any, void, any> {
   try {
     const response: any = yield call(AuthRequest.refreshToken);
-
-    console.log("🚀 ~ response:", response)
     if (response && response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken)
       const decoded: any = jwt.decode(response.data.accessToken);
-      console.log("🚀 ~ decoded:", decoded)
       if (decoded) {
         const userResponse = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(userResponse.data));

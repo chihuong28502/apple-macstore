@@ -9,7 +9,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setIsLoading(false);
     dispatch(AuthActions.getInfoUser({}));
-    console.log(123);
+    console.log("AuthProvider");
   }, []);
   return <div>{isLoading ? <LoadingFixed isOpenProps /> : children}</div>;
 };
