@@ -1,15 +1,15 @@
 'use client'
 import axios, { AxiosInstance } from "axios";
 import Cookies from "js-cookie";
-import { getCookie } from "@/hooks/Cookies"; // Tự định nghĩa
 import CONST from "./const";
 import { locales } from "@/constants/i18n.config";
 import { toast } from 'react-toastify';
 import { AuthActions } from "@/modules/auth/slice";
 import { store } from "./store";
+import { AuthUtils } from "@/lib/localAuth";
 
 export let AxiosClient = axios.create({
-  baseURL: CONST.REQUEST.API_ADDRESS,
+  baseURL: '/api',
   timeout: CONST.REQUEST.REQUEST_TIMEOUT,
   headers: {
     "Content-Type": "application/json",
@@ -20,9 +20,9 @@ export let AxiosClient = axios.create({
 // Gắn token vào header cho mỗi yêu cầu
 AxiosClient.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('accessToken'); // Hoặc lấy từ localStorage
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const { accessToken } = AuthUtils.getTokens();
+    if (accessToken) {
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
     }
     return config;
   },

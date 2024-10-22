@@ -9,15 +9,23 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "i.pinimg.com",
-        pathname: "/**", // chấp nhận mọi đường dẫn con
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "img.youtube.com",
-        pathname: "/**", // chấp nhận mọi đường dẫn con
+        pathname: "/**",
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+      }
+    ]
+  }
 };
 
 export default withNextIntl(nextConfig);

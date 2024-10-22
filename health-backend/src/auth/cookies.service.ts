@@ -11,6 +11,7 @@ export class CookiesService {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
+      path:'/',
       sameSite: 'none',
       maxAge: this.cookieAge.accessTokenExpirationMs,
     });
@@ -18,6 +19,7 @@ export class CookiesService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
+      path:'/',
       sameSite: 'none',
       maxAge: this.cookieAge.refreshTokenExpirationMs,
     });
@@ -27,6 +29,7 @@ export class CookiesService {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
+      path:'/',
       maxAge: this.cookieAge.accessTokenExpirationMs,
     });
   }

@@ -4,22 +4,28 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './schema/category.schema';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RulesGuard } from 'src/common/guards/auth.guard';
+import { Public } from 'src/common/decorators/public.decorator';
 
+@UseGuards(JwtAuthGuard, RulesGuard)
+@Roles('admin')
 @Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) { }
 
   @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(createCategoryDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get()
-  async findAll(): Promise<{data:Category[]; success: boolean}> {
+  async findAll(): Promise<{ data: Category[]; success: boolean }> {
     return this.categoryService.findAll();
   }
 
+  @Public()
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Category> {
     return this.categoryService.findOne(id);

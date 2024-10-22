@@ -13,7 +13,8 @@ async function bootstrap() {
   // app.useGlobalGuards(new BlockApiGuard(reflector));
   app.enableCors({
     origin: corsOrigins.length > 1 ? corsOrigins : corsOrigins[0],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Các phương thức HTTP được phép
+    allowedHeaders: ['Content-Type', 'Authorization','X-Lang'],
     credentials: true, 
   });
   app.use(cookieParser());

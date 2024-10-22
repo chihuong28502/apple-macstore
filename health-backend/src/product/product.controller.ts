@@ -19,20 +19,22 @@ import { ProductService } from './product.service';
 import { Product } from './schema/product.schema';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 
+@UseGuards(JwtAuthGuard, RulesGuard)
+@Roles('admin')
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  // @UseGuards(JwtAuthGuard, RulesGuard) // Sử dụng RulesGuard để kiểm tra vai trò
-  // @Roles('admin', 'support')
   @Post()
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productService.create(createProductDto);
   }
+
   @Post('create-multiple')
   async createMultiple(@Body() createMultipleProductsDto: CreateMultipleProductsDto): Promise<Product[]> {
     return this.productService.createMultiple(createMultipleProductsDto);
   }
+
   @Public()
   @Get()
   async getAllProducts(
@@ -44,7 +46,6 @@ export class ProductController {
   ): Promise<{ data: Product[]; total: number; success: boolean }> {
     return await this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
   }
-  
 
   @Public()
   @Get(':id')
@@ -52,7 +53,6 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
-  @Roles('admin', 'support')
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -61,7 +61,6 @@ export class ProductController {
     return this.productService.update(id, updateProductDto);
   }
 
-  @Roles('admin', 'support')
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Product> {
     return this.productService.remove(id);
