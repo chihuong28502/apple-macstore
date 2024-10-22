@@ -19,7 +19,7 @@ function decodeToken(token: string): JwtPayload | null {
   }
 }
 
-const basePaths = ["private", "product"];
+const basePaths = ["private"];
 const privatePaths = locales.flatMap((locale) =>
   basePaths.map((path) => `/${locale}/${path}`)
 );

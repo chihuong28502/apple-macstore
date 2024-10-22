@@ -9,12 +9,12 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
-import { ResponseDto } from 'src/dtoRequest/return.dto';
 import { User, UserDocument } from 'src/user/schema/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshToken, RefreshTokenDocument } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
+import { ResponseDto } from 'src/utils/dto/response.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +45,7 @@ export class AuthService {
     }
   }
 
-  async register(createUserDto: CreateUserDto): Promise<ResponseDto> {
+  async register(createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
     }
@@ -58,11 +58,11 @@ export class AuthService {
     return {
       message: 'Register success',
       success: true,
-      data: { user: createdUser },
+      data: createdUser,
     };
   }
 
-  async login(loginDto: LoginDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto> {
+  async login(loginDto: LoginDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<User>> {
     const { email, password } = loginDto;
     const user = await this.validateUser(email, password);
     await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
@@ -84,7 +84,7 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<ResponseDto> {
+  async refreshAccessToken(refreshToken: string): Promise<ResponseDto<User>> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('REFRESH_TOKEN'),
@@ -106,7 +106,7 @@ export class AuthService {
     }
   }
 
-  async logout(): Promise<ResponseDto> {
+  async logout(): Promise<ResponseDto<User>> {
     return {
       success: true,
       message: 'Logout success',

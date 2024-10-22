@@ -5,6 +5,7 @@ import { Product, ProductDocument } from './schema/product.schema';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
+import { ResponseDto } from 'src/utils/dto/response.dto';
 
 @Injectable()
 export class ProductService {
@@ -12,83 +13,155 @@ export class ProductService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) { }
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    const createdProduct = new this.productModel(createProductDto);
-    return createdProduct.save();
+  async create(createProductDto: CreateProductDto): Promise<ResponseDto<Product>> {
+    try {
+      const createdProduct = new this.productModel(createProductDto);
+      const savedProduct = await createdProduct.save();
+      return {
+        success: true,
+        message: 'Product created successfully',
+        data: savedProduct,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create product',
+        data: null,
+      };
+    }
   }
-  async createMultiple(createMultipleProductsDto: CreateMultipleProductsDto): Promise<Product[]> {
-    const createdProducts = await this.productModel.insertMany(createMultipleProductsDto.products);
-    return createdProducts;
+
+  async createMultiple(createMultipleProductsDto: CreateMultipleProductsDto): Promise<ResponseDto<Product[]>> {
+    try {
+      const createdProducts = await this.productModel.insertMany(createMultipleProductsDto.products);
+      return {
+        success: true,
+        message: 'Products created successfully',
+        data: createdProducts,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create products',
+        data: null,
+      };
+    }
   }
 
   async getAll(
     page: number,
     categoryId: string,
     limit: number,
-    minPrice?: number, // Giá tối thiểu (optional)
-    maxPrice?: number, // Giá tối đa (optional)
-  ): Promise<{ data: Product[]; total: number; success: boolean }> {
-    const skip = (page - 1) * limit;
+    minPrice?: number,
+    maxPrice?: number,
+  ): Promise<ResponseDto<{ products: Product[]; total: number }>> {
+    try {
+      const skip = (page - 1) * limit;
+      const filter: any = {};
 
-    // Xây dựng bộ lọc: categoryId, minPrice, maxPrice
-    const filter: any = {};
+      if (categoryId) {
+        filter.categoryId = categoryId;
+      }
 
-    if (categoryId) {
-      filter.categoryId = categoryId;
+      if (minPrice !== undefined && maxPrice !== undefined) {
+        filter.price = { $gte: minPrice, $lte: maxPrice };
+      } else if (minPrice !== undefined) {
+        filter.price = { $gte: minPrice };
+      } else if (maxPrice !== undefined) {
+        filter.price = { $lte: maxPrice };
+      }
+
+      const total = await this.productModel.countDocuments(filter).exec();
+      const products = await this.productModel
+        .find(filter)
+        .populate('categoryId', 'name description')
+        .limit(limit)
+        .skip(skip)
+        .exec();
+
+      const filteredProducts = products.map(({ _id, name, price, categoryId }) => ({
+        _id,
+        name,
+        price,
+        categoryId,
+      }));
+
+      return {
+        success: true,
+        message: 'Products retrieved successfully',
+        data: { products: filteredProducts, total },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to retrieve products',
+        data: { products: [], total: 0 },
+      };
     }
-
-    // Nếu có khoảng giá, thêm điều kiện vào bộ lọc
-    if (minPrice !== undefined && maxPrice !== undefined) {
-      filter.price = { $gte: minPrice, $lte: maxPrice };
-    } else if (minPrice !== undefined) {
-      filter.price = { $gte: minPrice };
-    } else if (maxPrice !== undefined) {
-      filter.price = { $lte: maxPrice };
-    }
-
-    // Lấy tổng số sản phẩm để tính tổng số trang, dựa trên filter
-    const total = await this.productModel.countDocuments(filter).exec();
-
-    // Lấy danh sách sản phẩm với phân trang
-    const products = await this.productModel
-      .find(filter) // Lọc theo categoryId và khoảng giá nếu có
-      .populate('categoryId', 'name description') // Liên kết với collection Category
-      .limit(limit) // Giới hạn số lượng sản phẩm trả về
-      .skip(skip) // Bỏ qua sản phẩm đã lấy ở trang trước đó
-      .exec();
-
-    return { data: products, total, success: true };
   }
 
-  async findOne(id: string): Promise<{ data: Product, success: boolean }> {
-    const product = await this.productModel.findById(id)
-    if (!product) {
-      throw new NotFoundException(`Product with ID "${id}" not found`);
+  async findOne(id: string): Promise<ResponseDto<Product>> {
+    try {
+      const product = await this.productModel.findById(id).exec();
+      if (!product) {
+        throw new NotFoundException(`Product with ID "${id}" not found`);
+      }
+      return {
+        success: true,
+        message: 'Product retrieved successfully',
+        data: product,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to retrieve product: ${error.message}`,
+        data: null,
+      };
     }
-    return {
-      data: product,
-      success: true
-    };
   }
 
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<Product> {
-    const updatedProduct = await this.productModel
-      .findByIdAndUpdate(id, updateProductDto, { new: true })
-      .exec();
-    if (!updatedProduct) {
-      throw new NotFoundException(`Product with ID "${id}" not found`);
+  ): Promise<ResponseDto<Product>> {
+    try {
+      const updatedProduct = await this.productModel
+        .findByIdAndUpdate(id, updateProductDto, { new: true })
+        .exec();
+      if (!updatedProduct) {
+        throw new NotFoundException(`Product with ID "${id}" not found`);
+      }
+      return {
+        success: true,
+        message: 'Product updated successfully',
+        data: updatedProduct,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to update product: ${error.message}`,
+        data: null,
+      };
     }
-    return updatedProduct;
   }
 
-  async remove(id: string): Promise<Product> {
-    const deletedProduct = await this.productModel.findByIdAndDelete(id).exec();
-    if (!deletedProduct) {
-      throw new NotFoundException(`Product with ID "${id}" not found`);
+  async remove(id: string): Promise<ResponseDto<Product>> {
+    try {
+      const deletedProduct = await this.productModel.findByIdAndDelete(id).exec();
+      if (!deletedProduct) {
+        throw new NotFoundException(`Product with ID "${id}" not found`);
+      }
+      return {
+        success: true,
+        message: 'Product deleted successfully',
+        data: deletedProduct,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to delete product: ${error.message}`,
+        data: null,
+      };
     }
-    return deletedProduct;
   }
 }

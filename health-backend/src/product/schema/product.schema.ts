@@ -5,20 +5,20 @@ export type ProductDocument = Product & Document;
 
 @Schema({ timestamps: true })
 export class Product {
-  @Prop({  })
-  name: string;  // Tên sản phẩm
+  @Prop({ required: true })
+  name: string;  // Tên sản phẩm (MacBook, Mac mini, iMac)
 
-  @Prop({  })
+  @Prop({ required: true })
   description: string;  // Mô tả sản phẩm
 
-  @Prop({  min: 0 })
+  @Prop({ required: true, min: 0 })
   basePrice: number;  // Giá nhập sản phẩm (giá gốc)
 
-  @Prop({  min: 0 })
+  @Prop({ required: true, min: 0 })
   price: number;  // Giá bán sản phẩm
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category',  }) 
-  categoryId: string;  // ID danh mục sản phẩm
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', required: true })
+  categoryId: string;  // ID danh mục sản phẩm (Mac mini, MacBook, iMac)
 
   @Prop([String])
   images: string[];  // URL hình ảnh sản phẩm
@@ -28,26 +28,20 @@ export class Product {
 
   @Prop({
     type: {
+      models: { type: [String], default: [] },  // Dòng sản phẩm (ví dụ: MacBook Air, MacBook Pro)
+      storageOptions: { type: [String], default: [] },  // Tùy chọn dung lượng (ví dụ: 256GB, 512GB)
+      ramOptions: { type: [String], default: [] },  // Tùy chọn RAM (ví dụ: 8GB, 16GB, 32GB)
       colors: { type: [String], default: [] },  // Màu sắc sản phẩm
-      sizes: { type: [String], default: [] },  // Kích cỡ sản phẩm
-      materials: { type: [String], default: [] },  // Chất liệu sản phẩm
-      personalizationOptions: {
-        addName: { type: Boolean, default: false },  // Tùy chọn thêm tên cá nhân
-        addLogo: { type: Boolean, default: false },  // Tùy chọn thêm logo cá nhân
-      },
     },
-    _id: false,  // Loại bỏ _id cho tùy chỉnh
+    _id: false,
     default: {},
   })
-  customizations: {
+  specifications: {
+    models: string[],
+    storageOptions: string[],
+    ramOptions: string[],
     colors: string[],
-    sizes: string[],
-    materials: string[],
-    personalizationOptions: {
-      addName: boolean,
-      addLogo: boolean,
-    }
-  };  // Tùy chọn cá nhân hóa
+  };  // Tùy chọn cấu hình sản phẩm
 
   @Prop({ default: 0 })
   reviewsCount: number;  // Số lượng đánh giá
@@ -56,20 +50,20 @@ export class Product {
   averageRating: number;  // Đánh giá trung bình (0 đến 5 sao)
 
   @Prop({
-    type: Map, // Map của màu sắc, mỗi màu lại chứa một Map khác của kích cỡ và tồn kho
+    type: Map, // Map của màu sắc và cấu hình, mỗi cấu hình chứa số lượng tồn kho
     of: {
       type: Map,
-      of: Number,  // Mỗi kích cỡ có một số lượng tồn kho
+      of: Number,  // Mỗi cấu hình có một số lượng tồn kho
     },
     default: new Map(),
   })
-  stock: Map<string, Map<number, number>>;  // Quản lý tồn kho theo màu và kích cỡ
+  stock: Map<string, Map<string, number>>;  // Quản lý tồn kho theo cấu hình (màu, dung lượng, RAM)
 
   @Prop({ default: Date.now })
-  createdAt: Date;  // Ngày tạo sản phẩm
+  createdAt: Date;  
 
   @Prop({ default: Date.now })
-  updatedAt: Date;  // Ngày cập nhật sản phẩm
+  updatedAt: Date; 
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
