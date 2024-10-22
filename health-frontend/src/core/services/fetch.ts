@@ -9,7 +9,7 @@ import { store } from "./store";
 import { AuthUtils } from "@/lib/localAuth";
 
 export let AxiosClient = axios.create({
-  baseURL: '/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL_LOCAL || '/api',
   timeout: CONST.REQUEST.REQUEST_TIMEOUT,
   headers: {
     "Content-Type": "application/json",
