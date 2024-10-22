@@ -13,7 +13,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schema/user.schema';
 import { UserService } from './user.service';
-import { ResponseDto } from 'src/dtoRequest/return.dto';
+import { ResponseDto} from 'src/utils/dto/response.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard) // Áp dụng guard ở cấp controller
 @Roles('admin')
@@ -26,7 +26,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ResponseDto> {
+  async findOne(@Param('id') id: string): Promise<ResponseDto<User>> {
     if (!id) {
       throw new Error('ID is required');
     }
@@ -37,7 +37,7 @@ export class UserController {
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<ResponseDto> {
+  ): Promise<ResponseDto<User>> {
     if (!id) {
       throw new Error('ID is required');
     }
@@ -45,7 +45,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ResponseDto> {
+  async remove(@Param('id') id: string): Promise<ResponseDto<User>> {
     if (!id) {
       throw new Error('ID is required');
     }

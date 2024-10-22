@@ -1,11 +1,22 @@
 "use client";
 import { motion } from "framer-motion";
 import MenuSidebar from "./Menu";
+import { useEffect } from "react";
+import { usePathname } from "@/i18n/routing";
+
 type Props = {
   isOpenMenuMobile: boolean;
   toggleSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
 const SidebarMobile = ({ isOpenMenuMobile, toggleSidebar }: Props) => {
+  const pathname = usePathname(); // Get the current pathname
+
+  // Close the sidebar when the pathname changes
+  useEffect(() => {
+    toggleSidebar(false);
+  }, [pathname, toggleSidebar]);
+
   const sidebarVariants = {
     open: { translateX: 0 },
     closed: { translateX: "-100%" },

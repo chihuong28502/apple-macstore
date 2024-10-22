@@ -5,9 +5,10 @@ import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { ResponseDto } from 'src/dtoRequest/return.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
 import { CookiesService } from './cookies.service';
+import { ResponseDto } from 'src/utils/dto/response.dto';
+import { User } from 'src/user/schema/user.schema';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +21,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() createUserDto: CreateUserDto): Promise<ResponseDto> {
+  async register(@Body() createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
     return this.authService.register(createUserDto);
   }
 
@@ -31,7 +32,7 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<ResponseDto> {
+  ): Promise<ResponseDto<User>> {
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || 'Unknown IP';
     const result = await this.authService.login(loginDto, deviceInfo, ipAddress);
@@ -41,14 +42,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('user/:id')
-  async getUser(@Param('id') id: string): Promise<ResponseDto> {
+  async getUser(@Param('id') id: string): Promise<ResponseDto<User>> {
     return this.userService.findOne(id);
   }
 
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ResponseDto> {
+  async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ResponseDto<User>> {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('Token không được gửi lên');
@@ -61,7 +62,7 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Res({ passthrough: true }) res: Response): Promise<ResponseDto> {
+  async logout(@Res({ passthrough: true }) res: Response): Promise<ResponseDto<User>> {
     const result = await this.authService.logout();
     this.cookiesService.clearAuthCookies(res);
     return result;

@@ -18,6 +18,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductService } from './product.service';
 import { Product } from './schema/product.schema';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
+import { ResponseDto } from 'src/utils/dto/response.dto';
 
 @UseGuards(JwtAuthGuard, RulesGuard)
 @Roles('admin')
@@ -26,12 +27,12 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
+  async create(@Body() createProductDto: CreateProductDto): Promise<ResponseDto<Product>> {
     return this.productService.create(createProductDto);
   }
 
   @Post('create-multiple')
-  async createMultiple(@Body() createMultipleProductsDto: CreateMultipleProductsDto): Promise<Product[]> {
+  async createMultiple(@Body() createMultipleProductsDto: CreateMultipleProductsDto): Promise<ResponseDto<Product[]>> {
     return this.productService.createMultiple(createMultipleProductsDto);
   }
 
@@ -41,15 +42,15 @@ export class ProductController {
     @Query('categoryId') categoryId: string,
     @Query('page') page: number = 1, 
     @Query('limit') limit: number = 10, 
-    @Query('minPrice') minPrice: number, 
-    @Query('maxPrice') maxPrice: number, 
-  ): Promise<{ data: Product[]; total: number; success: boolean }> {
-    return await this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
+    @Query('minPrice') minPrice?: number, 
+    @Query('maxPrice') maxPrice?: number
+  ): Promise<ResponseDto<{ products: Product[]; total: number }>> {
+    return this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
   }
 
   @Public()
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<{data:Product,success:boolean}> {
+  async findOne(@Param('id') id: string): Promise<ResponseDto<Product>> {
     return this.productService.findOne(id);
   }
 
@@ -57,12 +58,12 @@ export class ProductController {
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
-  ): Promise<Product> {
+  ): Promise<ResponseDto<Product>> {
     return this.productService.update(id, updateProductDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Product> {
+  async remove(@Param('id') id: string): Promise<ResponseDto<Product>> {
     return this.productService.remove(id);
   }
 }
