@@ -12,7 +12,7 @@ export class TasksService {
   async handleCron() {
     try {
       const response = await firstValueFrom(
-        this.httpService.get('https://health-yov6.onrender.com/categories'),
+        this.httpService.get('https://apple-macstore.onrender.com/categories'),
       );
     } catch (error) {
     }
