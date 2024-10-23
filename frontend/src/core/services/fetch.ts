@@ -1,6 +1,6 @@
 'use client'
 import axios, { AxiosInstance } from "axios";
-import Cookies from "js-cookie";
+import Cookies from "../../../node_modules/@types/js-cookie";
 import CONST from "./const";
 import { locales } from "@/constants/i18n.config";
 import { toast } from 'react-toastify';
