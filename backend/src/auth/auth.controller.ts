@@ -17,7 +17,11 @@ export class AuthController {
     private readonly userService: UserService,
     private readonly cookiesService: CookiesService,
   ) { }
-
+ 
+  async onModuleInit() {
+    await this.authService.createAdmin();
+  }
+  
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)

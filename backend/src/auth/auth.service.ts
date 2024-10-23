@@ -19,7 +19,7 @@ import { ResponseDto } from 'src/utils/dto/response.dto';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-
+  
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshTokenDocument>,
@@ -27,6 +27,7 @@ export class AuthService {
     private cookieAge: CookieAge,
     private configService: ConfigService,
   ) { }
+
 
   async createAdmin(): Promise<void> {
     const adminEmail = 'admin@gmail.com';
