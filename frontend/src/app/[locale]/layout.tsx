@@ -38,7 +38,6 @@ export default function RootLayout({
           {children}
           <ToastContainer />
           <LoadingFixed />
-
         </Providers>
       </body>
     </html>

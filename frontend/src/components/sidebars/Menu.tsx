@@ -1,20 +1,12 @@
 "use client";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import type { MenuProps } from "antd";
-import { ConfigProvider, Menu } from "antd";
-import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { ConfigProvider, Menu, Tooltip } from "antd";
 import { useTheme } from "next-themes";
-import Image from "next/image";
-import { useEffect } from "react";
 import { FaShirt } from "react-icons/fa6";
 import { LuHome } from "react-icons/lu";
-import { useDispatch, useSelector } from "react-redux";
 import DarkModeSwitch from "../DarkModeSwitch";
-import SearchComponent from "../Search/Search";
-import SelectLanguage from "../Select/SelectLanguage";
 type MenuItem = Required<MenuProps>["items"][number];
 
 type Props = {
@@ -23,35 +15,31 @@ type Props = {
 
 const MenuSidebar = ({ collapsed = false }: Props) => {
   const { resolvedTheme } = useTheme();
-  const dispatch = useDispatch();
-  const allCategory = useSelector(ProductSelectors.categories);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      dispatch(ProductActions.fetchCategories());
-    };
-    fetchData();
-  }, [dispatch]);
-  const translations = useTranslations("product");
-  const translationsHome = useTranslations("home");
   const items: MenuItem[] = [
     {
       key: "home",
-      icon: <LuHome />,
-      label: <Link href={`/`}>{translationsHome("home")}</Link>,
+      icon: (
+          <LuHome />
+      ),
+      label: (
+        <Tooltip title="Home" placement="right">
+          <Link href={`/`}></Link>
+        </Tooltip>
+      ),
     },
     {
       key: "product",
       icon: <FaShirt />,
-      label: <Link href={`/product`}> {translations("title")} </Link>
+      label: (
+        <Tooltip title="Product" placement="right">
+          <Link href={`/product`}></Link>
+        </Tooltip>
+      ),
     },
   ];
 
   return (
     <>
-      <div className="w-full mx-auto block lg:hidden my-3">
-        <SearchComponent />
-      </div>
       <ConfigProvider
         theme={{
           components: {
@@ -75,13 +63,13 @@ const MenuSidebar = ({ collapsed = false }: Props) => {
           items={items}
         />
       </ConfigProvider>
-      <div className="flex items-center justify-start z-20 md:hidden">
+      {/* <div className="flex items-center justify-start z-20 md:hidden">
         <SelectLanguage />
-      </div>
+      </div> */}
       <div
         className={cn(
-          "flex items-center h-10 my-0.5 z-0",
-          collapsed ? "justify-center" : "justify-start pl-6"
+          "flex items-center h-10 my-0.5 z-0 justify-center",
+          collapsed ? "justify-center" : "justify-center"
         )}
       >
         <DarkModeSwitch />

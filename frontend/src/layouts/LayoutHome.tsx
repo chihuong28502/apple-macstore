@@ -4,6 +4,7 @@ import Header from "@/components/Header/Header";
 import SideBar from "@/components/sidebars/Sidebar";
 import SidebarMobile from "@/components/sidebars/SidebarMobile";
 import { useWindowSize } from "@/hooks/breakpoint";
+import { Tooltip } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 
 const LayoutHome = ({ children }: { children: ReactNode }) => {
@@ -24,14 +25,7 @@ const LayoutHome = ({ children }: { children: ReactNode }) => {
         isOpenMenuMobile={isOpenMenuMobile}
       />
       <div className="flex flex-1 overflow-hidden">
-        {isMobile ? (
-          <SidebarMobile
-            isOpenMenuMobile={isOpenMenuMobile}
-            toggleSidebar={setIsOpenMenuMobile}
-          />
-        ) : (
-          <SideBar collapsed={collapsed} />
-        )}
+        <SideBar collapsed={collapsed} />
         <main className="flex-1 overflow-auto p-4 flex flex-col justify-between bg-mainContent">
           <div className="flex-grow">{children}</div>
           <div className="">

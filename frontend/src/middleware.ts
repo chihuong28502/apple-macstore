@@ -48,7 +48,6 @@ export function middleware(request: NextRequest) {
       userRole = decodedToken.role;
     }
   }
-  console.log("🚀 ~ userRole:", userRole);
 
   // Check private routes
   if (privatePaths.some((path) => pathname.startsWith(path)) && !accessToken) {
