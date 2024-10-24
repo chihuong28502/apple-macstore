@@ -19,7 +19,7 @@ import { ResponseDto } from 'src/utils/dto/response.dto';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  
+
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshTokenDocument>,
@@ -47,13 +47,19 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
+    const checkEmail = await this.userModel.findOne({ email: createUserDto.email })
+    if (checkEmail) {
+      throw new BadRequestException('Email tồn tại'); 
+    }
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
     }
+    const code = await this.generateUniqueCode()
     const hashedPassword = await this.hashPassword(createUserDto.password);
     const createdUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
+      code: code
     });
     await createdUser.save();
     return {
@@ -183,5 +189,20 @@ export class AuthService {
       expiresAt,
     });
     await newRefreshToken.save();
+  }
+
+  private async generateUniqueCode(): Promise<string> {
+    let code: string;
+    const existingCodes = new Set(await this.getAllCodes());
+    do {
+      code = Math.floor(10000 + Math.random() * 90000).toString(); 
+    } while (existingCodes.has(code)); 
+
+    return code;
+  }
+
+  private async getAllCodes(): Promise<string[]> {
+    const users = await this.userModel.find().select('code');
+    return users.map(user => user.code);
   }
 }

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Product, ProductDocument } from './schema/product.schema';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { CreateProductDto } from './dto/create-product.dto';
-import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 import { ResponseDto } from 'src/utils/dto/response.dto';
+import { CreateMultipleProductsDto } from './dto/create-multi.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { Product, ProductDocument } from './schema/product.schema';
 
 @Injectable()
 export class ProductService {
@@ -79,17 +79,11 @@ export class ProductService {
         .skip(skip)
         .exec();
 
-      const filteredProducts = products.map(({ _id, name, price, categoryId }) => ({
-        _id,
-        name,
-        price,
-        categoryId,
-      }));
 
       return {
         success: true,
         message: 'Products retrieved successfully',
-        data: { products: filteredProducts, total },
+        data: { products: products, total },
       };
     } catch (error) {
       return {
@@ -106,7 +100,7 @@ export class ProductService {
       if (!product) {
         throw new NotFoundException(`Product with ID "${id}" not found`);
       }
-    return {
+      return {
         success: true,
         message: 'Product retrieved successfully',
         data: product,
