@@ -1,86 +1,39 @@
 "use client";
-import Product from "@/components/Product/Product";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
-import { Dropdown, Menu, Pagination, Tabs } from "antd";
+import { type ProductPage } from "@/type/product.page.type";
+import { Pagination, Skeleton } from "antd";
 import { debounce } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { BreadcrumbNav } from "./components/BreadcrumbNav";
+import { CategoryFilter } from "./components/CategoryFilter";
+import { PriceFilter } from "./components/PriceFilter";
+import { ProductGrid } from "./components/ProductGrid";
+import { usePathname } from "next/navigation";
 
-const ProductPage = () => {
+const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
+  const pathname = usePathname();
+  const allProducts = useSelector(
+    ProductSelectors.productList
+  ) as ProductPage.Product[];
+  const totalProducts = useSelector(ProductSelectors.totalProducts) as number;
+  const categories = useSelector(
+    ProductSelectors.categories
+  ) as ProductPage.Category[];
+  const loading = useSelector(ProductSelectors.isLoading) as boolean;
 
-  const allProducts = useSelector(ProductSelectors.productList);
-  const totalProducts = useSelector(ProductSelectors.totalProducts);
-  const categories = useSelector(ProductSelectors.categories);
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000000000]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(8);
-  const [activeTab, setActiveTab] = useState("1");
-  const [selectedRangeId, setSelectedRangeId] = useState<number | null>(0); // Default to Mặc định
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(8);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedRangeId, setSelectedRangeId] = useState<number>(0);
+  const [localCategoryPath, setLocalCategoryPath] = useState<
+    ProductPage.Category[]
+  >([]);
+  const isFromCategoryChange = useRef<boolean>(false);
 
-  useEffect(() => {
-    dispatch(ProductActions.fetchCategories());
-  }, [dispatch]);
-
-  useEffect(() => {
-    // Set default price range and selected range ID when the component mounts
-    setSelectedRangeId(0); // Mặc định
-    setPriceRange([0, 10000000000]); // Mức giá mặc định
-  }, []);
-
-  const debouncedFetchProducts = useCallback(
-    debounce((priceRange, categoryId) => {
-      dispatch(
-        ProductActions.fetchPaginatedProducts({
-          page: currentPage,
-          limit: pageSize,
-          minPrice: priceRange[0],
-          maxPrice: priceRange[1],
-          categoryId: categoryId !== "1" ? categoryId : undefined,
-        })
-      );
-    }, 500),
-    [dispatch, currentPage, pageSize]
-  );
-
-  useEffect(() => {
-    debouncedFetchProducts(priceRange, activeTab);
-  }, [priceRange, activeTab, debouncedFetchProducts]);
-
-  const parentCategories = categories.filter(
-    (category: any) => !category.parentCategoryId
-  );
-  const childCategories = categories.filter(
-    (category: any) => category.parentCategoryId
-  );
-
-  const getChildCategories = (parentId: string) => {
-    return categories.filter((cat: any) => cat.parentCategoryId === parentId);
-  };
-
-  const buildMenuItems = (category: any): any => {
-    const children = getChildCategories(category._id);
-
-    return {
-      key: category._id,
-      label: (
-        <div className="flex justify-between items-center w-full py-2 px-4">
-          <span>{category.name}</span>
-          {children.length > 0 && <span className="text-gray-400">›</span>}
-        </div>
-      ),
-      children:
-        children.length > 0
-          ? children.map((child) => buildMenuItems(child))
-          : null,
-      onClick: () => {
-        setActiveTab(category._id);
-        setCurrentPage(1);
-      },
-    };
-  };
-
-  const priceRanges = [
+  const priceRanges: ProductPage.PriceRange[] = [
     { id: 0, label: "Mặc định", min: 0, max: 10000000000 },
     { id: 1, label: "Dưới 10 triệu", min: 0, max: 10000000 },
     { id: 2, label: "10 - 20 triệu", min: 10000000, max: 20000000 },
@@ -89,121 +42,112 @@ const ProductPage = () => {
     { id: 5, label: "Trên 40 triệu", min: 40000000, max: 100000000 },
   ];
 
-  const handlePriceRangeChange = (range: (typeof priceRanges)[0]) => {
+  useEffect(() => {
+    const fetchCategories = async () => {
+      dispatch(ProductActions.fetchCategories());
+    };
+
+    fetchCategories();
+  }, [dispatch]);
+
+  const fetchProducts = useCallback(
+    (params: ProductPage.FetchProductsParams) => {
+      dispatch(ProductActions.fetchPaginatedProducts(params));
+    },
+    [dispatch]
+  );
+
+  const debouncedFetchProducts = useCallback(
+    debounce((params: ProductPage.FetchProductsParams) => {
+      fetchProducts(params);
+    }, 500),
+    [fetchProducts]
+  );
+ 
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setCurrentPage(1);
+    isFromCategoryChange.current = true;
+    fetchProducts({
+      page: 1,
+      limit: pageSize,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+      categoryId: categoryId !== "all" ? categoryId : undefined,
+    });
+  };
+
+  useEffect(() => {
+    if (isFromCategoryChange.current) {
+      isFromCategoryChange.current = false;
+      return;
+    }
+    debouncedFetchProducts({
+      page: currentPage,
+      limit: pageSize,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+      categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
+    });
+    return () => {
+      debouncedFetchProducts.cancel();
+    };
+  }, [
+    priceRange,
+    currentPage,
+    pageSize,
+    selectedCategory,
+    debouncedFetchProducts,
+  ]);
+
+  const handlePriceRangeChange = (range: ProductPage.PriceRange) => {
     setSelectedRangeId(range.id);
     setPriceRange([range.min, range.max]);
   };
 
-  const renderPriceFilter = () => (
-    <div className="mb-6">
-      <div className="flex flex-wrap gap-2 items-center">
-        <span className="mr-1">Mức giá:</span>
-        {priceRanges.map((range) => (
-          <label
-            key={range.id}
-            className={`hover:bg-green-300 hover:text-white shadow-xl
-              px-4 rounded-full cursor-pointer border
-              transition-colors duration-200
-              ${
-                selectedRangeId === range.id
-                  ? "bg-green-500 text-white border-green-500"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-green-500"
-              }
-            `}
-          >
-            <input
-              type="radio"
-              name="priceRange"
-              className="hidden"
-              checked={selectedRangeId === range.id}
-              onChange={() => handlePriceRangeChange(range)}
-            />
-            <span className="text-xs">{range.label}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderProductGrid = () => (
-    <>
-      {allProducts?.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-6 gap-12">
-          {allProducts.map((product: any, index: number) => (
-            <Product product={product} key={index} />
-          ))}
-        </div>
-      )}
-      <div className="mt-4 flex justify-center">
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={totalProducts}
-          onChange={(page, size) => {
-            setCurrentPage(page);
-            setPageSize(size);
-          }}
-        />
-      </div>
-    </>
-  );
-
-  const tabItems = [
-    {
-      key: "1",
-      label: "All",
-      children: (
-        <div>
-          {renderPriceFilter()}
-          {renderProductGrid()}
-        </div>
-      ),
-    },
-    ...parentCategories.map((category: any) => ({
-      key: category._id,
-      label: (
-        <Dropdown
-          overlay={
-            <Menu
-              mode="vertical"
-              items={getChildCategories(category._id).map((child) =>
-                buildMenuItems(child)
-              )}
-              className="category-dropdown"
-            />
-          }
-          trigger={["hover"]}
-        >
-          <span className="px-4 py-2">{category.name}</span>
-        </Dropdown>
-      ),
-      children: (
-        <div>
-          {renderPriceFilter()}
-          {renderProductGrid()}
-        </div>
-      ),
-    })),
-  ];
-
   return (
-    <div className="p-8">
-      <style jsx global>{`
-        .category-dropdown .ant-dropdown-menu-item {
-          padding: 8px 12px;
-        }
-        .category-dropdown .ant-dropdown-menu-submenu-title {
-          padding-right: 24px;
-        }
-      `}</style>
-      <Tabs
-        activeKey={activeTab}
-        items={tabItems}
-        onChange={(key) => {
-          setActiveTab(key);
-          setCurrentPage(1);
-        }}
-      />
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {loading ? (
+          <Skeleton active />
+        ) : (
+          <BreadcrumbNav
+            onCategoryChange={handleCategoryChange}
+            selectedCategory={selectedCategory}
+            categories={categories}
+            loading={loading}
+          />
+        )}
+
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
+          loading={loading}
+        />
+
+        <PriceFilter
+          priceRanges={priceRanges}
+          selectedRangeId={selectedRangeId}
+          onPriceChange={handlePriceRangeChange}
+          loading={loading}
+        />
+        <ProductGrid products={allProducts} loading={loading} />
+        {totalProducts > pageSize && allProducts?.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={totalProducts}
+              onChange={(page: number, size: number) => {
+                setCurrentPage(page);
+                setPageSize(size);
+              }}
+              className="bg-white p-4 rounded-lg shadow-md"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

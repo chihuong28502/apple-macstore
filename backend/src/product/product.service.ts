@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Category, CategoryDocument } from 'src/category/schema/category.schema';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -11,6 +12,7 @@ import { Product, ProductDocument } from './schema/product.schema';
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) { }
 
   async create(createProductDto: CreateProductDto): Promise<ResponseDto<Product>> {
@@ -50,19 +52,89 @@ export class ProductService {
 
   async getAll(
     page: number,
-    categoryId: string,
-    limit: number,
+    categoryId?: string,
+    limit?: number,
     minPrice?: number,
     maxPrice?: number,
   ): Promise<ResponseDto<{ products: Product[]; total: number }>> {
     try {
       const skip = (page - 1) * limit;
       const filter: any = {};
-
-      if (categoryId) {
-        filter.categoryId = categoryId;
+  
+      // Nếu categoryId không được truyền vào, trả về tất cả sản phẩm
+      if (!categoryId) {
+        // Thêm bộ lọc giá nếu có
+        if (minPrice !== undefined && maxPrice !== undefined) {
+          filter.price = { $gte: minPrice, $lte: maxPrice };
+        } else if (minPrice !== undefined) {
+          filter.price = { $gte: minPrice };
+        } else if (maxPrice !== undefined) {
+          filter.price = { $lte: maxPrice };
+        }
+  
+        const total = await this.productModel.countDocuments(filter).exec();
+        const products = await this.productModel
+          .find(filter)
+          .select('_id name price images reviewsCount') // Chọn các trường cần thiết
+          .limit(limit)
+          .skip(skip)
+          .exec();
+  
+        return {
+          success: true,
+          message: 'Products retrieved successfully',
+          data: { products: products, total },
+        };
       }
-
+  
+      // Tiếp tục xử lý nếu có categoryId
+      const currentCategory = await this.categoryModel.findById(categoryId).exec();
+      if (!currentCategory) {
+        return {
+          success: false,
+          message: 'Category not found',
+          data: { products: [], total: 0 },
+        };
+      }
+  
+      // Hàm để tìm tất cả các danh mục con (đệ quy)
+      const findAllChildCategories = async (parentId: string): Promise<string[]> => {
+        const categoryIds: string[] = [];
+        const childCategories = await this.categoryModel.find({ parentCategoryId: parentId }).exec();
+  
+        for (const child of childCategories) {
+          categoryIds.push(child._id.toString()); // Lưu ID của danh mục con
+          const grandChildIds = await findAllChildCategories(child._id.toString());
+          categoryIds.push(...grandChildIds); // Thêm các danh mục con vào mảng
+        }
+  
+        return categoryIds; // Trả về danh sách tất cả các danh mục con
+      };
+  
+      // Lấy danh sách các danh mục con
+      let categoryIds: string[] = [];
+      if (currentCategory.parentCategoryId === null) {
+        // Cấp 1: lấy tất cả cấp 2 và cấp 3
+        const childCategories = await findAllChildCategories(categoryId);
+        categoryIds = [categoryId, ...childCategories];
+      } else {
+        const parentCategory = await this.categoryModel.findById(currentCategory.parentCategoryId).exec();
+        if (parentCategory) {
+          if (parentCategory.parentCategoryId === null) {
+            const childCategories = await findAllChildCategories(categoryId);
+            categoryIds = [categoryId, ...childCategories];
+          } else {
+            categoryIds = [categoryId];
+          }
+        }
+      }
+  
+      // Thêm danh sách danh mục vào filter
+      if (categoryIds.length > 0) {
+        filter.categoryId = { $in: categoryIds }; // Lọc sản phẩm theo các danh mục
+      }
+  
+      // Thêm bộ lọc giá
       if (minPrice !== undefined && maxPrice !== undefined) {
         filter.price = { $gte: minPrice, $lte: maxPrice };
       } else if (minPrice !== undefined) {
@@ -70,16 +142,16 @@ export class ProductService {
       } else if (maxPrice !== undefined) {
         filter.price = { $lte: maxPrice };
       }
-
+  
       const total = await this.productModel.countDocuments(filter).exec();
       const products = await this.productModel
         .find(filter)
-        .populate('categoryId', 'name description')
+        .select('_id name price images reviewsCount')
+        .populate('categoryId', 'name')
         .limit(limit)
         .skip(skip)
         .exec();
-
-
+  
       return {
         success: true,
         message: 'Products retrieved successfully',
@@ -93,7 +165,7 @@ export class ProductService {
       };
     }
   }
-
+  
   async findOne(id: string): Promise<ResponseDto<Product>> {
     try {
       const product = await this.productModel.findById(id).exec();

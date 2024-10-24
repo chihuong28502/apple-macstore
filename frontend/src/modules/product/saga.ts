@@ -39,7 +39,9 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
 }
 
 // Gộp phân trang và category vào một hàm duy nhất
-function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limit: number; categoryId?: string; minPrice?: number, maxPrice?: number }>) {
+function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limit: number; categoryId
+  
+  ?: string; minPrice?: number, maxPrice?: number }>) {
   const { page, limit, categoryId, minPrice, maxPrice } = payload;
   try {
     yield put(ProductActions.setLoading(true));

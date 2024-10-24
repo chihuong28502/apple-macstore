@@ -9,23 +9,23 @@ function Product({ product }: any) {
   };
   return (
     <div
-      key={product._id}
+      key={product?._id}
       onClick={handleNextProductDetail}
       className="bg-gray-100 shadow-md p-2 rounded-lg group overflow-hidden cursor-pointer relative z-10 hover:bg-gray-200"
     >
       <div className="w-full overflow-hidden mx-auto aspect-w-16 aspect-h-8 transition-transform duration-300 ease-in-out transform group-hover:-translate-y-2">
         <img
-          src={product.images[0]}
-          alt={product.name}
+          src={product?.images[0]}
+          alt={product?.name}
           className="object-contain rounded-lg"
         />
       </div>
 
       <div className="mx-auto left-0 right-0 -bottom-80 group-hover:bottom-2 py-1 rounded-lg transition-all duration-300">
         <div className="text-center">
-          <h3 className="text-base font-bold text-gray-800">{product.name}</h3>
+          <h3 className="text-base font-bold text-gray-800">{product?.name}</h3>
           <h4 className="text-lg text-[red] font-bold">
-            {product.price.toLocaleString()} VNĐ
+            {product?.price.toLocaleString()} VNĐ
           </h4>
         </div>
 

@@ -7,13 +7,16 @@ type ProductState = {
   totalProducts: number; // Tổng số sản phẩm cho phân trang
   isLoading: boolean;
   categories: any[];
+  listCategories: any[],
+
 };
 
 const initialState: ProductState = {
   product: null,
   categories: [],
+  listCategories: [],
   productList: [],
-  totalProducts: 0, // Khởi tạo tổng số sản phẩm là 0
+  totalProducts: 0, 
   isLoading: false,
 };
 
@@ -27,16 +30,13 @@ const ProductSlice = createSlice({
       { payload }: PayloadAction<string>
     ) => {
       state.isLoading = true;
-
-
     },
-
     // Hàm lấy dữ liệu sản phẩm có phân trang và category
     fetchPaginatedProducts: (
       state: ProductState,
       {
         payload,
-      }: PayloadAction<{ page: number; limit: number; categoryId?: string, minPrice?: number, maxPrice?: number }>
+      }: PayloadAction<{ page: number; limit: number; categoryId?:  string , minPrice?: number, maxPrice?: number }>
     ) => {
       state.isLoading = true;
     },

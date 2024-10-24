@@ -10,7 +10,7 @@ import { ResponseDto } from 'src/utils/dto/response.dto';
 export class CategoryService {
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
-  ) {}
+  ) { }
 
   // Create a new category
   async create(createCategoryDto: CreateCategoryDto): Promise<ResponseDto<Category>> {
