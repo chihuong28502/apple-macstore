@@ -11,12 +11,12 @@ import { AuthActions } from "./slice";
 const getUserIdFromToken = () => {
   // Lấy accessToken từ localStorage
   const accessToken = localStorage.getItem('accessToken');
-  
+
   if (accessToken) {
     const decoded: any = jwt.decode(accessToken); // Giải mã token
     return decoded?._id || null; // Trả về userId hoặc null
   }
-  
+
   return null; // Trả về null nếu không có accessToken
 };
 
@@ -99,6 +99,7 @@ function* logout(): Generator<any, void, any> {
     const { success } = yield call(AuthRequest.logout);
     if (success) {
       yield put(AuthActions.logout({}));
+      window.location.replace('/')
     }
   } catch (error) {
     yield* handleApiError(error, () => { });

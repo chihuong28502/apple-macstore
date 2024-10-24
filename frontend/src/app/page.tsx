@@ -6,8 +6,6 @@ import TopCard from "@/components/TopicCard/TopCard";
 import { useState } from "react";
 import { HiInboxStack } from "react-icons/hi2";
 
-// import { useTranslations } from "next-intl";
-// import { Link } from "@/i18n/routing";
 const listTopic = [
   { _id: 1, title: "Nội dung nổi bật" },
   { _id: 2, title: "Ca nhạc" },
@@ -106,34 +104,35 @@ export default function Home() {
   const [selectCategoryCard, setSelectCategoryCard] = useState(null);
 
   return (
-    <div className="bg-mainLayout rounded-xl p-8">
-      {/* Slider */}
-      <div className="w-full">
-        <TripleSlider slides={slides} />
-      </div>
-      {/* List Topic Card */}
-      <div className="mb-8 flex flex-wrap gap-x-2 gap-y-2">
-        {listTopic.map((item: any, index: number) => (
-          <TopCard
-            key={index}
-            item={item}
-            onSelect={setSelectTopcard}
-            isSelect={selectTopCard}
-          />
-        ))}
-      </div>
+    <></>
+    // <div className="bg-mainLayout rounded-xl p-8">
+    //   {/* Slider */}
+    //   <div className="w-full">
+    //     <TripleSlider slides={slides} />
+    //   </div>
+    //   {/* List Topic Card */}
+    //   <div className="mb-8 flex flex-wrap gap-x-2 gap-y-2">
+    //     {listTopic.map((item: any, index: number) => (
+    //       <TopCard
+    //         key={index}
+    //         item={item}
+    //         onSelect={setSelectTopcard}
+    //         isSelect={selectTopCard}
+    //       />
+    //     ))}
+    //   </div>
 
-      {/* List Category Card */}
-      <div className="grid grid-cols-5 gap-6">
-        {listCategoryCard.map((item: any, index: number) => (
-          <CategoryCard
-            key={index}
-            item={item}
-            onSelect={setSelectCategoryCard}
-            isSelect={selectCategoryCard}
-          />
-        ))}
-      </div>
-    </div>
+    //   {/* List Category Card */}
+    //   <div className="grid grid-cols-5 gap-6">
+    //     {listCategoryCard.map((item: any, index: number) => (
+    //       <CategoryCard
+    //         key={index}
+    //         item={item}
+    //         onSelect={setSelectCategoryCard}
+    //         isSelect={selectCategoryCard}
+    //       />
+    //     ))}
+    //   </div>
+    // </div>
   );
 }

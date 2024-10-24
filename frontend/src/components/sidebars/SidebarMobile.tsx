@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import MenuSidebar from "./Menu";
 import { useEffect } from "react";
-import { usePathname } from "@/i18n/routing";
+import { usePathname } from "next/navigation";
 
 type Props = {
   isOpenMenuMobile: boolean;

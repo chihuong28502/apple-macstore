@@ -1,5 +1,5 @@
 "use client";
-import CustomButton from "@/app/[locale]/components/Button";
+import CustomButton from "@/app/components/Button";
 import { VALIDATE } from "@/core/validate/validate";
 import { AuthActions } from "@/modules/auth/slice";
 import Link from "next/link";

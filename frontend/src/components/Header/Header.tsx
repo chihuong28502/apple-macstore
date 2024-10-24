@@ -8,14 +8,13 @@ import React from "react";
 import { HiOutlineQueueList } from "react-icons/hi2";
 import { MdMenuOpen } from "react-icons/md";
 import SearchComponent from "../Search/Search";
-import SelectLanguage from "../Select/SelectLanguage";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
 import { cn } from "@/lib/utils";
 import _ from "lodash";
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
 import User from "./User";
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 
 type Props = {
   isMobile: boolean;
@@ -53,9 +52,6 @@ const Header = ({
               <SearchComponent />
             </div>
             <div className="flex items-center gap-5">
-              {/* <div className="hidden md:block ">
-                <SelectLanguage />
-              </div> */}
               {auth && <User />}
               {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
               {auth && <NotificationPopover />}

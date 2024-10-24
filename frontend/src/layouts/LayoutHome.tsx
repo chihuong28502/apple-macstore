@@ -2,9 +2,7 @@
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import SideBar from "@/components/sidebars/Sidebar";
-import SidebarMobile from "@/components/sidebars/SidebarMobile";
 import { useWindowSize } from "@/hooks/breakpoint";
-import { Tooltip } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 
 const LayoutHome = ({ children }: { children: ReactNode }) => {

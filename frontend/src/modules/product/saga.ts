@@ -44,12 +44,12 @@ function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limi
   try {
     yield put(ProductActions.setLoading(true));
 
-    const response: { success: boolean; data: any[]; total: number } = yield ProductRequest.getAllProducts({ page, limit, categoryId, minPrice, maxPrice });
+    const response: { success: boolean; data: any; total: number } = yield ProductRequest.getAllProducts({ page, limit, categoryId, minPrice, maxPrice });
     yield put(ProductActions.setLoading(false));
 
     if (response.success) {
-      yield put(ProductActions.setProductList(response.data));
-      yield put(ProductActions.setTotalProducts(response.total));
+      yield put(ProductActions.setProductList(response.data.products));
+      yield put(ProductActions.setTotalProducts(response.data.total));
     }
   } catch (e) {
     console.error("Error fetching products:", e);

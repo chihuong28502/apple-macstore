@@ -1,6 +1,6 @@
-import { Link } from "@/i18n/routing";
 import { Badge, ConfigProvider, Popover } from "antd";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { FaRegBell } from "react-icons/fa";
 import { FiFileText } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";

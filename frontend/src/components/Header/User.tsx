@@ -6,8 +6,8 @@ import { FiUser } from "react-icons/fi";
 import { useAppDispatch, useAppSelector } from "@/core/services/hook";
 import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
 import { useState } from "react";
-import { useRouter } from "@/i18n/routing";
 import { TbLogout } from "react-icons/tb";
+import { useRouter } from "next/navigation";
 
 const User = () => {
   const [isOpen, setIsOpen] = useState(false);
