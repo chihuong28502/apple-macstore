@@ -8,6 +8,9 @@ import { LuHome } from "react-icons/lu";
 import DarkModeSwitch from "../DarkModeSwitch";
 import { MdDashboardCustomize } from "react-icons/md";
 import Link from "next/link";
+import { FaCalculator, FaPowerOff, FaUser } from "react-icons/fa";
+import { usePathname, useRouter } from "next/navigation";
+
 type MenuItem = Required<MenuProps>["items"][number];
 
 type Props = {
@@ -16,26 +19,68 @@ type Props = {
 
 const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
   const { resolvedTheme } = useTheme();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleOnclickPush = (path: string) => {
+    router.push(path);
+  };
+
   const items: MenuItem[] = [
     {
-      key: "Dashboard",
+      key: "/dashboard",
       icon: (
-          <MdDashboardCustomize />
-      ),
-      label: (
-        <Tooltip title="Home" placement="right">
-          <Link href={`/`}></Link>
+        <Tooltip title="Dashboard" placement="right">
+          <div className="flex items-center w-full h-full cursor-pointer">
+            <MdDashboardCustomize  /> 
+          </div>
         </Tooltip>
       ),
+      onClick: () => handleOnclickPush("/dashboard"),
     },
     {
-      key: "product",
-      icon: <FaShirt />,
-      label: (
-        <Tooltip title="Product" placement="right">
-          <Link href={`/product`}></Link>
+      key: "/dashboard/product",
+      icon: (
+        <Tooltip title="Products" placement="right">
+          <div className="w-full">
+            <FaShirt />
+          </div>
         </Tooltip>
       ),
+      onClick: () => handleOnclickPush("/dashboard/product"),
+    },
+    {
+      key: "/dashboard/user",
+      icon: (
+        <Tooltip title="Users" placement="right">
+          <div  className="w-full">
+            <FaUser className="flex justify-center"/>
+          </div>
+        </Tooltip>
+      ),
+      onClick: () => handleOnclickPush("/dashboard/user"),
+    },
+    {
+      key: "/dashboard/category",
+      icon: (
+        <Tooltip title="Categories" placement="right">
+          <div className="w-full">
+            <FaCalculator />
+          </div>
+        </Tooltip>
+      ),
+      onClick: () => handleOnclickPush("/dashboard/category"),
+    },
+    {
+      key: "/dashboard/promotion",
+      icon: (
+        <Tooltip title="Promotions" placement="right">
+          <div>
+            <FaPowerOff />
+          </div>
+        </Tooltip>
+      ),
+      onClick: () => handleOnclickPush("/dashboard/promotion"),
     },
   ];
 
@@ -45,21 +90,21 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
         theme={{
           components: {
             Menu: {
-              itemSelectedColor: "#FF8900", // Màu khi được chọn
+              itemSelectedColor: "#FF8900",
               itemSelectedBg: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
               itemHoverBg: resolvedTheme === "dark" ? "#333" : "#fdfdfd",
-              itemActiveBg: " #139dffa6", // Màu khi đang active
+              itemActiveBg: " #139dffa6",
               itemColor: resolvedTheme === "dark" ? "#fff" : "#000",
               itemHoverColor: resolvedTheme === "dark" ? "#fff" : "#000",
+              itemMarginInline: 8,
             },
           },
         }}
       >
         <Menu
-          defaultSelectedKeys={["1"]}
-          defaultOpenKeys={["sub1"]}
+          selectedKeys={[pathname]}
           mode="inline"
-          className="bg-transparent "
+          className="bg-transparent"
           inlineCollapsed={collapsed}
           items={items}
         />

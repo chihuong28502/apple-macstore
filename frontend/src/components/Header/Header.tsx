@@ -43,8 +43,10 @@ const Header = ({
     <div className="p-6 bg-layout z-20">
       <div className="h-12 flex md:justify-between justify-end">
         <div className="h-full flex flex-grow ">
-         
-          <Link href={"/"} className="flex items-center mr-11">
+          <Link
+            href={auth && auth.role === "admin" ? "/dashboard" : "/"}
+            className="flex items-center mr-11"
+          >
             <SVGLogo className="text-fontColor" />
           </Link>
           <div className="flex flex-grow items-center justify-end lg:justify-between">

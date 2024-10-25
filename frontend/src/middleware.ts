@@ -18,22 +18,22 @@ function decodeToken(token: string): JwtPayload | null {
 }
 
 const basePaths = ["private"];
-const privatePaths = basePaths.map((path) => `/${path}`); // Paths without locale
+const privatePaths = basePaths.map((path) => `/${path}`);
 
-const adminPaths = [`/dashboard`]; // Paths without locale
+const adminPaths = [`/dashboard`];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const accessToken = request.cookies.get("accessToken")?.value;
-  const refreshToken = request.cookies.get("refreshToken")?.value;
-
+  
   // Decode token to get user role
   let userRole = null;
   if (accessToken) {
     const decodedToken = decodeToken(accessToken);
     if (decodedToken) {
       userRole = decodedToken.role;
+      console.log("🚀 ~ userRole:", userRole)
     }
   }
 

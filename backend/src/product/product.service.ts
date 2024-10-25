@@ -75,7 +75,7 @@ export class ProductService {
         const total = await this.productModel.countDocuments(filter).exec();
         const products = await this.productModel
           .find(filter)
-          .select('_id name price images reviewsCount') // Chọn các trường cần thiết
+          // .select('_id name price images reviewsCount') // Chọn các trường cần thiết
           .limit(limit)
           .skip(skip)
           .exec();
@@ -146,7 +146,7 @@ export class ProductService {
       const total = await this.productModel.countDocuments(filter).exec();
       const products = await this.productModel
         .find(filter)
-        .select('_id name price images reviewsCount')
+        // .select('_id name price images reviewsCount')
         .populate('categoryId', 'name')
         .limit(limit)
         .skip(skip)
@@ -220,13 +220,11 @@ export class ProductService {
       return {
         success: true,
         message: 'Product deleted successfully',
-        data: deletedProduct,
       };
     } catch (error) {
       return {
         success: false,
         message: `Failed to delete product: ${error.message}`,
-        data: null,
       };
     }
   }

@@ -1,8 +1,12 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { put, takeLeading } from "redux-saga/effects";
+import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
 import { ProductRequest } from "./request";
 import { ProductActions } from "./slice";
-
+import { toast } from "react-toastify";
+interface DeleteProductResponse {
+  success: boolean;
+  message?: string;
+}
 function* createProduct({ payload }: PayloadAction<any>) {
   const { data, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
@@ -39,9 +43,11 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
 }
 
 // Gộp phân trang và category vào một hàm duy nhất
-function* fetchPaginatedProducts({ payload }: PayloadAction<{ page: number; limit: number; categoryId
-  
-  ?: string; minPrice?: number, maxPrice?: number }>) {
+function* fetchPaginatedProducts({ payload }: PayloadAction<{
+  page: number; limit: number; categoryId
+
+  ?: string; minPrice?: number, maxPrice?: number
+}>) {
   const { page, limit, categoryId, minPrice, maxPrice } = payload;
   try {
     yield put(ProductActions.setLoading(true));
@@ -73,9 +79,26 @@ function* fetchCategories() {
     console.error("Error fetching categories:", e);
   }
 }
+
+function* deleteProduct({ payload }: any) {
+  try {
+    yield delay(100);
+    const { id, onSuccess } = payload;
+    const rs: DeleteProductResponse = yield ProductRequest.deleteProduct(id);
+    if (rs.success) {
+      yield put(ProductActions.fetchPaginatedProducts({ page: 1, limit: 8 }));
+      onSuccess();
+    } else {
+      throw rs.message;
+    }
+  } catch (error: any) {
+    toast.error(error);
+  }
+}
 export function* ProductSaga() {
   yield takeLeading(ProductActions.fetchCategories, fetchCategories);
   yield takeLeading(ProductActions.createProduct, createProduct);
   yield takeLeading(ProductActions.fetchProductById, fetchProductById);
-  yield takeLeading(ProductActions.fetchPaginatedProducts, fetchPaginatedProducts); // Gộp phân trang và category
+  yield takeLeading(ProductActions.fetchPaginatedProducts, fetchPaginatedProducts);
+  yield takeLatest(ProductActions.deleteProduct, deleteProduct)
 }

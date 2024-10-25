@@ -2,6 +2,7 @@ import { RootState } from "@/core/services/store";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 type ProductState = {
+  _id?: string;
   product?: any;
   productList: any[];
   totalProducts: number; // Tổng số sản phẩm cho phân trang
@@ -16,7 +17,7 @@ const initialState: ProductState = {
   categories: [],
   listCategories: [],
   productList: [],
-  totalProducts: 0, 
+  totalProducts: 0,
   isLoading: false,
 };
 
@@ -36,7 +37,7 @@ const ProductSlice = createSlice({
       state: ProductState,
       {
         payload,
-      }: PayloadAction<{ page: number; limit: number; categoryId?:  string , minPrice?: number, maxPrice?: number }>
+      }: PayloadAction<{ page: number; limit: number; categoryId?: string, minPrice?: number, maxPrice?: number }>
     ) => {
       state.isLoading = true;
     },
@@ -60,10 +61,8 @@ const ProductSlice = createSlice({
     },
 
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => { },
-    deleteProduct: (
-      state: ProductState,
-      { payload }: PayloadAction<string>
-    ) => { },
+    deleteProduct: (state: any, { payload: any }) => { 
+    },
 
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
