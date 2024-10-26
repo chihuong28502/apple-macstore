@@ -17,8 +17,6 @@ function decodeToken(token: string): JwtPayload | null {
   }
 }
 
-const basePaths = ["private"];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("accessToken")?.value;
@@ -32,10 +30,12 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Kiểm tra nếu đang truy cập vào đường dẫn riêng tư
-  if (basePaths.some((path) => pathname.startsWith(`/${path}`))) {
-    // Kiểm tra nếu không có token hoặc không phải là customer
-    if (!accessToken || userRole !== "customer") {
+  // Kiểm tra nếu không có token hoặc không phải là admin
+  const isLoginPage = pathname === '/auth/login';
+
+  if (!accessToken || userRole !== "admin") {
+    // Chỉ chuyển hướng nếu không phải đang ở trang đăng nhập
+    if (!isLoginPage) {
       const url = new URL(`/auth/login`, request.url); // Chuyển hướng đến trang đăng nhập
       return NextResponse.redirect(url);
     }
@@ -47,7 +47,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next|_vercel|.*\\..*).*)", // Để ngoại trừ các route không cần xác thực
-    "/users/(.+)", // Có thể thêm các route khác vào đây nếu cần
+    "/((?!api|_next|_vercel|.*\\..*).*)", 
+    "/users/(.+)", 
   ],
 };

@@ -8,6 +8,15 @@ export const ProductRequest = {
   getProductById(id: string) {
     return MSTFetch.get(`/products/${id}`);
   },
+
+  updateProduct(id: string, data: any) {
+    return MSTFetch.put(`/products/${id}`, data);
+  },
+
+  deleteProduct(id: string) {
+    return MSTFetch.delete(`/products/${id}`);
+  },
+
   getAllProducts({ page, limit, categoryId, minPrice, maxPrice }: { page: number; limit: number; categoryId?: string; minPrice?: number; maxPrice?: number }) {
     let url = `/products?page=${page || 1}&limit=${limit || 8}&minPrice=${minPrice || 0}&maxPrice=${maxPrice || 100000000}`;
     if (categoryId) {

@@ -44,7 +44,7 @@ const Header = ({
       <div className="h-12 flex md:justify-between justify-end">
         <div className="h-full flex flex-grow ">
           <Link
-            href={"/"}
+            href={ "/"}
             className="flex items-center mr-11"
           >
             <SVGLogo className="text-fontColor" />

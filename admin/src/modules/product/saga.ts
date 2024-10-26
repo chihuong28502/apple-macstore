@@ -80,10 +80,25 @@ function* fetchCategories() {
   }
 }
 
-
+function* deleteProduct({ payload }: any) {
+  try {
+    yield delay(100);
+    const { id, onSuccess } = payload;
+    const rs: DeleteProductResponse = yield ProductRequest.deleteProduct(id);
+    if (rs.success) {
+      yield put(ProductActions.fetchPaginatedProducts({ page: 1, limit: 8 }));
+      onSuccess();
+    } else {
+      throw rs.message;
+    }
+  } catch (error: any) {
+    toast.error(error);
+  }
+}
 export function* ProductSaga() {
   yield takeLeading(ProductActions.fetchCategories, fetchCategories);
   yield takeLeading(ProductActions.createProduct, createProduct);
   yield takeLeading(ProductActions.fetchProductById, fetchProductById);
   yield takeLeading(ProductActions.fetchPaginatedProducts, fetchPaginatedProducts);
+  yield takeLatest(ProductActions.deleteProduct, deleteProduct)
 }

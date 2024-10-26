@@ -32,6 +32,7 @@ const ProductSlice = createSlice({
     ) => {
       state.isLoading = true;
     },
+    // Hàm lấy dữ liệu sản phẩm có phân trang và category
     fetchPaginatedProducts: (
       state: ProductState,
       {
@@ -60,6 +61,8 @@ const ProductSlice = createSlice({
     },
 
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => { },
+    deleteProduct: (state: any, { payload: any }) => { 
+    },
 
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
