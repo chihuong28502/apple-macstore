@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
-import MultiSelectDropdown from "../MultipleSelect/MultipleSelectDropDown";
 const SearchComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
