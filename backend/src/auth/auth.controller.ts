@@ -9,6 +9,10 @@ import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
 import { CookiesService } from './cookies.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { User } from 'src/user/schema/user.schema';
+import { LoginAdminDto } from './dto/login.admin.dto';
+import { Admin } from 'src/user/schema/admin.schema';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RulesGuard } from 'src/common/guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -44,10 +48,32 @@ export class AuthController {
     return result;
   }
 
+  @Public()
+  @Post('login-admin')
+  @HttpCode(HttpStatus.OK)
+  async loginAdmin(
+    @Body() loginAdminDto: LoginAdminDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ResponseDto<User>> {
+    const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
+    const ipAddress = req.ip || 'Unknown IP';
+    const result = await this.authService.loginAdmin(loginAdminDto, deviceInfo, ipAddress);
+    this.cookiesService.setAuthCookies(res, result.data.accessToken, result.data.refreshToken);
+    return result;
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('user/:id')
   async getUser(@Param('id') id: string): Promise<ResponseDto<User>> {
     return this.userService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard,RulesGuard)
+  @Roles('admin')
+  @Get('user-admin/:id')
+  async getAdmin(@Param('id') id: string): Promise<ResponseDto<Admin>> {
+    return this.userService.findOneAdmin(id);
   }
 
   @Public()
@@ -59,6 +85,19 @@ export class AuthController {
       throw new UnauthorizedException('Token không được gửi lên');
     }
     const result = await this.authService.refreshAccessToken(refreshToken);
+    this.cookiesService.setAccessTokenCookie(res, result.data.accessToken);
+    return result;
+  }
+
+  @Public()
+  @Post('refresh-admin')
+  @HttpCode(HttpStatus.OK)
+  async refreshTokenAdmin(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<ResponseDto<Admin>> {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Token không được gửi lên');
+    }
+    const result = await this.authService.refreshAccessTokenAdmin(refreshToken);
     this.cookiesService.setAccessTokenCookie(res, result.data.accessToken);
     return result;
   }

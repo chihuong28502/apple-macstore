@@ -17,7 +17,7 @@ import { ResponseDto} from 'src/utils/dto/response.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard) // Áp dụng guard ở cấp controller
 @Roles('admin')
-@Controller('admin')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) { }
   @Get()
@@ -33,7 +33,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @Put(':id')
+  @Put('update/:id')
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -44,7 +44,7 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async remove(@Param('id') id: string): Promise<ResponseDto<User>> {
     if (!id) {
       throw new Error('ID is required');

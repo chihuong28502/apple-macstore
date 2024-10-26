@@ -15,6 +15,8 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshToken, RefreshTokenDocument } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
+import { LoginAdminDto } from './dto/login.admin.dto';
+import { Admin, AdminDocument } from 'src/user/schema/admin.schema';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,7 @@ export class AuthService {
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
     @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshTokenDocument>,
     private jwtService: JwtService,
     private cookieAge: CookieAge,
@@ -30,16 +33,15 @@ export class AuthService {
 
 
   async createAdmin(): Promise<void> {
-    const adminEmail = 'admin@gmail.com';
-    const existingAdmin = await this.userModel.findOne({ email: adminEmail });
+    const adminUsername = 'admin';
+    const existingAdmin = await this.adminModel.findOne({ username: adminUsername });
     if (!existingAdmin) {
       const adminUser = {
-        username: 'admin',
+        username: adminUsername,
         password: await this.hashPassword('12345678'),
-        email: adminEmail,
         role: 'admin',
       };
-      await this.userModel.create(adminUser);
+      await this.adminModel.create(adminUser);
       this.logger.log('Admin account created');
     } else {
       this.logger.log('Admin account already exists');
@@ -91,6 +93,28 @@ export class AuthService {
     };
   }
 
+  async loginAdmin(loginAdminDto: LoginAdminDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<Admin>> {
+    const { username, password } = loginAdminDto;
+    const user = await this.validateAdmin(username, password);
+    await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+    await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
+    return {
+      message: 'Login success',
+      success: true,
+      data: {
+        user: {
+          id: user._id.toString(),
+          username: user.username,
+          role: user.role,
+        },
+        accessToken,
+        refreshToken,
+      },
+    };
+  }
+
   async refreshAccessToken(refreshToken: string): Promise<ResponseDto<User>> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
@@ -98,6 +122,28 @@ export class AuthService {
       });
       await this.validateRefreshToken(payload._id, refreshToken);
       const user = await this.userModel.findById(payload._id).exec();
+      if (!user) {
+        throw new UnauthorizedException('Không tìm thấy người dùng');
+      }
+      const newAccessToken = await this.generateAccessToken(user);
+      return {
+        message: 'Làm mới token thành công',
+        success: true,
+        data: { accessToken: newAccessToken },
+      };
+    } catch (error) {
+      this.logger.error(`Lỗi khi làm mới token: ${error.message}`);
+      throw new UnauthorizedException('Token làm mới không hợp lệ');
+    }
+  }
+
+  async refreshAccessTokenAdmin(refreshToken: string): Promise<ResponseDto<Admin>> {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get<string>('REFRESH_TOKEN'),
+      });
+      await this.validateRefreshToken(payload._id, refreshToken);
+      const user = await this.adminModel.findById(payload._id).exec();
       if (!user) {
         throw new UnauthorizedException('Không tìm thấy người dùng');
       }
@@ -123,7 +169,19 @@ export class AuthService {
 
   private async validateUser(email: string, password: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email });
-    if (!user) {
+    if (!user || user.role !== 'customer') {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return user;
+  }
+
+  private async validateAdmin(username: string, password: string): Promise<AdminDocument> {
+    const user = await this.adminModel.findOne({ username });
+    if (!user || user.role !== 'admin') {
       throw new UnauthorizedException('Invalid credentials');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -153,7 +211,7 @@ export class AuthService {
     return bcrypt.hash(password, salt);
   }
 
-  private async generateAccessToken(user: UserDocument): Promise<string> {
+  private async generateAccessToken(user: UserDocument | AdminDocument): Promise<string> {
     const payload = {
       username: user.username,
       _id: user._id.toString(),
@@ -164,7 +222,7 @@ export class AuthService {
     });
   }
 
-  private async generateRefreshToken(user: UserDocument): Promise<string> {
+  private async generateRefreshToken(user: UserDocument | AdminDocument): Promise<string> {
 
     const payload = {
       username: user.username,

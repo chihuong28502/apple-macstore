@@ -11,13 +11,15 @@ import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
 import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookiesService } from './cookies.service';
 import { CookieAge } from './utils/cookieAgeAuth.service';
+import { Admin, AdminSchema } from 'src/user/schema/admin.schema';
 
 @Module({
   imports: [
     ConfigModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
-      { name: RefreshToken.name, schema: RefreshTokenSchema }
+      { name: RefreshToken.name, schema: RefreshTokenSchema },
+      { name: Admin.name, schema: AdminSchema }
     ]), 
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

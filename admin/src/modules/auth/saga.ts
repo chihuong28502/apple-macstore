@@ -32,10 +32,10 @@ function* handleApiError(error: any, onFail: (error: any) => void) {
 
 // Saga for login
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
+  const { username, password, onSuccess = () => { }, onFail = () => { } } = payload;
   try {
     yield delay(500); // Simulate API delay
-    const { success, message, data } = yield call(AuthRequest.login, { email, password });
+    const { success, message, data } = yield call(AuthRequest.login, { username, password });
 
     if (success) {
       const decoded: any = jwt.decode(data.accessToken);

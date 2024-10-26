@@ -72,7 +72,7 @@ export class ProductController {
     return res.status(statusCode).json(result);
   }
 
-  @Put(':id')
+  @Put('update/:id')
   async update(
     @Res() res: Response,
     @Param('id') id: string,
@@ -86,7 +86,7 @@ export class ProductController {
     return res.status(statusCode).json(result);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async remove(
     @Res() res: Response,
     @Param('id') id: string

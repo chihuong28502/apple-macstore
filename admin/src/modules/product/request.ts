@@ -10,11 +10,11 @@ export const ProductRequest = {
   },
 
   updateProduct(id: string, data: any) {
-    return MSTFetch.put(`/products/${id}`, data);
+    return MSTFetch.put(`/products/update/${id}`, data);
   },
 
   deleteProduct(id: string) {
-    return MSTFetch.delete(`/products/${id}`);
+    return MSTFetch.delete(`/products/delete/${id}`);
   },
 
   getAllProducts({ page, limit, categoryId, minPrice, maxPrice }: { page: number; limit: number; categoryId?: string; minPrice?: number; maxPrice?: number }) {

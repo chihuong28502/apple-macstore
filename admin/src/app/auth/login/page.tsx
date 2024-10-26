@@ -13,26 +13,26 @@ import { InputField } from "./components/InputField";
 function Page() {
   const route = useRouter();
   const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
+  const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ username: "", password: "" });
 
   // Hàm xử lý đăng nhập
   const handleLogin = async () => {
     try {
-      setErrors({ email: "", password: "" });
+      setErrors({ username: "", password: "" });
 
       // Xác thực đầu vào
       await VALIDATE.loginSchema.validate(
-        { email, password },
+        {password },
         { abortEarly: false }
       );
 
       // Kiểm tra nếu không có lỗi
-      if (!errors.email && !errors.password) {
+      if (!errors.username && !errors.password) {
         dispatch(
           AuthActions.login({
-            email,
+            username,
             password,
             onSuccess: (rs: any) => {
               toast.success("Đăng nhập thành công");
@@ -71,7 +71,7 @@ function Page() {
     };
     document.addEventListener("keydown", handleEnterPress);
     return () => document.removeEventListener("keydown", handleEnterPress);
-  }, [email, password]);
+  }, [username, password]);
 
   return (
     <>
@@ -88,12 +88,12 @@ function Page() {
               <h1 className="text-2xl xl:text-3xl font-extrabold">Sign up</h1>
               <div className="w-full flex-1 mt-8 ">
                 <InputField
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="username"
+                  value={username}
+                  onChange={(e) => setusername(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Email"
-                  error={errors.email}
+                  placeholder="username"
+                  error={errors.username}
                 />
                 <InputField
                   type="password"

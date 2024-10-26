@@ -4,10 +4,12 @@ import { Model } from 'mongoose';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schema/user.schema';
+import { Admin, AdminDocument } from './schema/admin.schema';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Admin.name) private adminModel: Model<AdminDocument>) { }
 
   // Fetch all users excluding sensitive fields
   async findAll(): Promise<ResponseDto<User[]>> {
@@ -35,6 +37,26 @@ export class UserService {
   async findOne(id: string): Promise<ResponseDto<User>> {
     try {
       const user = await this.userModel.findById(id).select('-password -__v -createdAt').exec();
+      if (!user) {
+        throw new NotFoundException(`User with ID "${id}" not found`);
+      }
+      return {
+        success: true,
+        message: 'Lấy thông tin người dùng thành công',
+        data: user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Lấy thông tin người dùng thất bại',
+        data: null,
+      };
+    }
+  }
+
+  async findOneAdmin(id: string): Promise<ResponseDto<Admin>> {
+    try {
+      const user = await this.adminModel.findById(id).select('-password -__v -createdAt').exec();
       if (!user) {
         throw new NotFoundException(`User with ID "${id}" not found`);
       }

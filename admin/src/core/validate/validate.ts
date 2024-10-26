@@ -16,12 +16,6 @@ export const VALIDATE = {
 
 
   loginSchema: Yup.object().shape({
-    email: Yup.string()
-      .required("Email là bắt buộc")
-      .matches(
-        /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|hotmail\.com)$/,
-        "Email ko hợp lệ"
-      ),
     password: Yup.string()
       .required("Mật khẩu là bắt buộc")
       .min(6, "Mật khẩu không hợp lệ vì quá ngắn"),

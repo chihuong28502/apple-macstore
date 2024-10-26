@@ -4,10 +4,10 @@ function page() {
   
   return (
     <nav>
-      <Link href="/dashboard">Dashboard Home</Link>
-      <Link href="/dashboard/product">Products</Link>
-      <Link href="/dashboard/category">Categories</Link>
-      <Link href="/dashboard/user">Users</Link>
+      <Link href=" ">Dashboard Home</Link>
+      <Link href=" /product">Products</Link>
+      <Link href=" /category">Categories</Link>
+      <Link href=" /user">Users</Link>
     </nav>
   )
 }
