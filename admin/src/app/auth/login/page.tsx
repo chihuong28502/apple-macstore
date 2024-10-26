@@ -11,7 +11,6 @@ import * as Yup from "yup";
 import { InputField } from "./components/InputField";
 
 function Page() {
-  const route = useRouter();
   const dispatch = useDispatch();
   const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,10 +22,7 @@ function Page() {
       setErrors({ username: "", password: "" });
 
       // Xác thực đầu vào
-      await VALIDATE.loginSchema.validate(
-        {password },
-        { abortEarly: false }
-      );
+      await VALIDATE.loginSchema.validate({ password }, { abortEarly: false });
 
       // Kiểm tra nếu không có lỗi
       if (!errors.username && !errors.password) {

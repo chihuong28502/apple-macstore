@@ -12,7 +12,7 @@ export const AuthRequest = {
     return MSTFetch.get(`/auth/user-admin/${id}`);
   },
   refreshToken() {
-    return MSTFetch.post('/auth/refresh', );
+    return MSTFetch.post('/auth/refresh-admin', );
   }, 
   logout() {
     return MSTFetch.post("/auth/logout", );

@@ -28,10 +28,11 @@ export namespace ProductPage {
   export interface Category {
     _id: string;
     name: string;
-    parentCategoryId: string | null; 
+    parentCategoryId: string | null;
   }
-  
+
   export interface CategoryFilterProps {
+    onAddCategory?: any
     categories: Category[]; // Mảng các danh mục (Category)
     selectedCategory: string; // Danh mục đang được chọn
     onCategoryChange: (categoryId: string) => void; // Hàm callback để thay đổi danh mục
@@ -46,7 +47,10 @@ export namespace ProductPage {
   }
 
   export interface ProductGridProps {
+    onAddProduct?:any
+    categories?: Category[]
     products: Product[];
+    items?: number;
     loading: boolean;
   }
 

@@ -1,7 +1,6 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 function page() {
-  
   return (
     <nav>
       <Link href=" ">Dashboard Home</Link>
@@ -9,7 +8,7 @@ function page() {
       <Link href=" /category">Categories</Link>
       <Link href=" /user">Users</Link>
     </nav>
-  )
+  );
 }
 
-export default page
+export default page;

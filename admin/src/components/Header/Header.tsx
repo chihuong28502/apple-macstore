@@ -2,19 +2,14 @@
 
 import { SVGLogo } from "@/asset/svg";
 import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
-import { FaRegUserCircle } from "react-icons/fa";
-import { motion } from "framer-motion";
-import React from "react";
-import { HiOutlineQueueList } from "react-icons/hi2";
-import { MdMenuOpen } from "react-icons/md";
-import SearchComponent from "../Search/Search";
-import BtnAuth from "../headerBtnAuth/BtnAuth";
-import { cn } from "@/lib/utils";
-import _ from "lodash";
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-import User from "./User";
 import Link from "next/link";
+import React from "react";
+import { FaRegUserCircle } from "react-icons/fa";
+import SearchComponent from "../Search/Search";
+import BtnAuth from "../headerBtnAuth/BtnAuth";
+import User from "./User";
 
 type Props = {
   isMobile: boolean;
@@ -43,10 +38,7 @@ const Header = ({
     <div className="p-6 bg-layout z-20">
       <div className="h-12 flex md:justify-between justify-end">
         <div className="h-full flex flex-grow ">
-          <Link
-            href={ "/"}
-            className="flex items-center mr-11"
-          >
+          <Link href={"/"} className="flex items-center mr-11">
             <SVGLogo className="text-fontColor" />
           </Link>
           <div className="flex flex-grow items-center justify-end lg:justify-between">

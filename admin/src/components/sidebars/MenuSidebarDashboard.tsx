@@ -30,7 +30,7 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       icon: (
         <Tooltip title="Dashboard" placement="right">
           <div className="flex items-center w-full h-full cursor-pointer">
-            <MdDashboardCustomize  /> 
+            <MdDashboardCustomize />
           </div>
         </Tooltip>
       ),
@@ -51,8 +51,8 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       key: "/user",
       icon: (
         <Tooltip title="Users" placement="right">
-          <div  className="w-full">
-            <FaUser className="flex justify-center"/>
+          <div className="w-full">
+            <FaUser className="flex justify-center" />
           </div>
         </Tooltip>
       ),

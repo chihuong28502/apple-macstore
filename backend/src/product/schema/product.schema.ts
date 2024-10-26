@@ -28,10 +28,10 @@ export class Product {
 
   @Prop({
     type: {
-      models: { type: [String], default: [] },  // Dòng sản phẩm (ví dụ: MacBook Air, MacBook Pro)
-      storageOptions: { type: [String], default: [] },  // Tùy chọn dung lượng (ví dụ: 256GB, 512GB)
-      ramOptions: { type: [String], default: [] },  // Tùy chọn RAM (ví dụ: 8GB, 16GB, 32GB)
-      colors: { type: [String], default: [] },  // Màu sắc sản phẩm
+      models: { type: [String], default: [] },  
+      storageOptions: { type: [String], default: [] },
+      ramOptions: { type: [String], default: [] },  
+      colors: { type: [String], default: [] },
     },
     _id: false,
     default: {},
@@ -41,7 +41,7 @@ export class Product {
     storageOptions: string[],
     ramOptions: string[],
     colors: string[],
-  };  // Tùy chọn cấu hình sản phẩm
+  };  
 
   @Prop({ default: 0 })
   reviewsCount: number;  // Số lượng đánh giá
@@ -53,11 +53,11 @@ export class Product {
     type: Map, // Map của màu sắc và cấu hình, mỗi cấu hình chứa số lượng tồn kho
     of: {
       type: Map,
-      of: Number,  // Mỗi cấu hình có một số lượng tồn kho
+      of: Number, 
     },
     default: new Map(),
   })
-  stock: Map<string, Map<string, number>>;  // Quản lý tồn kho theo cấu hình (màu, dung lượng, RAM)
+  stock: Map<string, Map<string, number>>;  
 
   @Prop({ default: Date.now })
   createdAt: Date;  

@@ -21,7 +21,7 @@ const BtnAuth: React.FC<BtnAuthProps> = ({ title, icon: Icon, onClick }) => {
     hover:bg-button rounded-md duration-100 p-2"
       onClick={handleClick}
     >
-      {Icon && <Icon className="text-fontColor group-hover:text-[#000]"/>}
+      {Icon && <Icon className="text-fontColor group-hover:text-[#000]" />}
       <span className="text-sm font-bold pr-1 text-fontColor group-hover:text-[#000]">
         {title}
       </span>

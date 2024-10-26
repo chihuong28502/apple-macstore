@@ -2,9 +2,8 @@
 import { type ProductPage } from "@/type/product.page.type";
 import { HomeOutlined } from "@ant-design/icons";
 import { Breadcrumb, Card, Skeleton } from "antd";
-import React, { useEffect } from "react";
 import Link from "next/link";
-import { ProductActions } from "@/modules/product/slice";
+import React from "react";
 
 export const BreadcrumbNav: React.FC<ProductPage.BreadcrumbNavProps> = ({
   selectedCategory,
