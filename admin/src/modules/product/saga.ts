@@ -64,22 +64,6 @@ function* fetchPaginatedProducts({ payload }: PayloadAction<{
   }
 }
 
-function* fetchCategories() {
-  try {
-    yield put(ProductActions.setLoading(true));
-
-    const response: { success: boolean; data: any[] } = yield ProductRequest.getAllCategories();
-
-    yield put(ProductActions.setLoading(false));
-
-    if (response.success) {
-      yield put(ProductActions.setCategories(response.data)); // Store categories in Redux state
-    }
-  } catch (e) {
-    console.error("Error fetching categories:", e);
-  }
-}
-
 function* deleteProduct({ payload }: any) {
   try {
     yield delay(100);
@@ -96,7 +80,6 @@ function* deleteProduct({ payload }: any) {
   }
 }
 export function* ProductSaga() {
-  yield takeLeading(ProductActions.fetchCategories, fetchCategories);
   yield takeLeading(ProductActions.createProduct, createProduct);
   yield takeLeading(ProductActions.fetchProductById, fetchProductById);
   yield takeLeading(ProductActions.fetchPaginatedProducts, fetchPaginatedProducts);

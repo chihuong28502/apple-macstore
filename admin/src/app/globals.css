@@ -6,6 +6,7 @@
   --foreground: #fafafa;
 }
 html.light {
+  color: #000 !important;
   --layout: #f0f0f0;
   --mainContent:#EAEAEA:;
   --background: var(--foreground);
@@ -42,6 +43,8 @@ html.light {
 }
 
 html.dark {
+  color: #000 !important;
+
   --bgLoadingIndicator: rgba(255, 255, 255, 0.8);
 
   --bgSVGGenerate: rgba(169, 174, 187, 0.08);

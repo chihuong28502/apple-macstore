@@ -23,9 +23,5 @@ export const ProductRequest = {
       url += `&categoryId=${categoryId}`;
     }
     return MSTFetch.get(url);
-  },
-  getAllCategories() {
-    return MSTFetch.get("/categories");
-  },
-  
+  }
 };

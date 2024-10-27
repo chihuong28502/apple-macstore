@@ -1,27 +1,11 @@
 import React, { useState } from "react";
-import { FaSearch, FaTimes } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 const SearchComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
-
-  const toggleOption = (optionId: number) => {
-    setSelectedOptions((prev) =>
-      prev.includes(optionId)
-        ? prev.filter((id) => id !== optionId)
-        : [...prev, optionId]
-    );
-  };
-
-  const clearSelection = () => {
-    setSelectedOptions([]);
-  };
-
- 
-
   return (
     <div className=" items-center w-full bg-inputBackground rounded">
       <div className="relative">

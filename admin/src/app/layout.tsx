@@ -2,20 +2,10 @@ import { Providers } from "@/providers/providers";
 import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import localFont from "next/font/local";
 import "@/app/globals.css";
 import LoadingFixed from "@/components/Loading/LoadingFixed";
 
-// const geistSans = localFont({
-//   src: "@/app/fonts/GeistVF.woff",
-//   variable: "--font-geist-sans",
-//   weight: "100 900",
-// });
-// const geistMono = localFont({
-//   src: "@/app/fonts/GeistMonoVF.woff",
-//   variable: "--font-geist-mono",
-//   weight: "100 900",
-// });
+
 
 export const metadata: Metadata = {
   title: "MAC STORE",
@@ -30,7 +20,6 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning >
       <body
-      // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
           {children}

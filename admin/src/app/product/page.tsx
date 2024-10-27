@@ -1,14 +1,15 @@
 "use client";
+import { CategoryActions, CategorySelectors } from "@/modules/category/slice";
+import { CategoryType } from "@/modules/category/type";
+import { ProductActions, ProductSelectors } from "@/modules/product/slice";
+import { Pagination, message } from "antd";
+import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Pagination, Skeleton, message } from "antd";
-import { debounce } from "lodash";
-import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { BreadcrumbNav } from "./components/BreadcrumbNav";
 import { CategoryFilter } from "./components/CategoryFilter";
 import { PriceFilter } from "./components/PriceFilter";
 import { ProductGrid } from "./components/ProductGrid";
-import SkeletonGrid from "@/components/loadingComp";
 
 // Type definitions
 interface PriceRange {
@@ -35,7 +36,7 @@ const ProductPage: React.FC = () => {
   // Selectors
   const allProducts = useSelector(ProductSelectors.productList);
   const totalProducts = useSelector(ProductSelectors.totalProducts);
-  const categories = useSelector(ProductSelectors.categories);
+  const categories = useSelector(CategorySelectors.categories);
   const loading = useSelector(ProductSelectors.isLoading);
 
   // State
@@ -62,7 +63,7 @@ const ProductPage: React.FC = () => {
 
   // Fetch initial data
   useEffect(() => {
-    dispatch(ProductActions.fetchCategories());
+    dispatch(CategoryActions.fetchCategories());
   }, [dispatch]);
 
   // Product fetching logic
@@ -98,18 +99,12 @@ const ProductPage: React.FC = () => {
     [fetchProducts, pageSize, priceRange]
   );
 
-  const handleAddCategory = async (newCategory: {
-    name: string;
-    description: string;
-    parentCategoryId: string | null;
-  }) => {
+  const handleAddCategory = async (newCategory: CategoryType) => {
     try {
-      // await dispatch(ProductActions.createCategory(newCategory));
-      message.success("Category added successfully");
-      dispatch(ProductActions.fetchCategories());
+      await dispatch(CategoryActions.createCategory({ data: newCategory }));
+      dispatch(CategoryActions.fetchCategories()); 
     } catch (error) {
       message.error("Failed to add category");
-      console.error("Error adding category:", error);
     }
   };
 
@@ -129,7 +124,6 @@ const ProductPage: React.FC = () => {
   }) => {
     try {
       // await dispatch(ProductActions.createProduct(productData));
-      console.log("🚀 ~ productData:", productData);
 
       message.success("Product added successfully");
 
@@ -190,13 +184,13 @@ const ProductPage: React.FC = () => {
               loading={loading}
             />
 
-              <CategoryFilter
-                categories={categories}
-                selectedCategory={selectedCategory}
-                onCategoryChange={handleCategoryChange}
-                onAddCategory={handleAddCategory}
-                loading={loading}
-              />
+            <CategoryFilter
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategoryChange={handleCategoryChange}
+              onAddCategory={handleAddCategory}
+              loading={loading}
+            />
             <PriceFilter
               priceRanges={priceRanges}
               selectedRangeId={selectedRangeId}

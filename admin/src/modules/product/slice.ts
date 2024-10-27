@@ -7,15 +7,11 @@ type ProductState = {
   productList: any[];
   totalProducts: number; // Tổng số sản phẩm cho phân trang
   isLoading: boolean;
-  categories: any[];
-  listCategories: any[],
 
 };
 
 const initialState: ProductState = {
   product: null,
-  categories: [],
-  listCategories: [],
   productList: [],
   totalProducts: 0,
   isLoading: false,
@@ -61,16 +57,12 @@ const ProductSlice = createSlice({
     },
 
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => { },
-    deleteProduct: (state: any, { payload: any }) => { 
+    deleteProduct: (state: any, { payload: any }) => {
     },
 
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
-    },
-    fetchCategories: (state: ProductState) => { state.isLoading = true; },
-    setCategories: (state: ProductState, { payload }: PayloadAction<any[]>) => {
-      state.categories = payload;
-    },
+    }
   },
 });
 
@@ -84,5 +76,4 @@ export const ProductSelectors = {
   productList: (state: RootState) => state.product.productList,
   totalProducts: (state: RootState) => state.product.totalProducts,
   isLoading: (state: RootState) => state.product.isLoading,
-  categories: (state: RootState) => state.product.categories,
 };

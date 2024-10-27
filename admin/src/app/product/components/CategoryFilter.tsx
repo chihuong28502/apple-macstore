@@ -15,6 +15,7 @@ import {
 } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   categories,
@@ -24,6 +25,7 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   loading,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [form] = Form.useForm();
 
   if (loading) {
@@ -35,18 +37,35 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   }
 
   const getChildrenCategories = (parentId: string | null) => {
+    if (!categories) return [];
     return categories.filter(
       (category) => category.parentCategoryId === parentId
     );
   };
+  const getBreadcrumb = (categoryId: string | null) => {
+    const breadcrumb = [];
+    let currentCategory = categories.find((cat) => cat._id === categoryId);
 
-  const handleSubmit = async (values: any) => {
+    while (currentCategory) {
+      breadcrumb.unshift(currentCategory.name); // Thêm vào đầu của mảng breadcrumb
+      currentCategory = categories.find(
+        (cat) => cat._id === currentCategory?.parentCategoryId
+      );
+    }
+
+    return breadcrumb;
+  };
+  const handleSubmit =  async(values: any) => {
     try {
       if (onAddCategory) {
-        await onAddCategory({
+        const breadcrumbs = getBreadcrumb(values.parentCategoryId).concat(
+          values.name
+        );
+         await onAddCategory({
           name: values.name,
           description: values.description,
           parentCategoryId: values.parentCategoryId || null,
+          breadcrumbs,
         });
         message.success("Thêm danh mục thành công");
         form.resetFields();
@@ -123,7 +142,10 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
         <Modal
           title="Thêm danh mục mới"
           open={isModalOpen}
-          onCancel={() => setIsModalOpen(false)}
+          onCancel={() => {
+            form.resetFields();
+            setIsModalOpen(false);
+          }}
           footer={null}
         >
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -143,13 +165,12 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
 
             <Form.Item name="parentCategoryId" label="Danh mục cha">
               <Select placeholder="Chọn danh mục cha" allowClear>
-                {/* Render danh mục cha (parentCategoryId = null) */}
                 {categories
                   .filter((cat) => cat.parentCategoryId === null)
                   .map((parentCat) => (
-                    <Select.OptGroup key={parentCat._id} label={parentCat.name}>
+                    <Select.OptGroup key={`parent-${parentCat._id}`} label={parentCat.name}>
                       {/* Render danh mục con của từng danh mục cha */}
-                      <Select.Option key={parentCat._id} value={parentCat._id}>
+                      <Select.Option key={`opt-${parentCat._id}`} value={parentCat._id}>
                         {parentCat.name}
                       </Select.Option>
                       {categories
