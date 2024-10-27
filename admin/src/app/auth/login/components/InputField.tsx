@@ -21,9 +21,9 @@ export const InputField = ({
         onChange={onChange}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
-        className={`w-full px-8 py-4 text-fontColor rounded-lg font-medium bg-gray-100 border ${
+        className={`w-full px-8 py-4 text-fontColor rounded-lg font-medium bg-layout border ${
           error ? "border-red-500" : "border-gray-200"
-        } placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white`}
+        } placeholder-gray-500 text-sm`}
       />
       {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
     </div>

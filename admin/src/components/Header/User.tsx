@@ -7,11 +7,9 @@ import { useAppDispatch, useAppSelector } from "@/core/services/hook";
 import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
 import { useState } from "react";
 import { TbLogout } from "react-icons/tb";
-import { useRouter } from "next/navigation";
 
 const User = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
   const auth = useAppSelector(AuthSelectors.user);
   const dispatch = useAppDispatch();
   const { resolvedTheme } = useTheme();
@@ -76,7 +74,7 @@ const User = () => {
         menu={{ items: getMenuItems() }}
         trigger={["click"]}
       >
-        <div className="cursor-pointer p-1.5 pl-0">
+        <div className="cursor-pointer p-1.5 pl-0 text-fontColor">
           <FiUser className="size-5" />
         </div>
       </Dropdown>
