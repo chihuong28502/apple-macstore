@@ -11,9 +11,10 @@ function* createProduct({ payload }: PayloadAction<any>) {
   const { data, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(ProductActions.setLoading(true));
+    console.log("data saga:",data);
+    
     const response: { success: boolean; data: any } = yield ProductRequest.createProduct(data);
     yield put(ProductActions.setLoading(false));
-
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
       onSuccess(response.data);

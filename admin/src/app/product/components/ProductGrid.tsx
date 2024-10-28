@@ -7,6 +7,7 @@ import { Button, Form, Input, InputNumber, message, Modal, Select } from "antd";
 import { useState } from "react";
 import Product from "./ProductCard";
 import { StockInput } from "./StockInput";
+import imageCompression from 'browser-image-compression';
 
 export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
   products,
@@ -17,23 +18,52 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [imageFiles, setImageFiles] = useState<string[]>([]);
   const [specifications, setSpecifications] = useState({
     colors: [],
     storageOptions: [],
     ramOptions: [],
   });
 
-  const handleSubmit = async (values: any) => {
+  // Hàm xử lý chuyển đổi ảnh thành base64
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      const base64Files: string[] = [];
+  
+      for (let file of fileArray) {
+        const compressedFile = await imageCompression(file, {
+          maxSizeMB: 1, // Giới hạn dung lượng ảnh (ví dụ: 1MB)
+          maxWidthOrHeight: 1024, // Giới hạn kích thước ảnh
+        });
+  
+        const reader = new FileReader();
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          if (reader.result) {
+            base64Files.push(reader.result as string);
+            
+            if (base64Files.length === fileArray.length) {
+              setImageFiles(base64Files);
+            }
+          }
+        };
+      }
+    }
+  };
+
+  const handleSubmit = (values: any) => {
     try {
       if (onAddProduct) {
         const stockMap = values.stock || new Map();
 
+        // Chuẩn bị dữ liệu sản phẩm
         const productData = {
           ...values,
           basePrice: Number(values.basePrice),
           price: Number(values.price),
-          images: values.images || [],
+          images: imageFiles, // Sử dụng chuỗi base64 từ imageFiles
           tags: values.tags || [],
           specifications: {
             models: values.specifications?.models || [],
@@ -46,10 +76,10 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
           averageRating: 0,
         };
 
-        await onAddProduct(productData);
+        onAddProduct(productData);
         message.success("Thêm sản phẩm thành công");
         form.resetFields();
-        setImageUrl("");
+        setImageFiles([]);
         setIsModalOpen(false);
       }
     } catch (error) {
@@ -126,23 +156,29 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
           </Form.Item>
 
           <Form.Item
-            name="images"
             label="Hình ảnh"
-            rules={[{ required: true, message: "Vui lòng nhập URL hình ảnh" }]}
+            rules={[{ required: true, message: "Vui lòng chọn hình ảnh" }]}
           >
-            <Select
-              mode="tags"
-              placeholder="Nhập URL hình ảnh"
-              onChange={(value) => setImageUrl(value[value.length - 1])}
+            <Input
+              type="file"
+              multiple
+              onChange={handleFileChange} // Cập nhật xử lý khi chọn ảnh
             />
           </Form.Item>
 
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt="Preview"
-              className="mt-2 max-w-full h-40 object-contain"
-            />
+          {imageFiles.length > 0 && (
+            <div className="mt-2">
+              {imageFiles.map((file, index) => (
+                <div key={index} className="flex items-center">
+                  <span className="mr-2">Ảnh {index + 1}</span>
+                  <img
+                    src={file}
+                    alt="Preview"
+                    className="h-20 w-20 object-cover"
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
@@ -253,7 +289,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
       {loading ? (
         <SkeletonGrid items={items} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {products.map((product) => (
             <Product key={product._id} product={product} />
           ))}
@@ -265,13 +301,10 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
-        width={1000}
-        className="overflow-y-auto"
+        width={800}
       >
         {renderForm()}
       </Modal>
     </>
   );
 };
-
-export default ProductGrid;

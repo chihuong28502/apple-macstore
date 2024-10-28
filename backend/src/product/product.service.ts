@@ -16,13 +16,14 @@ export class ProductService {
   ) { }
 
   async create(createProductDto: CreateProductDto): Promise<ResponseDto<Product>> {
-    try {
+      try {
       const createdProduct = new this.productModel(createProductDto);
-      const savedProduct = await createdProduct.save();
+      await createdProduct.save();
+      console.log("🚀 ~ ProductService ~ createdProduct:", createdProduct)
       return {
         success: true,
         message: 'Product created successfully',
-        data: savedProduct,
+        data: createdProduct,
       };
     } catch (error) {
       return {

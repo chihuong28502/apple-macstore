@@ -113,17 +113,10 @@ const ProductPage: React.FC = () => {
     setPriceRange([range.min, range.max]);
   }, []);
 
-  const handleAddProduct = async (productData: {
-    name: string;
-    description: string;
-    categoryId: string;
-    price: number;
-    originalPrice: number;
-    stock: number;
-    image: string;
-  }) => {
+  const handleAddProduct =  (productData:any) => {
+    console.log("🚀 ~ productData:", productData)
     try {
-      // await dispatch(ProductActions.createProduct(productData));
+       dispatch(ProductActions.createProduct({data:productData}));
 
       message.success("Product added successfully");
 
