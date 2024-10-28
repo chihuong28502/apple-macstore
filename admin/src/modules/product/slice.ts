@@ -56,7 +56,10 @@ const ProductSlice = createSlice({
       state.totalProducts = payload;
     },
 
-    updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => { },
+    updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => {
+      console.log(payload);
+      
+     },
     deleteProduct: (state: any, { payload: any }) => {
     },
 

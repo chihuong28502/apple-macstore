@@ -20,7 +20,6 @@ const CategorySlice = createSlice({
   initialState,
   reducers: {
     createCategory: (state: CategoryState, { payload }: PayloadAction<any>) => {
-      console.log("🚀 ~ payload:", payload)
     },
     fetchCategoryById: (
       state: CategoryState,
@@ -37,7 +36,6 @@ const CategorySlice = createSlice({
     },
     fetchCategories: (state: CategoryState) => { state.isLoading = true; },
     setCategories: (state: CategoryState, { payload }: PayloadAction<any[]>) => {
-      console.log("🚀 ~ payload:", payload)
       state.categories = payload;
     },
     setCategoryById: (state: CategoryState, { payload }: PayloadAction<any[]>) => {

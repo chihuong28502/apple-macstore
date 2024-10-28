@@ -25,25 +25,24 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
     ramOptions: [],
   });
 
-  // Hàm xử lý chuyển đổi ảnh thành base64
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       const fileArray = Array.from(files);
       const base64Files: string[] = [];
-  
+
       for (let file of fileArray) {
         const compressedFile = await imageCompression(file, {
-          maxSizeMB: 1, // Giới hạn dung lượng ảnh (ví dụ: 1MB)
-          maxWidthOrHeight: 1024, // Giới hạn kích thước ảnh
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1024,
         });
-  
+
         const reader = new FileReader();
         reader.readAsDataURL(compressedFile);
         reader.onloadend = () => {
           if (reader.result) {
             base64Files.push(reader.result as string);
-            
+
             if (base64Files.length === fileArray.length) {
               setImageFiles(base64Files);
             }
@@ -53,40 +52,65 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
     }
   };
 
-  const handleSubmit = (values: any) => {
+  const handleSubmit = async (values: any) => {
     try {
       if (onAddProduct) {
-        const stockMap = values.stock || new Map();
-
-        // Chuẩn bị dữ liệu sản phẩm
+        let stockValue: any = form.getFieldValue('stock') || [];
+    
+        // Kiểm tra xem stockValue có phải là một mảng không
+        if (stockValue instanceof Map) {
+          stockValue = Array.from(stockValue.entries());
+        } else if (!Array.isArray(stockValue)) {
+          console.error("Expected stockValue to be an array or Map, got:", stockValue);
+          message.error("Thông tin tồn kho không hợp lệ");
+          return; // Dừng lại nếu stockValue không phải là mảng hoặc Map
+        }
+    
+        // Kiểm tra từng phần tử trong stockValue
+        const isValidStock = stockValue.every(([color, configMap]: any) => {
+          return typeof color === 'string' && (configMap instanceof Map || typeof configMap === 'object');
+        });
+    
+        if (!isValidStock) {
+          console.error("Invalid stock structure:", stockValue);
+          message.error("Thông tin tồn kho không hợp lệ");
+          return;
+        }
+  
         const productData = {
           ...values,
           basePrice: Number(values.basePrice),
           price: Number(values.price),
-          images: imageFiles, // Sử dụng chuỗi base64 từ imageFiles
+          images: imageFiles,
           tags: values.tags || [],
           specifications: {
-            models: values.specifications?.models || [],
-            storageOptions: values.specifications?.storageOptions || [],
-            ramOptions: values.specifications?.ramOptions || [],
-            colors: values.specifications?.colors || [],
+            storageOptions: specifications.storageOptions,
+            ramOptions: specifications.ramOptions,
+            colors: specifications.colors,
           },
-          stock: stockMap,
+          stock: (stockValue as [string, Map<string, number> | Record<string, number>][]).reduce<Record<string, Record<string, number>>>(
+            (acc, [color, configMap]) => {
+              acc[color] = Object.fromEntries(configMap instanceof Map ? configMap : Object.entries(configMap));
+              return acc;
+            },
+            {}
+          ),
           reviewsCount: 0,
           averageRating: 0,
         };
-
-        onAddProduct(productData);
-        message.success("Thêm sản phẩm thành công");
+  
+        await onAddProduct(productData);
+        message.success("Sản phẩm đã được thêm thành công!");
         form.resetFields();
         setImageFiles([]);
         setIsModalOpen(false);
       }
     } catch (error) {
+      console.error("Error in handleSubmit:", error);
       message.error("Có lỗi xảy ra khi thêm sản phẩm");
     }
   };
-
+  
   const renderForm = () => (
     <Form form={form} layout="vertical" onFinish={handleSubmit}>
       <div className="grid grid-cols-2 gap-4">
@@ -162,7 +186,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
             <Input
               type="file"
               multiple
-              onChange={handleFileChange} // Cập nhật xử lý khi chọn ảnh
+              onChange={handleFileChange}
             />
           </Form.Item>
 
@@ -285,26 +309,21 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
           </Button>
         </div>
       )}
-
-      {loading ? (
-        <SkeletonGrid items={items} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {products.map((product) => (
-            <Product key={product._id} product={product} />
-          ))}
-        </div>
+      {isModalOpen && (
+        <Modal
+          title="Thêm sản phẩm"
+          visible={isModalOpen}
+          footer={null}
+          onCancel={() => setIsModalOpen(false)}
+        >
+          {renderForm()}
+        </Modal>
       )}
-
-      <Modal
-        title="Thêm sản phẩm mới"
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={null}
-        width={800}
-      >
-        {renderForm()}
-      </Modal>
+      <div className="grid grid-cols-4 gap-4">
+        {products.map((product) => (
+          <Product key={product._id} product={product} />
+        ))}
+      </div>
     </>
   );
 };

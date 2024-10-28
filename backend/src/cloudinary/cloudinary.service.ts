@@ -1,10 +1,22 @@
 import cloudinary from '../../cloudinary.config';
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as streamifier from 'streamifier';
 
 @Injectable()
 export class CloudinaryService {
-  async uploadMedia(fileBuffer: Buffer, folder: string, resourceType: 'auto' | 'image' | 'video' | 'raw' = 'auto') {
+  constructor(private configService: ConfigService) {
+    cloudinary.config({
+      cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
+      api_key: this.configService.get<string>('CLOUDINARY_API_KEY'),
+      api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET'),
+    });
+  }
+  async uploadMedia(
+    fileBuffer: Buffer,
+    folder: string,
+    resourceType: 'auto' | 'image' | 'video' | 'raw' = 'auto',
+  ) {
     try {
       if (!Buffer.isBuffer(fileBuffer)) {
         throw new Error('Invalid file buffer');
@@ -19,6 +31,7 @@ export class CloudinaryService {
           },
           (error, result) => {
             if (error) {
+              console.error('Cloudinary upload error:', error);
               reject(error);
             } else {
               resolve(result);
@@ -27,35 +40,40 @@ export class CloudinaryService {
         );
         stream.pipe(uploadStream);
       });
+      console.log("result", result);
 
       return {
         success: true,
         data: {
           url: result.secure_url,
+          publicId: result.public_id,
           resourceType,
         },
       };
     } catch (error) {
+      console.error('Error uploading media:', error);
       return {
         success: false,
-        data: null
-      }
+        data: error.message || 'An error occurred during upload.',
+      };
     }
   }
 
   async deleteMedia(publicId: string, resourceType: 'auto' | 'image' | 'video' | 'raw') {
     try {
-      await cloudinary.uploader.destroy(publicId, {
+      const result = await cloudinary.uploader.destroy(publicId, {
         resource_type: resourceType,
       });
-      return { success: true };
+      return { success: result.result === 'ok' }; // Kiểm tra xem kết quả có phải là 'ok' không
     } catch (error) {
+      console.error(`Error deleting media: ${error.message}`); // Thêm câu lệnh log lỗi
       return {
         success: false,
         message: error.message,
       };
     }
   }
+
 
   async getMedia(folder: string, resourceType: 'auto' | 'image' | 'video' | 'raw', maxResults: number = 500) {
     try {
@@ -73,5 +91,5 @@ export class CloudinaryService {
       };
     }
   }
-  
+
 }

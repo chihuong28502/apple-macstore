@@ -1,6 +1,6 @@
 "use client";
 import { InputNumber, Table } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Component quản lý stock
 export const StockInput: React.FC<{
@@ -16,6 +16,13 @@ export const StockInput: React.FC<{
     value || new Map()
   );
 
+  // Cập nhật stockMap khi giá trị props value thay đổi
+  useEffect(() => {
+    if (value) {
+      setStockMap(value);
+    }
+  }, [value]);
+
   const columns = [
     {
       title: "Cấu hình",
@@ -30,8 +37,8 @@ export const StockInput: React.FC<{
         <InputNumber
           min={0}
           value={record.quantity}
-          onChange={(value) =>
-            handleStockChange(record.color, record.config, value || 0)
+          onChange={(quantity) =>
+            handleStockChange(record.color, record.config, quantity || 0)
           }
         />
       ),

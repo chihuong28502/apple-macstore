@@ -20,8 +20,8 @@ export class Product {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', required: true })
   categoryId: string;  // ID danh mục sản phẩm (Mac mini, MacBook, iMac)
 
-  @Prop([String])
-  images: string[];  // URL hình ảnh sản phẩm
+  @Prop({ type: [{ image: String, publicId: String }], required: true })
+  images: { image: string; publicId: string; _id: string }[];
 
   @Prop([String])
   tags: string[];  // Thẻ tìm kiếm cho sản phẩm
@@ -58,7 +58,6 @@ export class Product {
     default: new Map(),
   })
   stock: Map<string, Map<string, number>>;  
-
   @Prop({ default: Date.now })
   createdAt: Date;  
 

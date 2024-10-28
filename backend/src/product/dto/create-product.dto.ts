@@ -4,7 +4,7 @@ export class CreateProductDto {
   basePrice: number;  // Giá gốc
   price: number;  // Giá bán
   categoryId: string;  // ID danh mục sản phẩm
-  images: string[];  // URL hình ảnh sản phẩm
+  images?:any;  // URL hình ảnh sản phẩm
   tags: string[];  // Thẻ tìm kiếm
 
   specifications: {
