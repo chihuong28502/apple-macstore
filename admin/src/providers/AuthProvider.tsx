@@ -1,8 +1,9 @@
 "use client";
+import { useEffect, useState } from "react";
+
 import LoadingFixed from "@/components/Loading/LoadingFixed";
 import { useAppDispatch } from "@/core/services/hook";
 import { AuthActions } from "@/modules/auth/slice";
-import { useEffect, useState } from "react";
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useAppDispatch();

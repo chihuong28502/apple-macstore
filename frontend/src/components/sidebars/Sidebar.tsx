@@ -1,10 +1,12 @@
 "use client";
 import { motion } from "framer-motion";
-import MenuSidebar from "./Menu";
-import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
+
 import { AuthSelectors } from "@/modules/auth/slice";
+
+import MenuSidebar from "./Menu";
 
 type Props = {
   collapsed: boolean;

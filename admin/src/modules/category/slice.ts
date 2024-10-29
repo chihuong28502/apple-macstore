@@ -1,6 +1,7 @@
+import { createSlice,PayloadAction } from "@reduxjs/toolkit";
+
 import { RootState } from "@/core/services/store";
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { CategoryType } from "./type";
+
 
 type CategoryState = {
   _id?: string;

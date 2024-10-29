@@ -1,8 +1,8 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
+import { put, takeLeading } from "redux-saga/effects";
+
 import { ProductRequest } from "./request";
 import { ProductActions } from "./slice";
-import { toast } from "react-toastify";
 interface DeleteProductResponse {
   success: boolean;
   message?: string;

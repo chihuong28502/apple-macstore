@@ -1,12 +1,13 @@
+import Image from "next/image";
 import React from "react";
-import UpPlatformIcon from "@/asset/icons/UpPlatformIcon";
-import ViewIcon from "@/asset/icons/ViewIcon";
+
 import CommentIcon from "@/asset/icons/CommentIcon";
+import DownIcon from "@/asset/icons/DownIcon";
 import LikeIcon from "@/asset/icons/LikeIcon";
 import UpIcon from "@/asset/icons/UpIcon";
-import DownIcon from "@/asset/icons/DownIcon";
+import UpPlatformIcon from "@/asset/icons/UpPlatformIcon";
+import ViewIcon from "@/asset/icons/ViewIcon";
 import { SVGDecreaseSmall } from "@/asset/svg";
-import Image from "next/image";
 
 const PlatformStatisticsList = ({
   item,

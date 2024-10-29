@@ -1,6 +1,4 @@
 "use client";
-import SkeletonGrid from "@/components/loadingComp";
-import type { ProductPage } from "@/type/product.page.type";
 import { DownOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -8,14 +6,16 @@ import {
   Form,
   Input,
   Menu,
+  message,
   Modal,
   Select,
   Space,
-  message,
 } from "antd";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+
+import SkeletonGrid from "@/components/loadingComp";
+import type { ProductPage } from "@/type/product.page.type";
 
 export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   categories,

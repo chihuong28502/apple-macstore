@@ -1,5 +1,5 @@
-import React from "react";
 import { Card, Skeleton } from "antd";
+import React from "react";
 
 const SkeletonOne: React.FC<any> = ({ rows }) => {
   return (

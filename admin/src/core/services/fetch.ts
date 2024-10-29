@@ -1,12 +1,14 @@
 'use client'
-import { AuthUtils } from "@/lib/localAuth";
-import { AuthActions } from "@/modules/auth/slice";
 import axios, { AxiosInstance } from "axios";
 import { toast } from 'react-toastify';
+
+import { AuthUtils } from "@/lib/localAuth";
+import { AuthActions } from "@/modules/auth/slice";
+
 import CONST from "./const";
 import { store } from "./store";
 
-export let AxiosClient = axios.create({
+export const AxiosClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL_LOCAL || '/api',
   timeout: CONST.REQUEST.REQUEST_TIMEOUT,
   headers: {

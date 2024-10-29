@@ -1,13 +1,14 @@
 "use client";
-import SkeletonGrid from "@/components/loadingComp";
-import SkeletonOne from "@/components/loadingOne";
-import { type ProductPage } from "@/type/product.page.type";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, message, Modal, Select } from "antd";
+import imageCompression from 'browser-image-compression';
 import { useState } from "react";
+
+import SkeletonOne from "@/components/loadingOne";
+import { type ProductPage } from "@/type/product.page.type";
+
 import Product from "./ProductCard";
 import { StockInput } from "./StockInput";
-import imageCompression from 'browser-image-compression';
 
 export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
   products,
@@ -31,7 +32,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
       const fileArray = Array.from(files);
       const base64Files: string[] = [];
 
-      for (let file of fileArray) {
+      for (const file of fileArray) {
         const compressedFile = await imageCompression(file, {
           maxSizeMB: 1,
           maxWidthOrHeight: 1024,

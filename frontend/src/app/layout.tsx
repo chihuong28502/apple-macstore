@@ -1,10 +1,12 @@
-import { Providers } from "@/providers/providers";
-import type { Metadata } from "next";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import localFont from "next/font/local";
 import "@/app/globals.css";
+
+import type { Metadata } from "next";
+import { ToastContainer } from "react-toastify";
+
 import LoadingFixed from "@/components/Loading/LoadingFixed";
+import { Providers } from "@/providers/providers";
 
 // const geistSans = localFont({
 //   src: "@/app/fonts/GeistVF.woff",

@@ -1,13 +1,14 @@
 "use client";
-import CustomButton from "@/app/components/Button"
-import { VALIDATE } from "@/core/validate/validate";
-import { AuthActions } from "@/modules/auth/slice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
+
+import CustomButton from "@/app/components/Button"
+import { VALIDATE } from "@/core/validate/validate";
+import { AuthActions } from "@/modules/auth/slice";
 
 // Định nghĩa kiểu cho formData và errors
 interface FormData {

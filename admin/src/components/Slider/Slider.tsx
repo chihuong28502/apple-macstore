@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import React, { useCallback,useState } from "react";
 
 interface Props {
   slides: any[];

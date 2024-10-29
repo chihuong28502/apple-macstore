@@ -1,9 +1,10 @@
 "use client";
+import { ReactNode, useEffect, useState } from "react";
+
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import SideBar from "@/components/sidebars/Sidebar";
 import { useWindowSize } from "@/hooks/breakpoint";
-import { ReactNode, useEffect, useState } from "react";
 
 const LayoutHome = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);

@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { HiInboxStack } from "react-icons/hi2";
+
 import CategoryCard from "@/components/CategoryCard/CategoryCard";
 import TripleSlider from "@/components/Slider/Slider";
 import TopCard from "@/components/TopicCard/TopCard";
-import { useState } from "react";
-import { HiInboxStack } from "react-icons/hi2";
 
 const listTopic = [
   { _id: 1, title: "Nội dung nổi bật" },

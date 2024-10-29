@@ -1,15 +1,17 @@
 "use client";
-import { ProductActions, ProductSelectors } from "@/modules/product/slice";
-import { type ProductPage } from "@/type/product.page.type";
 import { Pagination, Skeleton } from "antd";
 import { debounce } from "lodash";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+import { ProductActions, ProductSelectors } from "@/modules/product/slice";
+import { type ProductPage } from "@/type/product.page.type";
+
 import { BreadcrumbNav } from "./components/BreadcrumbNav";
 import { CategoryFilter } from "./components/CategoryFilter";
 import { PriceFilter } from "./components/PriceFilter";
 import { ProductGrid } from "./components/ProductGrid";
-import { usePathname } from "next/navigation";
 
 const ProductPage: React.FC = () => {
   const dispatch = useDispatch();

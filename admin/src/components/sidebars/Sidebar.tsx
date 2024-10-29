@@ -1,9 +1,6 @@
 "use client";
-import { AuthSelectors } from "@/modules/auth/slice";
 import { motion } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
+
 import MenuSidebarDashboard from "./MenuSidebarDashboard";
 
 type Props = {

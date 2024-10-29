@@ -1,10 +1,11 @@
-import { AppAction } from "@/core/components/AppSlice";
-import { getCookie, } from "@/hooks/Cookies";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { toast } from "react-toastify";
 import { call, delay, put, takeLeading } from "redux-saga/effects";
+
+import { AppAction } from "@/core/components/AppSlice";
+
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
 

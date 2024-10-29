@@ -1,5 +1,6 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 import { RootState } from "@/core/services/store";
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 type LoadingGlobalState = {
   isOpenLoadingGlobal: boolean;

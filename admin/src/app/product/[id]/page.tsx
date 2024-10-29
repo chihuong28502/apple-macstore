@@ -1,9 +1,10 @@
 "use client";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Form, Input, InputNumber, Select, Space,Upload } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
-import { Form, Input, InputNumber, Select, Button, Upload, Space } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 

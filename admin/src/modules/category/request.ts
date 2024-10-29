@@ -1,4 +1,5 @@
 import MSTFetch from "@/core/services/fetch";
+
 import { CategoryType } from "./type";
 
 export const CategoryRequest = {

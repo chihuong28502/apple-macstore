@@ -1,12 +1,13 @@
 "use client";
+import { ConfigProvider, Dropdown, MenuProps } from "antd";
 import _ from "lodash";
-import { Avatar, ConfigProvider, Dropdown, MenuProps } from "antd";
 import { useTheme } from "next-themes";
+import { useState } from "react";
 import { FiUser } from "react-icons/fi";
+import { TbLogout } from "react-icons/tb";
+
 import { useAppDispatch, useAppSelector } from "@/core/services/hook";
 import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
-import { useState } from "react";
-import { TbLogout } from "react-icons/tb";
 
 const User = () => {
   const [isOpen, setIsOpen] = useState(false);

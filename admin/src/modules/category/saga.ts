@@ -1,6 +1,7 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
+
 import { CategoryRequest } from "./request";
 import { CategoryActions } from "./slice";
 import { CategoryType } from "./type";

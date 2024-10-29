@@ -1,10 +1,11 @@
 "use client";
-import { ProductActions } from "@/modules/product/slice";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+
+import { ProductActions } from "@/modules/product/slice";
 
 function Product({ product,currentPage }: any) {
   const dispatch= useDispatch()

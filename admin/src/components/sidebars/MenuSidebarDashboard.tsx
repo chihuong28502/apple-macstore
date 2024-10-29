@@ -1,12 +1,14 @@
 "use client";
-import { cn } from "@/lib/utils";
 import type { MenuProps } from "antd";
 import { ConfigProvider, Menu, Tooltip } from "antd";
-import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { FaCalculator, FaPowerOff, FaUser } from "react-icons/fa";
 import { FaShirt } from "react-icons/fa6";
 import { MdDashboardCustomize } from "react-icons/md";
+
+import { cn } from "@/lib/utils";
+
 import DarkModeSwitch from "../DarkModeSwitch";
 
 type MenuItem = Required<MenuProps>["items"][number];

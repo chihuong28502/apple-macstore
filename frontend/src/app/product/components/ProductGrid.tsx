@@ -1,7 +1,8 @@
 "use client";
+import { Card, Empty, Skeleton } from "antd";
+
 import Product from "@/components/Product/Product";
 import { type ProductPage } from "@/type/product.page.type";
-import { Card, Empty, Skeleton } from "antd";
 
 export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
   products,

@@ -1,9 +1,10 @@
 import AuthReducer from "@/modules/auth/slice";
-import CustomerReducer from "@/modules/customer/slice";
-import AppReducer from "../components/AppSlice";
-import ProductReducer from "@/modules/product/slice";
-import LoadingGlobalReducer from "@/modules/loading-global/slice";
 import CategoryReducer from "@/modules/category/slice";
+import CustomerReducer from "@/modules/customer/slice";
+import LoadingGlobalReducer from "@/modules/loading-global/slice";
+import ProductReducer from "@/modules/product/slice";
+
+import AppReducer from "../components/AppSlice";
 
 export const reducers = {
   app: AppReducer,

@@ -1,9 +1,10 @@
 "use client";
-import { type ProductPage } from "@/type/product.page.type";
-import { Menu, Dropdown, Button, Space } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Menu, Space } from "antd";
 import Link from "next/link";
 import React from "react";
-import { DownOutlined } from "@ant-design/icons";
+
+import { type ProductPage } from "@/type/product.page.type";
 
 export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   categories,

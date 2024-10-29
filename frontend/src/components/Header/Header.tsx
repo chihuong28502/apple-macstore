@@ -1,20 +1,17 @@
 "use client";
 
+import Link from "next/link";
+import React from "react";
+import { FaRegUserCircle } from "react-icons/fa";
+
 import { SVGLogo } from "@/asset/svg";
 import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
-import { FaRegUserCircle } from "react-icons/fa";
-import { motion } from "framer-motion";
-import React from "react";
-import { HiOutlineQueueList } from "react-icons/hi2";
-import { MdMenuOpen } from "react-icons/md";
-import SearchComponent from "../Search/Search";
-import BtnAuth from "../headerBtnAuth/BtnAuth";
-import { cn } from "@/lib/utils";
-import _ from "lodash";
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
+
+import BtnAuth from "../headerBtnAuth/BtnAuth";
+import SearchComponent from "../Search/Search";
 import User from "./User";
-import Link from "next/link";
 
 type Props = {
   isMobile: boolean;

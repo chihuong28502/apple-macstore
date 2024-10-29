@@ -1,6 +1,6 @@
 "use client";
 import { InputNumber, Table } from "antd";
-import { useState, useEffect } from "react";
+import { useEffect,useState } from "react";
 
 // Component quản lý stock
 export const StockInput: React.FC<{

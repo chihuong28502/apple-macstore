@@ -1,6 +1,7 @@
 "use client";
-import { type ProductPage } from "@/type/product.page.type";
 import { Card, Skeleton } from "antd";
+
+import { type ProductPage } from "@/type/product.page.type";
 
 export const PriceFilter: React.FC<ProductPage.PriceFilterProps> = ({
   priceRanges,

@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Loading from "./Loading";
 
 import { useAppSelector } from "../services/hook";
 import { AppSelector } from "./AppSlice";
+import Loading from "./Loading";
 function GlobalLoading() {
   const isLoading = useAppSelector(AppSelector.isLoading);
 

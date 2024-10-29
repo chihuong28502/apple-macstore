@@ -1,6 +1,8 @@
-import { AppAction } from "@/core/components/AppSlice";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { put, takeLeading } from "redux-saga/effects";
+
+import { AppAction } from "@/core/components/AppSlice";
+
 import { CustomerRequest } from "./request";
 import { CustomerActions } from "./slice";
 

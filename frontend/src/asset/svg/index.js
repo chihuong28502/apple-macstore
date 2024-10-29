@@ -76,4 +76,4 @@ const SVGLogo = ({ width = 175, height = 24, className = "" }) => {
   );
 };
 
-export { SVGIconRings, SVGIconRedDot, SVGLogo, SVGDecreaseSmall };
+export { SVGDecreaseSmall,SVGIconRedDot, SVGIconRings, SVGLogo };

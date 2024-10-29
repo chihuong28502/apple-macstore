@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils";
 import React from "react";
 import { HiInboxStack } from "react-icons/hi2";
+
+import { cn } from "@/lib/utils";
 
 interface Props {
   item: { _id: number; title: string; description: string; icon: any };

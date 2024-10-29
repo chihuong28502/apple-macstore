@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 
 export default function ProductDetailPage({

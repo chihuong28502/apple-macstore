@@ -1,7 +1,8 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { FaChevronDown, FaTimes, FaCheck } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence,motion } from "framer-motion";
+import React, { useEffect,useRef, useState } from "react";
+import { FaCheck,FaChevronDown, FaTimes } from "react-icons/fa";
+
 import { cn } from "@/lib/utils";
 
 interface Option {
