@@ -1,19 +1,22 @@
 export class UpdateProductDto {
-  readonly name?: string;
-  readonly description?: string;
-  readonly basePrice?: number;  // Giá nhập
-  readonly price?: number;  // Giá bán
-  readonly categoryId?: string;
-  readonly images?: string[];
-  readonly tags?: string[];
-  readonly customizations?: {
-    colors?: string[];
-    sizes?: number[];
-    materials?: string[];
-    personalizationOptions?: {
-      addName?: boolean;
-      addLogo?: boolean;
-    };
-  };
-  readonly stock?: Record<string, number>;
+  name: string;  // Tên sản phẩm
+  description: string;  // Mô tả sản phẩm
+  basePrice: number;  // Giá gốc
+  price: number;  // Giá bán
+  categoryId: string;  // ID danh mục sản phẩm
+  images?: { image: string; publicId: string; _id: string }[];  // URL hình ảnh sản phẩm
+  tags: string[];  // Thẻ tìm kiếm
+
+  specifications: {
+    models: string[];  // Dòng sản phẩm
+    storageOptions: string[];  // Các tùy chọn dung lượng
+    ramOptions: string[];  // Các tùy chọn RAM
+    colors: string[];  // Các màu sắc
+  };  // Thông số kỹ thuật
+
+  reviewsCount?: number;  // Số lượng đánh giá
+  averageRating?: number;  // Đánh giá trung bình
+
+  stock: Map<string, Map<string, { quantity: number; price: number }>>;  // Tồn kho
+
 }

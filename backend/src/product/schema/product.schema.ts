@@ -50,14 +50,18 @@ export class Product {
   averageRating: number;  // Đánh giá trung bình (0 đến 5 sao)
 
   @Prop({
-    type: Map, // Map của màu sắc và cấu hình, mỗi cấu hình chứa số lượng tồn kho
+    type: Map, // Map của màu sắc và cấu hình, mỗi cấu hình chứa một đối tượng với số lượng và giá
     of: {
       type: Map,
-      of: Number, 
+      of: {
+        quantity: { type: Number, required: true }, // Số lượng tồn kho
+        price: { type: Number, required: true },    // Giá của tùy chọn
+      },
     },
     default: new Map(),
   })
-  stock: Map<string, Map<string, number>>;  
+  stock: Map<string, Map<string, { quantity: number; price: number }>>;  
+
   @Prop({ default: Date.now })
   createdAt: Date;  
 

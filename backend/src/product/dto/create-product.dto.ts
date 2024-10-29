@@ -4,7 +4,7 @@ export class CreateProductDto {
   basePrice: number;  // Giá gốc
   price: number;  // Giá bán
   categoryId: string;  // ID danh mục sản phẩm
-  images?:any;  // URL hình ảnh sản phẩm
+  images?: { image: string; publicId: string; _id: string }[];  // URL hình ảnh sản phẩm
   tags: string[];  // Thẻ tìm kiếm
 
   specifications: {
@@ -17,8 +17,6 @@ export class CreateProductDto {
   reviewsCount?: number;  // Số lượng đánh giá
   averageRating?: number;  // Đánh giá trung bình
 
-  stock: Map<string, Map<string, number>>;  // Tồn kho
+  stock: Map<string, Map<string, { quantity: number; price: number }>>;  // Tồn kho
 
-  createdAt?: Date;  // Thời gian tạo
-  updatedAt?: Date;  // Thời gian cập nhật
 }

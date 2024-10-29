@@ -21,12 +21,11 @@ export class ProductService {
     try {
       // Tải lên tất cả ảnh từ danh sách base64
       const uploadedImages = await Promise.all(
-        createProductDto.images.map(async (base64: string) => {
-          const base64Str = base64.split(',')[1]; // Lấy phần dữ liệu base64 (bỏ qua phần prefix)
-          const buffer = Buffer.from(base64Str, 'base64'); // Chuyển đổi base64 thành Buffer
+        createProductDto.images.map(async (base64: any) => {
+          const base64Str = base64.split(',')[1]; 
+          const buffer = Buffer.from(base64Str, 'base64');
           const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
           
-          // Trả về đối tượng với URL và publicId nếu thành công, ngược lại trả về null
           return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null; 
         })
       );
