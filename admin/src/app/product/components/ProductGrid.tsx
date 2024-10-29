@@ -55,62 +55,62 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
 
   const handleSubmit = async (values: any) => {
     try {
-      if (onAddProduct) {
-        let stockValue: any = form.getFieldValue('stock') || [];
-    
-        // Kiểm tra xem stockValue có phải là một mảng không
-        if (stockValue instanceof Map) {
-          stockValue = Array.from(stockValue.entries());
-        } else if (!Array.isArray(stockValue)) {
-          console.error("Expected stockValue to be an array or Map, got:", stockValue);
-          message.error("Thông tin tồn kho không hợp lệ");
-          return; // Dừng lại nếu stockValue không phải là mảng hoặc Map
+        if (onAddProduct) {
+            let stockValue: any = form.getFieldValue('stock') || [];
+
+            // Kiểm tra xem stockValue có phải là một mảng không
+            if (stockValue instanceof Map) {
+                stockValue = Array.from(stockValue.entries());
+            } else if (!Array.isArray(stockValue)) {
+                console.error("Expected stockValue to be an array or Map, got:", stockValue);
+                message.error("Thông tin tồn kho không hợp lệ");
+                return; // Dừng lại nếu stockValue không phải là mảng hoặc Map
+            }
+
+            // Kiểm tra từng phần tử trong stockValue
+            const isValidStock = stockValue.every(([color, configMap]: any) => {
+                return typeof color === 'string' && (configMap instanceof Map || typeof configMap === 'object');
+            });
+
+            if (!isValidStock) {
+                console.error("Invalid stock structure:", stockValue);
+                message.error("Thông tin tồn kho không hợp lệ");
+                return;
+            }
+
+            const productData = {
+                ...values,
+                basePrice: Number(values.basePrice),
+                price: Number(values.price),
+                images: imageFiles,
+                tags: values.tags || [],
+                specifications: {
+                    storageOptions: specifications.storageOptions,
+                    ramOptions: specifications.ramOptions,
+                    colors: specifications.colors,
+                },
+                stock: (stockValue as [string, Map<string, { quantity: number; price: number }>][]).reduce<Record<string, Record<string, { quantity: number; price: number }>>>(
+                    (acc, [color, configMap]) => {
+                        acc[color] = Object.fromEntries(configMap instanceof Map ? Array.from(configMap.entries()).map(([key, { quantity, price }]) => [key, { quantity, price }]) : Object.entries(configMap));
+                        return acc;
+                    },
+                    {}
+                ),
+                reviewsCount: 0,
+                averageRating: 0,
+            };
+
+            await onAddProduct(productData);
+            message.success("Sản phẩm đã được thêm thành công!");
+            form.resetFields();
+            setImageFiles([]);
+            setIsModalOpen(false);
         }
-    
-        // Kiểm tra từng phần tử trong stockValue
-        const isValidStock = stockValue.every(([color, configMap]: any) => {
-          return typeof color === 'string' && (configMap instanceof Map || typeof configMap === 'object');
-        });
-    
-        if (!isValidStock) {
-          console.error("Invalid stock structure:", stockValue);
-          message.error("Thông tin tồn kho không hợp lệ");
-          return;
-        }
-  
-        const productData = {
-          ...values,
-          basePrice: Number(values.basePrice),
-          price: Number(values.price),
-          images: imageFiles,
-          tags: values.tags || [],
-          specifications: {
-            storageOptions: specifications.storageOptions,
-            ramOptions: specifications.ramOptions,
-            colors: specifications.colors,
-          },
-          stock: (stockValue as [string, Map<string, number> | Record<string, number>][]).reduce<Record<string, Record<string, number>>>(
-            (acc, [color, configMap]) => {
-              acc[color] = Object.fromEntries(configMap instanceof Map ? configMap : Object.entries(configMap));
-              return acc;
-            },
-            {}
-          ),
-          reviewsCount: 0,
-          averageRating: 0,
-        };
-  
-        await onAddProduct(productData);
-        message.success("Sản phẩm đã được thêm thành công!");
-        form.resetFields();
-        setImageFiles([]);
-        setIsModalOpen(false);
-      }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      message.error("Có lỗi xảy ra khi thêm sản phẩm");
+        console.error("Error in handleSubmit:", error);
+        message.error("Có lỗi xảy ra khi thêm sản phẩm");
     }
-  };
+};
   
   const renderForm = () => (
     <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -123,7 +123,6 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
           >
             <Input placeholder="Nhập tên sản phẩm" />
           </Form.Item>
-
           <Form.Item
             name="categoryId"
             label="Danh mục"

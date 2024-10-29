@@ -1,6 +1,5 @@
-"use client";
 import { InputNumber, Table } from "antd";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 // Component quản lý stock
 export const StockInput: React.FC<{
@@ -9,10 +8,10 @@ export const StockInput: React.FC<{
     storageOptions: string[];
     ramOptions: string[];
   };
-  value?: Map<string, Map<string, number>>;
-  onChange?: (value: Map<string, Map<string, number>>) => void;
+  value?: Map<string, Map<string, { quantity: number; price: number }>>;
+  onChange?: (value: Map<string, Map<string, { quantity: number; price: number }>>) => void;
 }> = ({ specifications, value, onChange }) => {
-  const [stockMap, setStockMap] = useState<Map<string, Map<string, number>>>(
+  const [stockMap, setStockMap] = useState<Map<string, Map<string, { quantity: number; price: number }>>>(
     value || new Map()
   );
 
@@ -38,7 +37,23 @@ export const StockInput: React.FC<{
           min={0}
           value={record.quantity}
           onChange={(quantity) =>
-            handleStockChange(record.color, record.config, quantity || 0)
+            handleStockChange(record.color, record.config, quantity || 0, record.price)
+          }
+        />
+      ),
+    },
+    {
+      title: "Giá",
+      dataIndex: "price",
+      key: "price",
+      render: (_: any, record: any) => (
+        <InputNumber
+          min={0}
+          formatter={(value) =>
+            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          }
+          onChange={(price) =>
+            handleStockChange(record.color, record.config, record.quantity, price || 0)
           }
         />
       ),
@@ -49,11 +64,13 @@ export const StockInput: React.FC<{
     specifications.ramOptions.flatMap((ram) =>
       specifications.storageOptions.map((storage) => {
         const config = `${ram}-${storage}`;
+        const stockInfo = stockMap.get(color)?.get(config) || { quantity: 0, price: 0 };
         return {
           key: `${color}-${config}`,
           color,
           config,
-          quantity: stockMap.get(color)?.get(config) || 0,
+          quantity: stockInfo.quantity,
+          price: stockInfo.price,
         };
       })
     )
@@ -62,7 +79,8 @@ export const StockInput: React.FC<{
   const handleStockChange = (
     color: string,
     config: string,
-    quantity: number
+    quantity: number,
+    price: number
   ) => {
     const newStockMap = new Map(stockMap);
 
@@ -71,7 +89,7 @@ export const StockInput: React.FC<{
     }
 
     const colorMap = newStockMap.get(color)!;
-    colorMap.set(config, quantity);
+    colorMap.set(config, { quantity, price });
 
     setStockMap(newStockMap);
     onChange?.(newStockMap);

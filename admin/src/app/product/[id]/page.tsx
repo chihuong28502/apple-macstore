@@ -1,6 +1,6 @@
 "use client";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input, InputNumber, Select, Space,Upload } from "antd";
+import { Button, Form, Input, InputNumber, Select, Space, Upload } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -21,6 +21,7 @@ interface IImage {
 interface IStockItem {
   key: string;
   quantity: number;
+  price: number; // Thêm thuộc tính price vào stock item
 }
 
 interface IProduct {
@@ -55,7 +56,8 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       for (const model in stockData[color]) {
         transformedStock.push({
           key: `${color}-${model}`,
-          quantity: stockData[color][model],
+          quantity: stockData[color][model].quantity,
+          price: stockData[color][model].price || 0, // Lấy giá từ stock
         });
       }
     }
@@ -78,11 +80,14 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     const updatedStock: IStock = {};
 
     stockItems.forEach((item) => {
-      const [color, ramSize, storageSize] = item.key.split("-");
+      const [color, model] = item.key.split("-");
       if (!updatedStock[color]) {
         updatedStock[color] = {};
       }
-      updatedStock[color][`${ramSize}-${storageSize}`] = item.quantity;
+      updatedStock[color][model] = {
+        quantity: item.quantity,
+        price: item.price, // Lưu giá vào stock
+      };
     });
 
     return updatedStock;
@@ -145,8 +150,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           onFinish={handleSubmit}
           className="space-y-6"
         >
-          <div className="grid grid-cols-2 gap-4">
-            {/* Left Column */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div>
               <Form.Item
                 name="name"
@@ -216,6 +220,12 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 >
                   <Button>Select Images</Button>
                 </Upload>
+                {productById?.images?.map((item:any, index:number) => {
+                  return (
+
+                    <img key={index} src={item?.image} alt={item._id} />
+                  )
+                })}
               </Form.Item>
 
               <Form.Item
@@ -250,7 +260,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                           fieldKey={[fieldKey as any, "key"]}
                           label="Variant"
                           rules={[{ required: true, message: "Please enter stock variant" }]}
-                          className="w-1/2"
+                          className=""
                         >
                           <Input placeholder="Variant (e.g., Color-RAM-Storage)" />
                         </Form.Item>
@@ -261,12 +271,30 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                           fieldKey={[fieldKey as any, "quantity"]}
                           label="Quantity"
                           rules={[{ required: true, message: "Please enter quantity" }]}
-                          className="w-1/2"
+                          className=""
                         >
                           <InputNumber
                             placeholder="Quantity"
                             min={0}
                             className="w-full"
+                          />
+                        </Form.Item>
+
+                        <Form.Item
+                          {...restField}
+                          name={[name, "price"]}
+                          fieldKey={[fieldKey as any, "price"]}
+                          label="Price"
+                          rules={[{ required: true, message: "Please enter price" }]}
+                          className=""
+                        >
+                          <InputNumber
+                            placeholder="Price"
+                            min={0}
+                            className="w-full"
+                            formatter={(value) =>
+                              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }
                           />
                         </Form.Item>
 
@@ -277,9 +305,10 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                       <Button
                         type="dashed"
                         onClick={() => add()}
+                        block
                         icon={<PlusOutlined />}
                       >
-                        Add Stock Variant
+                        Add Stock
                       </Button>
                     </Form.Item>
                   </>
@@ -288,17 +317,9 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 mt-6">
-            <Button onClick={() => history.back()} className="px-6 py-2">
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isSubmitting}
-              className="px-6 py-2"
-            >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+          <div className="flex justify-end">
+            <Button type="primary" htmlType="submit" loading={isSubmitting}>
+              Save Changes
             </Button>
           </div>
         </Form>
