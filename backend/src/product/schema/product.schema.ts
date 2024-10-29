@@ -21,7 +21,7 @@ export class Product {
   categoryId: string;  // ID danh mục sản phẩm (Mac mini, MacBook, iMac)
 
   @Prop({ type: [{ image: String, publicId: String }], required: true })
-  images: { image: string; publicId: string; _id: string }[];
+  images: { image: string; publicId: string; }[];
 
   @Prop([String])
   tags: string[];  // Thẻ tìm kiếm cho sản phẩm
@@ -50,17 +50,20 @@ export class Product {
   averageRating: number;  // Đánh giá trung bình (0 đến 5 sao)
 
   @Prop({
-    type: Map, // Map của màu sắc và cấu hình, mỗi cấu hình chứa một đối tượng với số lượng và giá
+    type: Map, // Map của màu sắc và cấu hình
     of: {
       type: Map,
       of: {
-        quantity: { type: Number, required: true }, // Số lượng tồn kho
-        price: { type: Number, required: true },    // Giá của tùy chọn
+        type: Map,
+        of: {
+          quantity: { type: Number, required: true }, // Số lượng tồn kho
+          price: { type: Number, required: true },    // Giá của tùy chọn
+        },
       },
     },
     default: new Map(),
   })
-  stock: Map<string, Map<string, { quantity: number; price: number }>>;  
+  stock: Map<string, Map<string, Map<string, { quantity: number; price: number }>>>;  
 
   @Prop({ default: Date.now })
   createdAt: Date;  

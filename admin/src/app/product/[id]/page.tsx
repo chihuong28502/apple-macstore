@@ -1,10 +1,10 @@
 "use client";
+import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, Select, Space, Upload } from "antd";
+import { UploadFile } from "antd/lib/upload/interface";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 
 const { TextArea } = Input;
 
@@ -14,14 +14,14 @@ interface IStock {
 
 interface IImage {
   image: string;
-  publicId: string;
+  publicId?: string;
   _id?: string;
 }
 
 interface IStockItem {
   key: string;
   quantity: number;
-  price: number; // Thêm thuộc tính price vào stock item
+  price: number;
 }
 
 interface IProduct {
@@ -48,31 +48,32 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   const productById = useSelector(ProductSelectors.product);
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   // Helpers
   const transformStock = (stockData: IStock) => {
     const transformedStock: IStockItem[] = [];
     for (const color in stockData) {
       for (const model in stockData[color]) {
-        transformedStock.push({
-          key: `${color}-${model}`,
-          quantity: stockData[color][model].quantity,
-          price: stockData[color][model].price || 0, // Lấy giá từ stock
-        });
+        for (const size in stockData[color][model]) {
+          transformedStock.push({
+            key: `${color}-${model}-${size}`,
+            quantity: stockData[color][model][size].quantity,
+            price: stockData[color][model][size].price || 0,
+          });
+        }
       }
     }
     return transformedStock;
   };
 
   const transformImages = (images: IImage[]) => {
-    return images.map(img => img.image);
+    return images.map((img) => img.image);
   };
 
   const processUpdatedImages = (values: IProduct): IImage[] => {
-    return (values.images as IImage[]).map((imgData: IImage, index: number) => ({
-      image: typeof imgData === 'string' ? imgData : imgData.image,
-      publicId: productById?.images[index]?.publicId || "",
-      _id: productById?.images[index]?._id || "",
+    return (values.images as IImage[]).map((imgData: IImage) => ({
+      image: typeof imgData === "string" ? imgData : imgData.image,
     }));
   };
 
@@ -80,23 +81,61 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     const updatedStock: IStock = {};
 
     stockItems.forEach((item) => {
-      const [color, model] = item.key.split("-");
+      // Tách key thành color, storage và size
+      const [color, storage, size] = item.key.split("-");
+
+      // Kiểm tra tồn tại color trong updatedStock
       if (!updatedStock[color]) {
         updatedStock[color] = {};
       }
-      updatedStock[color][model] = {
+
+      // Kiểm tra tồn tại storage trong updatedStock[color]
+      if (!updatedStock[color][storage]) {
+        updatedStock[color][storage] = {};
+      }
+
+      // Thêm quantity và price vào updatedStock[color][storage][size]
+      updatedStock[color][storage][size] = {
         quantity: item.quantity,
-        price: item.price, // Lưu giá vào stock
+        price: item.price,
       };
     });
 
     return updatedStock;
   };
 
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   // Event Handlers
-  const handleImageChange = (info: any) => {
-    const fileList = info.fileList.map((file: any) => file.originFileObj);
-    form.setFieldsValue({ images: fileList });
+  const handleImageChange = async ({ fileList: newFileList }: any) => {
+    const updatedFileList = await Promise.all(
+      newFileList.map(async (file: UploadFile) => {
+        if (file.originFileObj) {
+          const base64Image = await convertToBase64(file.originFileObj);
+          return {
+            ...file,
+            url: base64Image,
+            thumbUrl: base64Image,
+          };
+        }
+        return file;
+      })
+    );
+    setFileList(updatedFileList);
+    form.setFieldsValue({ images: updatedFileList.map((file) => file.url) });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = [...fileList];
+    updatedImages.splice(index, 1);
+    setFileList(updatedImages);
   };
 
   const handleSubmit = async (values: IProduct) => {
@@ -130,6 +169,20 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
   }, [dispatch, params.id]);
 
   useEffect(() => {
+    if (productById?.images) {
+      const initialFileList = productById.images.map((img: IImage, index: number) => ({
+        uid: String(index),
+        name: `image-${index}`,
+        status: "done",
+        url: img.image,
+        thumbUrl: img.image,
+        originFileObj: null,
+      }));
+      setFileList(initialFileList);
+    }
+  }, [productById]);
+
+  useEffect(() => {
     if (productById) {
       const transformedStock = transformStock(productById.stock as IStock);
       form.setFieldsValue({
@@ -144,12 +197,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     <div className="p-6 max-w-7xl mx-auto">
       <div className="bg-mainContent rounded-lg shadow-lg p-6">
         <h1 className="text-2xl font-bold mb-6">Edit Product</h1>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          className="space-y-6"
-        >
+        <Form form={form} layout="vertical" onFinish={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             <div>
               <Form.Item
@@ -166,7 +214,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 rules={[{ required: true, message: "Please select category" }]}
               >
                 <Select placeholder="Select category">
-                  <Select.Option value="category1">Category 1</Select.Option>
+                  <Select.Option value="671e3c778a8054ab857d90fa">Category 1</Select.Option>
                   <Select.Option value="category2">Category 2</Select.Option>
                 </Select>
               </Form.Item>
@@ -179,9 +227,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 <InputNumber
                   className="w-full"
                   min={0}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   placeholder="Enter base price"
                 />
               </Form.Item>
@@ -194,9 +240,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 <InputNumber
                   className="w-full"
                   min={0}
-                  formatter={(value) =>
-                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                  }
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                   placeholder="Enter sale price"
                 />
               </Form.Item>
@@ -206,7 +250,6 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               </Form.Item>
             </div>
 
-            {/* Right Column */}
             <div>
               <Form.Item name="description" label="Description">
                 <TextArea rows={4} placeholder="Enter product description" />
@@ -215,113 +258,72 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <Form.Item name="images" label="Images">
                 <Upload
                   listType="picture-card"
+                  fileList={fileList}
                   beforeUpload={() => false}
                   onChange={handleImageChange}
+                  onRemove={(file) => handleRemoveImage(fileList.indexOf(file))}
                 >
-                  <Button>Select Images</Button>
+                  {fileList.length < 8 && <Button>Select Images</Button>}
                 </Upload>
-                {productById?.images?.map((item:any, index:number) => {
-                  return (
-
-                    <img key={index} src={item?.image} alt={item._id} />
-                  )
-                })}
               </Form.Item>
 
-              <Form.Item
-                name={["specifications", "models"]}
-                label="Product Models"
-              >
-                <Select mode="tags" placeholder="Enter product models" />
+              <Form.Item name={["specifications", "models"]} label="Specifications">
+                <Input placeholder="Enter specifications" />
               </Form.Item>
-
-              <Form.Item
-                name={["specifications", "storageOptions"]}
-                label="Storage Options"
-              >
-                <Select mode="tags" placeholder="Enter storage options" />
-              </Form.Item>
-
-              <Form.Item
-                name={["specifications", "colors"]}
-                label="Colors"
-              >
-                <Select mode="tags" placeholder="Enter colors" />
-              </Form.Item>
-
-              <Form.List name="stock">
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, fieldKey, ...restField }) => (
-                      <Space key={key} align="baseline" className="w-full">
-                        <Form.Item
-                          {...restField}
-                          name={[name, "key"]}
-                          fieldKey={[fieldKey as any, "key"]}
-                          label="Variant"
-                          rules={[{ required: true, message: "Please enter stock variant" }]}
-                          className=""
-                        >
-                          <Input placeholder="Variant (e.g., Color-RAM-Storage)" />
-                        </Form.Item>
-
-                        <Form.Item
-                          {...restField}
-                          name={[name, "quantity"]}
-                          fieldKey={[fieldKey as any, "quantity"]}
-                          label="Quantity"
-                          rules={[{ required: true, message: "Please enter quantity" }]}
-                          className=""
-                        >
-                          <InputNumber
-                            placeholder="Quantity"
-                            min={0}
-                            className="w-full"
-                          />
-                        </Form.Item>
-
-                        <Form.Item
-                          {...restField}
-                          name={[name, "price"]}
-                          fieldKey={[fieldKey as any, "price"]}
-                          label="Price"
-                          rules={[{ required: true, message: "Please enter price" }]}
-                          className=""
-                        >
-                          <InputNumber
-                            placeholder="Price"
-                            min={0}
-                            className="w-full"
-                            formatter={(value) =>
-                              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                            }
-                          />
-                        </Form.Item>
-
-                        <MinusCircleOutlined onClick={() => remove(name)} />
-                      </Space>
-                    ))}
-                    <Form.Item>
-                      <Button
-                        type="dashed"
-                        onClick={() => add()}
-                        block
-                        icon={<PlusOutlined />}
-                      >
-                        Add Stock
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <Form.List name="stock">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, fieldKey, ...restField }) => (
+                  <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                    <Form.Item
+                      {...restField}
+                      name={[name, "key"]}
+                      fieldKey={[fieldKey as any, "key"]}
+                      rules={[{ required: true, message: "Missing stock item" }]}
+                    >
+                      <Input placeholder="Color-Model-Size" />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "quantity"]}
+                      fieldKey={[fieldKey as any, "quantity"]}
+                      rules={[{ required: true, message: "Missing quantity" }]}
+                    >
+                      <InputNumber placeholder="Quantity" min={0} />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "price"]}
+                      fieldKey={[fieldKey as any, "price"]}
+                      rules={[{ required: true, message: "Missing price" }]}
+                    >
+                      <InputNumber placeholder="Price" min={0} />
+                    </Form.Item>
+                    <MinusCircleOutlined onClick={() => remove(name)} />
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add Stock Item
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
+          <Form.Item>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              Save Changes
+              Save
             </Button>
-          </div>
+          </Form.Item>
         </Form>
       </div>
     </div>

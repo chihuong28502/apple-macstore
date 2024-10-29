@@ -7,7 +7,6 @@ export const CategoryRequest = {
     return MSTFetch.get("/categories");
   },
   createCategory(data: CategoryType) {
-    console.log("🚀 ~ data:", data)
     return MSTFetch.post("/categories", data);
   },
   getCategoryById(id: string) {

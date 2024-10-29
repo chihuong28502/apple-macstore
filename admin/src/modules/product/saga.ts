@@ -12,8 +12,7 @@ function* createProduct({ payload }: PayloadAction<any>) {
   const { data, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(ProductActions.setLoading(true));
-    console.log("data saga:",data);
-    
+
     const response: { success: boolean; data: any } = yield ProductRequest.createProduct(data);
     yield put(ProductActions.setLoading(false));
     if (response.success) {
@@ -66,6 +65,26 @@ function* fetchPaginatedProducts({ payload }: PayloadAction<{
   }
 }
 
+function* updateProduct({ payload }: PayloadAction<any>): Generator<any, void, unknown> {
+  const { id, data, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
+  try {
+    yield put(ProductActions.setLoading(true));
+
+    const response: any = yield ProductRequest.updateProduct(id, data);
+    yield put(ProductActions.setLoading(false));
+
+    if (response.success) {
+      yield put(ProductActions.fetchPaginatedProducts({ page: 1, limit: 8 })); // Giả sử bạn muốn tải lại danh sách sản phẩm
+      onSuccess(response.data);
+    } else {
+      onFail(response);
+    }
+  } catch (error: any) {
+    onFail(error);
+    toast.error(error.message || "Cập nhật sản phẩm thất bại");
+  }
+}
+
 function* deleteProduct({ payload }: any) {
   try {
     yield delay(100);
@@ -86,4 +105,5 @@ export function* ProductSaga() {
   yield takeLeading(ProductActions.fetchProductById, fetchProductById);
   yield takeLeading(ProductActions.fetchPaginatedProducts, fetchPaginatedProducts);
   yield takeLatest(ProductActions.deleteProduct, deleteProduct)
+  yield takeLatest(ProductActions.updateProduct, updateProduct);
 }

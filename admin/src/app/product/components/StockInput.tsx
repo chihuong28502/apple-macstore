@@ -1,24 +1,20 @@
 import { InputNumber, Table } from "antd";
 import { useEffect, useState } from "react";
 
-// Component quản lý stock
 export const StockInput: React.FC<{
   specifications: {
     colors: string[];
     storageOptions: string[];
     ramOptions: string[];
   };
-  value?: Map<string, Map<string, { quantity: number; price: number }>>;
-  onChange?: (value: Map<string, Map<string, { quantity: number; price: number }>>) => void;
+  value?: Record<string, Record<string, Record<string, { quantity: number; price: number; _id?: { $oid: string } }>>>;  
+  onChange?: (value: Record<string, Record<string, Record<string, { quantity: number; price: number; _id?: { $oid: string } }>>>) => void;
 }> = ({ specifications, value, onChange }) => {
-  const [stockMap, setStockMap] = useState<Map<string, Map<string, { quantity: number; price: number }>>>(
-    value || new Map()
-  );
+  const [stockData, setStockData] = useState<Record<string, Record<string, Record<string, { quantity: number; price: number; _id?: { $oid: string } }>>>>(value || {});
 
-  // Cập nhật stockMap khi giá trị props value thay đổi
   useEffect(() => {
     if (value) {
-      setStockMap(value);
+      setStockData(value);
     }
   }, [value]);
 
@@ -30,14 +26,14 @@ export const StockInput: React.FC<{
     },
     {
       title: "Số lượng",
-      dataIndex: "quantity",
+      dataIndex: "quantity", 
       key: "quantity",
       render: (_: any, record: any) => (
         <InputNumber
           min={0}
           value={record.quantity}
-          onChange={(quantity) =>
-            handleStockChange(record.color, record.config, quantity || 0, record.price)
+          onChange={(quantity) => 
+            handleStockChange(record.color, record.ram, record.storage, quantity || 0, record.price)
           }
         />
       ),
@@ -49,28 +45,33 @@ export const StockInput: React.FC<{
       render: (_: any, record: any) => (
         <InputNumber
           min={0}
-          formatter={(value) =>
-            `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-          }
+          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          value={record.price}
           onChange={(price) =>
-            handleStockChange(record.color, record.config, record.quantity, price || 0)
+            handleStockChange(record.color, record.ram, record.storage, record.quantity, price || 0)
           }
         />
       ),
     },
   ];
 
+  // Generate data từ specifications
   const data = specifications.colors.flatMap((color) =>
     specifications.ramOptions.flatMap((ram) =>
       specifications.storageOptions.map((storage) => {
-        const config = `${ram}-${storage}`;
-        const stockInfo = stockMap.get(color)?.get(config) || { quantity: 0, price: 0 };
+        const existingData = stockData[color]?.[ram]?.[storage] || { 
+          quantity: 0, 
+          price: 0 
+        };
+        
         return {
-          key: `${color}-${config}`,
+          key: `${color}-${ram}-${storage}`,
           color,
-          config,
-          quantity: stockInfo.quantity,
-          price: stockInfo.price,
+          ram,
+          storage,
+          config: `${ram} GB - ${storage} GB`,
+          quantity: existingData.quantity,
+          price: existingData.price,
         };
       })
     )
@@ -78,21 +79,40 @@ export const StockInput: React.FC<{
 
   const handleStockChange = (
     color: string,
-    config: string,
+    ram: string, 
+    storage: string,
     quantity: number,
-    price: number
+    price: number,
   ) => {
-    const newStockMap = new Map(stockMap);
+    const newStockData = { ...stockData };
 
-    if (!newStockMap.has(color)) {
-      newStockMap.set(color, new Map());
+    // Khởi tạo cấu trúc nested nếu chưa tồn tại
+    if (!newStockData[color]) {
+      newStockData[color] = {};
+    }
+    if (!newStockData[color][ram]) {
+      newStockData[color][ram] = {};
     }
 
-    const colorMap = newStockMap.get(color)!;
-    colorMap.set(config, { quantity, price });
+    // Cập nhật hoặc xóa data
+    if (quantity > 0 || price > 0) {
+      newStockData[color][ram][storage] = {
+        quantity,
+        price,
+      };
+    } else {
+      delete newStockData[color][ram][storage];
+      // Dọn dẹp các object rỗng
+      if (Object.keys(newStockData[color][ram]).length === 0) {
+        delete newStockData[color][ram];
+      }
+      if (Object.keys(newStockData[color]).length === 0) {
+        delete newStockData[color];
+      }
+    }
 
-    setStockMap(newStockMap);
-    onChange?.(newStockMap);
+    setStockData(newStockData);
+    onChange?.(newStockData);
   };
 
   return (
