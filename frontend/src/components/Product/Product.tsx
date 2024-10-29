@@ -15,7 +15,7 @@ function Product({ product }: any) {
     >
       <div className="w-full overflow-hidden mx-auto aspect-w-16 aspect-h-8 transition-transform duration-300 ease-in-out transform group-hover:-translate-y-2">
         <img
-          src={product?.images[0]}
+          src={product?.images[0].image}
           alt={product?.name}
           className="object-contain rounded-lg"
         />

@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 
 export default function ProductDetailPage({
@@ -12,10 +11,13 @@ export default function ProductDetailPage({
   const dispatch = useDispatch();
   const productId = params.id;
   const productById = useSelector(ProductSelectors.product);
+  console.log("🚀 ~ productById:", productById);
 
   const [mainImage, setMainImage] = useState<string | undefined>(undefined);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
+  const [selectedRam, setSelectedRam] = useState<string | undefined>(undefined);
+  const [selectedStorage, setSelectedStorage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     dispatch(ProductActions.fetchProductById(productId));
@@ -23,7 +25,7 @@ export default function ProductDetailPage({
 
   useEffect(() => {
     if (productById?.images?.length) {
-      setMainImage(productById.images[0]);
+      setMainImage(productById.images[0].image);
     }
   }, [productById]);
 
@@ -38,13 +40,23 @@ export default function ProductDetailPage({
   const handleColorClick = (color: string) => {
     setSelectedColor(color);
     setSelectedSize(undefined); // Reset lại size khi chọn màu khác
+    setSelectedRam(undefined); // Reset RAM khi chọn màu khác
+    setSelectedStorage(undefined); // Reset dung lượng khi chọn màu khác
   };
 
-  const getStockForSelectedColorAndSize = () => {
-    if (selectedColor && selectedSize) {
-      return productById?.stock?.[selectedColor]?.[selectedSize] || 0;
+  const handleRamClick = (ram: string) => {
+    setSelectedRam(ram);
+  };
+
+  const handleStorageClick = (storage: string) => {
+    setSelectedStorage(storage);
+  };
+
+  const getStockForSelectedOptions = () => {
+    if (selectedColor && selectedRam && selectedStorage) {
+      return productById?.stock?.[selectedColor]?.[selectedRam]?.[selectedStorage] || {};
     }
-    return 0;
+    return {};
   };
 
   const availableSizesForSelectedColor = () => {
@@ -54,65 +66,113 @@ export default function ProductDetailPage({
     return [];
   };
 
-  // Hàm render các tùy chỉnh chung (màu sắc và kích cỡ)
+  const availableRamsForSelectedColor = () => {
+    if (selectedColor) {
+      return productById?.specifications?.ramOptions || [];
+    }
+    return [];
+  };
+
+  const availableStorageForSelectedRamAndColor = () => {
+    if (selectedColor && selectedRam) {
+      return Object.keys(productById?.stock?.[selectedColor]?.[selectedRam] || {});
+    }
+    return [];
+  };
+
+  // Hàm render các tùy chỉnh chung (màu sắc, kích cỡ, RAM và dung lượng)
   const renderCustomizations = () => {
-    // Kiểm tra nếu có customizations.colors, nếu không có thì kiểm tra trong stock
-    const colors = productById?.customizations?.colors?.length
-      ? productById?.customizations.colors
-      : Object.keys(productById?.stock || {});
+    const colors = productById?.specifications?.colors || [];
 
     return (
       <>
         {/* Màu sắc của sản phẩm */}
-        {colors?.length > 0 && (
+        {colors.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-800">Flavors/Colors</h3>
+            <h3 className="text-xl font-bold text-fontColor">Colors</h3>
             <div className="flex flex-wrap gap-4 mt-4">
               {colors.map((color: string) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => handleColorClick(color)}
-                  className={`w-12 h-11 border-2 ${
-                    selectedColor === color
-                      ? "border-gray-800" // Thêm viền khi màu được chọn
-                      : "border-white"
-                  } hover:border-gray-800 rounded-lg`}
+                  className={`w-12 h-11 border-2 rounded-lg transition-all duration-300 ${selectedColor === color
+                      ? "border-gray-800 bg-gray-200"
+                      : "border-white bg-white"
+                    } hover:border-gray-800 hover:bg-gray-100`}
                 >
-                  1123
+                  {color}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Kích cỡ của sản phẩm dựa trên màu đã chọn */}
-        {selectedColor && availableSizesForSelectedColor()?.length > 0 && (
+        {/* RAM của sản phẩm dựa trên màu đã chọn */}
+        {selectedColor && availableRamsForSelectedColor().length > 0 && (
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-800">Available Sizes</h3>
+            <h3 className="text-xl font-bold text-fontColor">Available RAM</h3>
             <div className="flex flex-wrap gap-4 mt-4">
-              {availableSizesForSelectedColor().map((size: string) => (
+              {availableRamsForSelectedColor().map((ram: string) => (
                 <button
-                  key={size}
+                  key={ram}
                   type="button"
-                  onClick={() => handleSizeClick(size)}
-                  className={`w-12 h-11 border-2 ${
-                    selectedSize === size
-                      ? "border-gray-800" // Thêm viền khi size được chọn
-                      : "border-gray-300"
-                  } hover:border-gray-800 font-semibold text-xs text-gray-800 rounded-lg flex items-center justify-center`}
+                  onClick={() => handleRamClick(ram)}
+                  className={`w-12 h-11 border-2 rounded-lg transition-all duration-300 ${selectedRam === ram
+                      ? "border-gray-800 bg-gray-200"
+                      : "border-gray-300 bg-white"
+                    } hover:border-gray-800 hover:bg-gray-100 font-semibold text-xs text-fontColor flex items-center justify-center`}
                 >
-                  {size}
+                  {ram} GB
                 </button>
               ))}
             </div>
+          </div>
+        )}
 
-            {/* Hiển thị tồn kho cho kích cỡ đã chọn */}
-            {selectedSize && (
-              <p className="mt-2 text-gray-600">
-                Stock available: {getStockForSelectedColorAndSize()}
-              </p>
-            )}
+        {/* Dung lượng lưu trữ của sản phẩm dựa trên màu và RAM đã chọn */}
+        {selectedColor && selectedRam && availableStorageForSelectedRamAndColor().length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-fontColor">Available Storage</h3>
+            <div className="flex flex-wrap gap-4 mt-4">
+              {availableStorageForSelectedRamAndColor().map((storage: string) => (
+                <button
+                  key={storage}
+                  type="button"
+                  onClick={() => handleStorageClick(storage)}
+                  className={`w-12 h-11 border-2 rounded-lg transition-all duration-300 ${selectedStorage === storage
+                      ? "border-gray-800 bg-gray-200"
+                      : "border-gray-300 bg-white"
+                    } hover:border-gray-800 hover:bg-gray-100 font-semibold text-xs text-fontColor flex items-center justify-center`}
+                >
+                  {storage} GB
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Hiển thị giá cho tùy chọn đã chọn */}
+        {selectedColor && selectedRam && selectedStorage && (
+          <div className="mt-4">
+            {(() => {
+              const selectedStock = getStockForSelectedOptions();
+              return (
+                selectedStock && selectedStock.price && (
+                  <>
+                    <p className="text-lg font-bold">
+                      Giá: {selectedStock.price.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    </p>
+                    <p className="text-[#999]">
+                      Tồn kho: {selectedStock.quantity} sản phẩm
+                    </p>
+                  </>
+                )
+              );
+            })()}
           </div>
         )}
       </>
@@ -127,18 +187,18 @@ export default function ProductDetailPage({
           <img
             src={mainImage}
             alt={productById?.name}
-            className="w-3/4 rounded-lg object-cover"
+            className="w-3/4 rounded-lg object-cover shadow-lg"
           />
 
           {/* Hình ảnh nhỏ (thumbnail) */}
           <div className="w-20 flex flex-col gap-3">
-            {productById?.images?.map((image: string, index: number) => (
+            {productById?.images?.map((image: { image: string }, index: number) => (
               <img
                 key={index}
-                src={image}
+                src={image.image}
                 alt={`Product Image ${index}`}
-                className="w-full cursor-pointer rounded-lg"
-                onClick={() => handleImageClick(image)}
+                className="w-full cursor-pointer rounded-lg hover:opacity-75 transition-opacity"
+                onClick={() => handleImageClick(image.image)}
               />
             ))}
           </div>
@@ -146,15 +206,14 @@ export default function ProductDetailPage({
 
         <div>
           {/* Tên sản phẩm */}
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-fontColor">
             {productById?.name}
           </h2>
 
-          {/* Mô tả sản phẩm */}
-          <p className="mt-2 text-gray-600">{productById?.description}</p>
+          <p className="mt-2 text-fontColor">{productById?.description}</p>
 
           {/* Giá của sản phẩm */}
-          <h3 className="text-gray-800 text-4xl mt-8 font-bold">
+          <h3 className="text-fontColor text-4xl mt-8 font-bold">
             {productById?.price?.toLocaleString("vi-VN", {
               style: "currency",
               currency: "VND",
@@ -168,7 +227,7 @@ export default function ProductDetailPage({
           <div className="mt-10 flex flex-wrap gap-4">
             <button
               type="button"
-              className="flex items-center justify-center px-8 py-4 bg-gray-800 hover:bg-gray-900 text-white border border-gray-800 text-base rounded-lg"
+              className="flex items-center justify-center px-8 py-4 bg-gray-800 hover:bg-gray-900 text-white border border-gray-800 text-base rounded-lg shadow-md transition duration-300"
             >
               Add to Cart
             </button>
