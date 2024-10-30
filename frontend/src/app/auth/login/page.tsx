@@ -84,6 +84,7 @@ function Page() {
               <img
                 src="https://storage.googleapis.com/devitary-image-host.appspot.com/15846435184459982716-LogoMakr_7POjrN.png"
                 className="w-32 mx-auto"
+                alt="logo"
               />
             </div>
             <div className="mt-12 flex flex-col items-center bg-layout">
