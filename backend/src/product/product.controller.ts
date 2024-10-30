@@ -78,8 +78,6 @@ export class ProductController {
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto
   ) {
-    console.log("🚀 ~ ProductController ~ id:", id)
-    console.log("🚀 ~ ProductController ~ updateProductDto:", updateProductDto)
     const result = await this.productService.update(id, updateProductDto);
     let statusCode = 200;
     if (!result.success) {

@@ -56,13 +56,13 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
     try {
       if (onAddProduct) {
         const stockValue = form.getFieldValue('stock');
-        
+
         if (!stockValue || typeof stockValue !== 'object') {
           console.error("Invalid stock data:", stockValue);
           message.error("Thông tin tồn kho không hợp lệ");
           return;
         }
-  
+
         const productData = {
           ...values,
           basePrice: Number(values.basePrice),
@@ -78,7 +78,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
           reviewsCount: 0,
           averageRating: 0,
         };
-  
+
         await onAddProduct(productData);
         message.success("Sản phẩm đã được thêm thành công!");
         form.resetFields();
@@ -90,7 +90,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
       message.error("Có lỗi xảy ra khi thêm sản phẩm");
     }
   };
-  
+
 
   const renderForm = () => (
     <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -127,21 +127,6 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
                   </Select.Option>
                 ))}
             </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="basePrice"
-            label="Giá gốc"
-            rules={[{ required: true, message: "Vui lòng nhập giá gốc" }]}
-          >
-            <InputNumber
-              className="w-full"
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              }
-              placeholder="Nhập giá gốc"
-              min={0}
-            />
           </Form.Item>
 
           <Form.Item
@@ -289,8 +274,8 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
         {loading
           ? [...Array(6)].map((_, index) => <SkeletonOne key={index} />)
           : products.map((product) => (
-              <Product key={product._id} product={product} />
-            ))}
+            <Product key={product._id} product={product} />
+          ))}
       </div>
 
       <Modal

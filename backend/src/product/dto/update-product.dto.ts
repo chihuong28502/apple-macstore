@@ -1,7 +1,6 @@
 export class UpdateProductDto {
   name: string;  // Tên sản phẩm
   description: string;  // Mô tả sản phẩm
-  basePrice: number;  // Giá gốc
   price: number;  // Giá bán
   categoryId: string;  // ID danh mục sản phẩm
   images?: { image: string; publicId: string; _id: string }[];  // URL hình ảnh sản phẩm
@@ -17,6 +16,6 @@ export class UpdateProductDto {
   reviewsCount?: number;  // Số lượng đánh giá
   averageRating?: number;  // Đánh giá trung bình
 
-  stock: Map<string, Map<string, { quantity: number; price: number }>>;  // Tồn kho
+  stock: Map<string, Map<string, { quantity: number; price: number ,basePrice: number}>>;  // Tồn kho
 
 }

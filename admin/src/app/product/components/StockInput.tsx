@@ -7,10 +7,10 @@ export const StockInput: React.FC<{
     storageOptions: string[];
     ramOptions: string[];
   };
-  value?: Record<string, Record<string, Record<string, { quantity: number; price: number; _id?: { $oid: string } }>>>;  
-  onChange?: (value: Record<string, Record<string, Record<string, { quantity: number; price: number; _id?: { $oid: string } }>>>) => void;
+  value?: Record<string, Record<string, Record<string, { quantity: number; price: number; basePrice: number }>>>;  
+  onChange?: (value: Record<string, Record<string, Record<string, { quantity: number; price: number; basePrice: number }>>>) => void;
 }> = ({ specifications, value, onChange }) => {
-  const [stockData, setStockData] = useState<Record<string, Record<string, Record<string, { quantity: number; price: number; _id?: { $oid: string } }>>>>(value || {});
+  const [stockData, setStockData] = useState<Record<string, Record<string, Record<string, { quantity: number; price: number; basePrice: number }>>>>(value || {});
 
   useEffect(() => {
     if (value) {
@@ -33,7 +33,7 @@ export const StockInput: React.FC<{
           min={0}
           value={record.quantity}
           onChange={(quantity) => 
-            handleStockChange(record.color, record.ram, record.storage, quantity || 0, record.price)
+            handleStockChange(record.color, record.ram, record.storage, quantity || 0, record.price, record.basePrice) // Thêm basePrice ở đây
           }
         />
       ),
@@ -48,7 +48,22 @@ export const StockInput: React.FC<{
           formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           value={record.price}
           onChange={(price) =>
-            handleStockChange(record.color, record.ram, record.storage, record.quantity, price || 0)
+            handleStockChange(record.color, record.ram, record.storage, record.quantity, price || 0, record.basePrice) // Thêm basePrice ở đây
+          }
+        />
+      ),
+    }, 
+    {
+      title: "Giá gốc",
+      dataIndex: "basePrice",
+      key: "basePrice",
+      render: (_: any, record: any) => (
+        <InputNumber
+          min={0}
+          formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+          value={record.basePrice}
+          onChange={(basePrice) =>
+            handleStockChange(record.color, record.ram, record.storage, record.quantity, record.price, basePrice || 0) // Thêm price ở đây
           }
         />
       ),
@@ -61,7 +76,8 @@ export const StockInput: React.FC<{
       specifications.storageOptions.map((storage) => {
         const existingData = stockData[color]?.[ram]?.[storage] || { 
           quantity: 0, 
-          price: 0 
+          price: 0 ,
+          basePrice: 0 
         };
         
         return {
@@ -72,6 +88,7 @@ export const StockInput: React.FC<{
           config: `${ram} GB - ${storage} GB`,
           quantity: existingData.quantity,
           price: existingData.price,
+          basePrice: existingData.basePrice,
         };
       })
     )
@@ -83,6 +100,7 @@ export const StockInput: React.FC<{
     storage: string,
     quantity: number,
     price: number,
+    basePrice: number,
   ) => {
     const newStockData = { ...stockData };
 
@@ -95,10 +113,11 @@ export const StockInput: React.FC<{
     }
 
     // Cập nhật hoặc xóa data
-    if (quantity > 0 || price > 0) {
+    if (quantity > 0 || price > 0 || basePrice > 0) { // Cần kiểm tra basePrice
       newStockData[color][ram][storage] = {
         quantity,
         price,
+        basePrice
       };
     } else {
       delete newStockData[color][ram][storage];

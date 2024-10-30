@@ -12,9 +12,6 @@ export class Product {
   description: string;  // Mô tả sản phẩm
 
   @Prop({ required: true, min: 0 })
-  basePrice: number;  // Giá nhập sản phẩm (giá gốc)
-
-  @Prop({ required: true, min: 0 })
   price: number;  // Giá bán sản phẩm
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', required: true })
@@ -28,9 +25,9 @@ export class Product {
 
   @Prop({
     type: {
-      models: { type: [String], default: [] },  
+      models: { type: [String], default: [] },
       storageOptions: { type: [String], default: [] },
-      ramOptions: { type: [String], default: [] },  
+      ramOptions: { type: [String], default: [] },
       colors: { type: [String], default: [] },
     },
     _id: false,
@@ -41,7 +38,7 @@ export class Product {
     storageOptions: string[],
     ramOptions: string[],
     colors: string[],
-  };  
+  };
 
   @Prop({ default: 0 })
   reviewsCount: number;  // Số lượng đánh giá
@@ -58,18 +55,19 @@ export class Product {
         of: {
           quantity: { type: Number, required: true }, // Số lượng tồn kho
           price: { type: Number, required: true },    // Giá của tùy chọn
+          basePrice: { type: Number, required: true },    // Giá của tùy chọn
         },
       },
     },
     default: new Map(),
   })
-  stock: Map<string, Map<string, Map<string, { quantity: number; price: number }>>>;  
+  stock: Map<string, Map<string, Map<string, { quantity: number; price: number; basePrice: number }>>>;
 
   @Prop({ default: Date.now })
-  createdAt: Date;  
+  createdAt: Date;
 
   @Prop({ default: Date.now })
-  updatedAt: Date; 
+  updatedAt: Date;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

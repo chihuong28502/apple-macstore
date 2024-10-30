@@ -22,6 +22,7 @@ interface IStockItem {
   key: string;
   quantity: number;
   price: number;
+  basePrice: number;
 }
 
 interface IProduct {
@@ -60,6 +61,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
             key: `${color}-${model}-${size}`,
             quantity: stockData[color][model][size].quantity,
             price: stockData[color][model][size].price || 0,
+            basePrice: stockData[color][model][size].basePrice || 0,
           });
         }
       }
@@ -98,6 +100,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       updatedStock[color][storage][size] = {
         quantity: item.quantity,
         price: item.price,
+        basePrice:item.basePrice,
       };
     });
 
@@ -220,19 +223,6 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               </Form.Item>
 
               <Form.Item
-                name="basePrice"
-                label="Base Price"
-                rules={[{ required: true, message: "Please enter base price" }]}
-              >
-                <InputNumber
-                  className="w-full"
-                  min={0}
-                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                  placeholder="Enter base price"
-                />
-              </Form.Item>
-
-              <Form.Item
                 name="price"
                 label="Sale Price"
                 rules={[{ required: true, message: "Please enter sale price" }]}
@@ -267,8 +257,17 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 </Upload>
               </Form.Item>
 
-              <Form.Item name={["specifications", "models"]} label="Specifications">
-                <Input placeholder="Enter specifications" />
+              <Form.Item name={["specifications", "models"]} label="models">
+                <Select mode="tags" placeholder="Enter models" />
+              </Form.Item>
+              <Form.Item name={["specifications", "storageOptions"]} label="storageOptions">
+                <Select mode="tags" placeholder="Enter storageOptions" />
+              </Form.Item>
+              <Form.Item name={["specifications", "ramOptions"]} label="ramOptions">
+                <Select mode="tags" placeholder="Enter ramOptions" />
+              </Form.Item>
+              <Form.Item name={["specifications", "colors"]} label="colors">
+                <Select mode="tags" placeholder="Enter colors" />
               </Form.Item>
             </div>
           </div>
@@ -301,6 +300,14 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                       rules={[{ required: true, message: "Missing price" }]}
                     >
                       <InputNumber placeholder="Price" min={0} />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "basePrice"]}
+                      fieldKey={[fieldKey as any, "basePrice"]}
+                      rules={[{ required: true, message: "Missing basePrice" }]}
+                    >
+                      <InputNumber placeholder="basePrice" min={0} />
                     </Form.Item>
                     <MinusCircleOutlined onClick={() => remove(name)} />
                   </Space>

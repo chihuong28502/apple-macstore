@@ -33,6 +33,7 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
     yield put(ProductActions.setLoading(false));
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
+      localStorage.setItem('productById', JSON.stringify(response.data));
       onSuccess(response.data);
     } else {
       onFail(response);
