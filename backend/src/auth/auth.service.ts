@@ -17,6 +17,8 @@ import { CookieAge } from './utils/cookieAgeAuth.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { LoginAdminDto } from './dto/login.admin.dto';
 import { Admin, AdminDocument } from 'src/user/schema/admin.schema';
+import { NotifyService } from 'src/notify/notify.service';
+import { CreateNotifyDto } from 'src/notify/dto/create-notify.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +31,7 @@ export class AuthService {
     private jwtService: JwtService,
     private cookieAge: CookieAge,
     private configService: ConfigService,
+    private notifyService: NotifyService,
   ) { }
 
 
@@ -51,7 +54,7 @@ export class AuthService {
   async register(createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
     const checkEmail = await this.userModel.findOne({ email: createUserDto.email })
     if (checkEmail) {
-      throw new BadRequestException('Email tồn tại'); 
+      throw new BadRequestException('Email tồn tại');
     }
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
@@ -78,6 +81,13 @@ export class AuthService {
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
+    const notifyDto: CreateNotifyDto = {
+      title: `New Login ${new Date(new Date)}`,
+      content: `User ${user.username} logged in.`,
+      isRead: false,
+      customer: user._id,
+    };
+    await this.notifyService.createNotify(notifyDto)
     return {
       message: 'Login success',
       success: true,
@@ -253,8 +263,8 @@ export class AuthService {
     let code: string;
     const existingCodes = new Set(await this.getAllCodes());
     do {
-      code = Math.floor(10000 + Math.random() * 90000).toString(); 
-    } while (existingCodes.has(code)); 
+      code = Math.floor(10000 + Math.random() * 90000).toString();
+    } while (existingCodes.has(code));
 
     return code;
   }

@@ -1,36 +1,25 @@
+'use client'
+import socket from "@/lib/socket/socket";
+import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/notify.socket";
+import { AuthSelectors } from "@/modules/auth/slice";
+import { NotifyActions, NotifySelectors } from "@/modules/notify/slice";
 import { Badge, ConfigProvider, Popover } from "antd";
-import Link from "next/link";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { FaRegBell } from "react-icons/fa";
-import { FiFileText } from "react-icons/fi";
 import { IoNotificationsOutline } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
 
-const notifications = [
-  {
-    icon: <FiFileText className="w-5 h-5 text-green-400" />,
-    title: "Nói đi bạn ơi Shoppe nghe hết",
-    description: "Tặng ngay mã Freeship lên đến 35k",
-    time: "2 giờ trước",
-    isRead: true,
-  },
-  {
-    icon: <FaRegBell className="w-5 h-5 text-green-400" />,
-    title: "Combo ưu đãi tới 45k dành riêng cho bạn",
-    description: "Chỉ còn 1 ngày nữa thôi",
-    time: "1 ngày trước",
-    isRead: false,
-  },
-];
-
-const NotificationList = () => (
+const NotificationList = ({ notifications }: any) => (
   <div className="divide-y divide-divideColor">
-    {notifications.map((item) => (
+    {notifications?.map((item: any) => (
       <div
         key={item.title}
         className="py-4 first:pt-2 last:pb-2 hover:bg-hoverBg transition-colors duration-200 ease-in-out"
       >
         <div className="flex items-start space-x-4 px-4">
-          <div className="flex-shrink-0">{item.icon}</div>
+          <div className="flex-shrink-0"><FaRegBell className="w-5 h-5 text-green-400" /></div>
           <div className="flex-grow">
             <p className="text-fontColor font-medium text-sm mb-1">
               {item.title}
@@ -38,7 +27,7 @@ const NotificationList = () => (
             {item.description && (
               <p className="text-fontColor text-xs mb-1">{item.description}</p>
             )}
-            <p className="text-fontColor text-xs">{item.time}</p>
+            <p className="text-fontColor text-xs">2 giờ trước</p>
           </div>
         </div>
       </div>
@@ -47,6 +36,24 @@ const NotificationList = () => (
 );
 
 const NotificationPopover = () => {
+  const dispatch = useDispatch();
+  const notificationss = useSelector(NotifySelectors.notify);
+  const user = useSelector(AuthSelectors.user);
+  const [notifications, setNotifications] = useState(notificationss);
+  useEffect(() => {
+    if (!notificationss) {
+      dispatch(NotifyActions.fetchNotifyById(user?._id));
+    } else {
+      setNotifications(notificationss);
+    }
+  }, [notificationss, dispatch, user]);
+  useEffect(() => {
+    // Lắng nghe sự kiện thông báo
+    listenToSocketEvent(socket, "notification", (notification) => {
+      setNotifications((prev: any) => [...prev, notification]);
+    });
+    return () => cleanupSocketEvent(socket, "notification");
+  }, [socket]);
   const { resolvedTheme } = useTheme();
   const content = (
     <div className="w-80 bg-inputBackground rounded-lg shadow-xl shadow-gray-300/50 dark:shadow-gray-800/50  overflow-hidden cursor-pointer">
@@ -62,7 +69,7 @@ const NotificationPopover = () => {
         </Link>
       </div>
       <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-        <NotificationList />
+        <NotificationList notifications={notifications} />
       </div>
     </div>
   );
@@ -77,6 +84,7 @@ const NotificationPopover = () => {
       color={resolvedTheme === "dark" ? "#4b4b4b" : "#fff"}
     >
       <div className="flex items-center p-3 bg-inputBackground rounded-lg cursor-pointer ">
+        {notifications?.length}
         <ConfigProvider
           theme={{
             components: {

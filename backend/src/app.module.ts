@@ -16,6 +16,7 @@ import { RecommendationModule } from './recommendation/recommendation.module';
 import { UsersModule } from './user/user.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './taskSchedule/tasks.module';
+import { NotifyModule } from './notify/notify.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { TasksModule } from './taskSchedule/tasks.module';
     CategoryModule,
     ProductModule,
     OrderModule,
+    NotifyModule,
   ],
   providers: [
     AppService,

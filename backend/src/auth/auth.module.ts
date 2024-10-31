@@ -3,15 +3,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
+import { NotifyModule } from 'src/notify/notify.module';
+import { NotifyService } from 'src/notify/notify.service';
+import { Notify, NotifySchema } from 'src/notify/schema/notify.schema';
+import { Admin, AdminSchema } from 'src/user/schema/admin.schema';
 import { User, UserSchema } from 'src/user/schema/user.schema';
 import { UsersModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
-import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookiesService } from './cookies.service';
+import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
-import { Admin, AdminSchema } from 'src/user/schema/admin.schema';
+import { NotificationsGateway } from 'src/notify/notifications.gateway';
 
 @Module({
   imports: [
@@ -19,8 +23,9 @@ import { Admin, AdminSchema } from 'src/user/schema/admin.schema';
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: RefreshToken.name, schema: RefreshTokenSchema },
+      { name: Notify.name, schema: NotifySchema },
       { name: Admin.name, schema: AdminSchema }
-    ]), 
+    ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -30,9 +35,9 @@ import { Admin, AdminSchema } from 'src/user/schema/admin.schema';
         signOptions: { expiresIn: '60m' },
       }),
     }),
-    UsersModule,
+    UsersModule, NotifyModule,
   ],
-  providers: [AuthService, JwtStrategy,CookiesService,CookieAge],
+  providers: [AuthService, JwtStrategy, CookiesService, CookieAge, NotifyService, NotificationsGateway],
   controllers: [AuthController],
   exports: [AuthService],
 })
