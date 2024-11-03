@@ -21,21 +21,8 @@ type Props = {
   isOpenMenuMobile: boolean;
 };
 
-const Header = ({
-  setCollapsed,
-  setIsOpenMenuMobile,
-  collapsed,
-  isMobile,
-  isOpenMenuMobile,
-}: Props) => {
+const Header = () => {
   const auth = useAppSelector(AuthSelectors.user);
-  const toggleCollapsed = () => {
-    if (isMobile) {
-      setIsOpenMenuMobile((prev: boolean) => !prev);
-    } else {
-      setCollapsed((prev: boolean) => !prev);
-    }
-  };
   return (
     <div className="p-6 bg-layout z-20">
       <div className="h-12 flex md:justify-between justify-end">
@@ -50,7 +37,6 @@ const Header = ({
             <div className="flex items-center gap-5">
               {auth && <User />}
               {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
-              {auth && <NotificationPopover />}
             </div>
           </div>
         </div>

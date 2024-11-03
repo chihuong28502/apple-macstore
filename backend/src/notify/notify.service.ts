@@ -54,7 +54,10 @@ export class NotifyService {
 
   async findNotifyByUserId(userId: string): Promise<ResponseDto<Notify[]>> {
     try {
-      const notifications = await this.notifyModel.find({ customer: new Types.ObjectId(userId) }).exec();
+      const notifications = await this.notifyModel
+        .find({ customer: new Types.ObjectId(userId) })
+        .sort({ createdAt: -1 })
+        .exec();
       return {
         success: true,
         message: 'User notifications retrieved successfully',
