@@ -9,7 +9,7 @@ const CustomizationOptions = React.memo(
           key={option}
           type="button"
           onClick={() => handleClick(option)}
-          className={`px-3 py-1 !text-black rounded-lg transition-all duration-300 ${
+          className={`px-3 py-1 !text-black rounded-lg transition-all duration-300 mr-2 mt-2 ${
             selectedOption === option ? "border-gray-800 bg-[#999]" : "border-gray-300 bg-[#fff]"
           } hover:border-gray-800 hover:bg-[#086508]`}
         >
@@ -20,7 +20,6 @@ const CustomizationOptions = React.memo(
   )
 );
 
-// Thêm displayName cho component
 CustomizationOptions.displayName = "CustomizationOptions";
 
 export default CustomizationOptions;

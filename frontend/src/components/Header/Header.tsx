@@ -3,7 +3,6 @@
 import Link from "next/link";
 import React from "react";
 import { FaRegUserCircle } from "react-icons/fa";
-
 import { SVGLogo } from "@/asset/svg";
 import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
 import { useAppSelector } from "@/core/services/hook";
@@ -12,6 +11,7 @@ import { AuthSelectors } from "@/modules/auth/slice";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
 import SearchComponent from "../Search/Search";
 import User from "./User";
+import Cart from "./Cart";
 
 type Props = {
   isMobile: boolean;
@@ -21,21 +21,8 @@ type Props = {
   isOpenMenuMobile: boolean;
 };
 
-const Header = ({
-  setCollapsed,
-  setIsOpenMenuMobile,
-  collapsed,
-  isMobile,
-  isOpenMenuMobile,
-}: Props) => {
+const Header = () => {
   const auth = useAppSelector(AuthSelectors.user);
-  const toggleCollapsed = () => {
-    if (isMobile) {
-      setIsOpenMenuMobile((prev: boolean) => !prev);
-    } else {
-      setCollapsed((prev: boolean) => !prev);
-    }
-  };
   return (
     <div className="p-6 bg-layout z-20">
       <div className="h-12 flex md:justify-between justify-end">
@@ -49,6 +36,9 @@ const Header = ({
           <div className="flex flex-grow items-center justify-end lg:justify-between">
             <div className="w-full max-w-lg  xl:max-w-3xl mx-auto px-4 block">
               <SearchComponent />
+            </div>
+            <div className=" mx-5">
+              {auth && <Cart />}
             </div>
             <div className="flex items-center gap-5">
               {auth && <User />}

@@ -3,6 +3,7 @@ import { DownOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Menu, Space } from "antd";
 import Link from "next/link";
 import React from "react";
+import type { MenuProps } from "antd"; // Import MenuProps để sử dụng kiểu ItemType
 
 import { type ProductPage } from "@/type/product.page.type";
 
@@ -28,39 +29,37 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   };
 
   // Hàm để tạo menu dropdown cho danh mục cha
-  const renderDropdownMenu: any = (parentId: string | null) => {
-    return getChildrenCategories(parentId).map(
-      (category: ProductPage.Category) => {
-        const children = getChildrenCategories(category._id);
+  const renderDropdownMenu = (parentId: string | null): MenuProps['items'] => {
+    return getChildrenCategories(parentId).map((category: ProductPage.Category) => {
+      const children = getChildrenCategories(category._id);
 
-        if (children.length > 0) {
-          return {
-            label: category.name,
-            key: category._id,
-            children: renderDropdownMenu(category._id), // Đệ quy để hiển thị danh mục con
-          };
-        }
-
+      if (children.length > 0) {
         return {
-          label: (
-            <button
-              onClick={() => onCategoryChange(category._id)}
-              className={`block w-full text-left px-2 py-1 transition-all duration-200  ${
-                selectedCategory === category._id
-                  ? "bg-green-500 text-white"
-                  : "text-gray-700"
-              }`}
-              type="button"
-            >
-              <Link href={`/product?categoryId=${category._id}`}>
-                {category.name}
-              </Link>
-            </button>
-          ),
+          label: category.name,
           key: category._id,
+          children: renderDropdownMenu(category._id), // Đệ quy để hiển thị danh mục con
         };
       }
-    );
+
+      return {
+        label: (
+          <button
+            onClick={() => onCategoryChange(category._id)}
+            className={`block w-full text-left px-2 py-1 transition-all duration-200 ${
+              selectedCategory === category._id
+                ? "bg-green-500 text-white"
+                : "text-gray-700"
+            }`}
+            type="button"
+          >
+            <Link href={`/product?categoryId=${category._id}`}>
+              {category.name}
+            </Link>
+          </button>
+        ),
+        key: category._id,
+      };
+    });
   };
 
   return (
@@ -73,11 +72,10 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
             return (
               <Dropdown
                 key={category._id}
-                overlay={<Menu items={renderDropdownMenu(category._id)} />}
+                menu={{ items: renderDropdownMenu(category._id) }} // Sử dụng menu thay vì overlay
                 trigger={["click"]}
               >
-                <Button className="flex items-center"
-                >
+                <Button className="flex items-center">
                   {category.name} <DownOutlined className="ml-2" />
                 </Button>
               </Dropdown>

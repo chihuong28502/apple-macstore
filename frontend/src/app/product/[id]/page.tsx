@@ -219,9 +219,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           )}
 
           <div className="mt-5 flex items-center gap-4">
-            <button onClick={handleDecreaseQuantity} className="px-3 py-2 bg-gray-200 rounded">-</button>
-            <span className="text-lg font-bold">{quantity}</span>
-            <button onClick={handleIncreaseQuantity} className="px-3 py-2 bg-gray-200 rounded">+</button>
+            <button onClick={handleDecreaseQuantity} className="px-3 bg-layout rounded text-fontColor font-bold">-</button>
+            <span className="text-lg font-bold text-fontColor">{quantity}</span>
+            <button onClick={handleIncreaseQuantity} className="px-3 bg-layout rounded text-fontColor font-bold">+</button>
           </div>
 
           <div className="mt-5 flex flex-wrap gap-4">
