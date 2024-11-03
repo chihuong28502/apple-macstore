@@ -12,10 +12,7 @@ type Props = {
   collapsed: boolean;
 };
 const SideBar = ({ collapsed }: Props) => {
-  const auth = useSelector(AuthSelectors.user);
   const pathname = usePathname();
-  const small = 80;
-  const large = 256;
   useEffect(() => {}, [pathname]);
   return (
     <motion.div
