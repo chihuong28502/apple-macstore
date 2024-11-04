@@ -1,28 +1,39 @@
 "use client";
-import { ConfigProvider, Dropdown, MenuProps } from "antd";
+import { ConfigProvider, Dropdown, Empty, MenuProps } from "antd";
 import _ from "lodash";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoCartOutline } from "react-icons/io5";
 
-import { useAppDispatch, useAppSelector } from "@/core/services/hook";
+import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-
+import { useDispatch } from "react-redux";
+import { CartActions, CartSelectors } from "@/modules/cart/slice";
 const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
+  const dispatch = useDispatch()
   const auth = useAppSelector(AuthSelectors.user);
-  const dispatch = useAppDispatch();
+  const cart = useAppSelector(CartSelectors.cart);
+  console.log("🚀 ~ cart:", cart)
+
+  useEffect(() => {
+    dispatch(CartActions.fetchCartById(auth._id))
+  }, [])
+  const router = useRouter();
   const { resolvedTheme } = useTheme();
 
 
   const getMenuItems = (): MenuProps["items"] => {
-    if (_.isEmpty(auth)) {
+    if (_.isEmpty(cart?.items)) {
       return [
         {
-          label: "123",
-          key: "login",
+          label: <>
+            <div>
+              <Empty description="Giỏ hàng trống" className="p-4" />
+            </div>
+          </>,
+          key: "empty",
         },
       ];
     } else {

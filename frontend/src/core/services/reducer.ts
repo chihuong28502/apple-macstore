@@ -3,8 +3,9 @@ import CustomerReducer from "@/modules/customer/slice";
 import LoadingGlobalReducer from "@/modules/loading-global/slice";
 import ProductReducer from "@/modules/product/slice";
 
-import AppReducer from "../components/AppSlice";
+import CartReducer from "@/modules/cart/slice";
 import NotifyReducer from "@/modules/notify/slice";
+import AppReducer from "../components/AppSlice";
 
 export const reducers = {
   app: AppReducer,
@@ -13,4 +14,5 @@ export const reducers = {
   loadingGlobal: LoadingGlobalReducer,
   customer: CustomerReducer,
   notify: NotifyReducer,
+  cart: CartReducer,
 };
