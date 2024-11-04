@@ -9,6 +9,11 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**", 
+      },
+      {
+        protocol: "https",
         hostname: "img.youtube.com",
         pathname: "/**",
       },
@@ -17,11 +22,11 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
+        source: "/api/:path*",
         destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
-      }
+      },
     ];
-  }
+  },
 };
 
 export default nextConfig;

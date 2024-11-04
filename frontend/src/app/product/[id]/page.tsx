@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import CustomizationOptions from "../components/CustomizationOptions";
 import { CartActions } from "@/modules/cart/slice";
 import { AuthSelectors } from "@/modules/auth/slice";
+import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
+import socket from "@/lib/socket/socket";
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const dispatch = useDispatch();
@@ -139,7 +141,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       setQuantity(quantity - 1);
     }
   };
-
   return (
     <div className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">

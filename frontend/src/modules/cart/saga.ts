@@ -7,7 +7,7 @@ function* fetchdCartById({ payload }: PayloadAction<any>) {
   const { id, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(CartActions.setLoading(true));
-    
+
     const response: { success: boolean; data: any } = yield CartRequest.getCartById(payload);
     yield put(CartActions.setLoading(false));
     if (response.success) {
@@ -19,18 +19,17 @@ function* fetchdCartById({ payload }: PayloadAction<any>) {
   } catch (e) {
     onFail(e);
   }
-} 
+}
 
 function* addItemtByCart({ payload }: PayloadAction<any>) {
-  const { id, item, onSuccess = (rs: any) => {}, onFail = (rs: any) => {} } = payload;
+  const { id, item, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(CartActions.setLoading(true));
-
     const response: { success: boolean; data: any } = yield CartRequest.addItemToCart({ id, item }); // Gọi API thêm sản phẩm vào giỏ hàng
     yield put(CartActions.setLoading(false));
-
     if (response.success) {
-      yield put(CartActions.setCart(item));
+      const response: { success: boolean; data: any } = yield CartRequest.getCartById(id);
+      yield put(CartActions.setCart(response.data));
       onSuccess(response.data);
     } else {
       onFail(response);

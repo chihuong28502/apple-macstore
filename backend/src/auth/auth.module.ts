@@ -18,6 +18,7 @@ import { CookieAge } from './utils/cookieAgeAuth.service';
 import { NotificationsGateway } from 'src/notify/notifications.gateway';
 import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
 import { CartService } from 'src/cart/cart.service';
+import { CartsGateway } from 'src/cart/cart.gateway';
 
 @Module({
   imports: [
@@ -42,7 +43,7 @@ import { CartService } from 'src/cart/cart.service';
   ],
   providers: [AuthService, JwtStrategy,
     CookiesService, CookieAge,
-    NotifyService, NotificationsGateway,
+    NotifyService, NotificationsGateway, CartsGateway,
     CartService],
   controllers: [AuthController],
   exports: [AuthService],
