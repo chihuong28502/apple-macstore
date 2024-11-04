@@ -16,6 +16,8 @@ import { CookiesService } from './cookies.service';
 import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
 import { NotificationsGateway } from 'src/notify/notifications.gateway';
+import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
+import { CartService } from 'src/cart/cart.service';
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { NotificationsGateway } from 'src/notify/notifications.gateway';
       { name: User.name, schema: UserSchema },
       { name: RefreshToken.name, schema: RefreshTokenSchema },
       { name: Notify.name, schema: NotifySchema },
+      { name: Cart.name, schema: CartSchema },
       { name: Admin.name, schema: AdminSchema }
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -37,7 +40,10 @@ import { NotificationsGateway } from 'src/notify/notifications.gateway';
     }),
     UsersModule, NotifyModule,
   ],
-  providers: [AuthService, JwtStrategy, CookiesService, CookieAge, NotifyService, NotificationsGateway],
+  providers: [AuthService, JwtStrategy,
+    CookiesService, CookieAge,
+    NotifyService, NotificationsGateway,
+    CartService],
   controllers: [AuthController],
   exports: [AuthService],
 })

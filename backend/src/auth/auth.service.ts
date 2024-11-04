@@ -19,6 +19,7 @@ import { LoginAdminDto } from './dto/login.admin.dto';
 import { Admin, AdminDocument } from 'src/user/schema/admin.schema';
 import { NotifyService } from 'src/notify/notify.service';
 import { CreateNotifyDto } from 'src/notify/dto/create-notify.dto';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +33,7 @@ export class AuthService {
     private cookieAge: CookieAge,
     private configService: ConfigService,
     private notifyService: NotifyService,
+    private cartService: CartService,
   ) { }
 
 
@@ -67,6 +69,7 @@ export class AuthService {
       code: code
     });
     await createdUser.save();
+    await this.cartService.createCartForUser(createdUser.id);
     return {
       message: 'Register success',
       success: true,
