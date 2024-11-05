@@ -17,7 +17,7 @@ function* createCategory({ payload }: PayloadAction<{ data: CategoryType }>) {
     const response: { success: boolean; data: any } = yield CategoryRequest.createCategory(data);
     yield put(CategoryActions.setLoading(false));
     if (response.success) {
-      
+
       message.success("Tạo Category thành công");
     } else {
     }
@@ -51,7 +51,7 @@ function* fetchCategories() {
     yield put(CategoryActions.setLoading(false));
 
     if (response.success) {
-      yield put(CategoryActions.setCategories(response.data)); 
+      yield put(CategoryActions.setCategories(response.data));
     }
   } catch (e) {
     console.error("Error fetching categories:", e);
@@ -65,6 +65,7 @@ function* deleteCategory({ payload }: any) {
     const rs: DeleteCategoryResponse = yield CategoryRequest.deleteCategory(id);
     if (rs.success) {
       const response: { success: boolean; data: any[] } = yield CategoryRequest.getAllCategories();
+      message.success("Xóa danh mục thành công");
       yield put(CategoryActions.setCategories(response.data));
       onSuccess();
     } else {
@@ -74,9 +75,32 @@ function* deleteCategory({ payload }: any) {
     message.error(error);
   }
 }
+
+function* updateCategory({ payload }: PayloadAction<{ id: string; data: any; onSuccess: () => void }>): Generator<any, void, any> {
+  try {
+    yield delay(100);
+    const { id, data, onSuccess } = payload;
+
+    // Pass both `id` and `data` as separate arguments
+    const rs = yield CategoryRequest.updateCategory(id, data);
+
+    if (rs.success) {
+      const response = yield CategoryRequest.getAllCategories();
+      message.success("Xóa danh mục thành công");
+      yield put(CategoryActions.setCategories(response.data));
+      if (onSuccess) onSuccess();
+    } else {
+      throw new Error(rs.message);
+    }
+  } catch (error: any) {
+    message.error(error.message || "An error occurred while updating the category.");
+  }
+}
+
 export function* CategorySaga() {
   yield takeLeading(CategoryActions.fetchCategories, fetchCategories);
   yield takeLeading(CategoryActions.fetchCategoryById, fetchCategoryById);
   yield takeLatest(CategoryActions.deleteCategory, deleteCategory)
+  yield takeLatest(CategoryActions.updateCategory, updateCategory)
   yield takeLeading(CategoryActions.createCategory, createCategory)
 }

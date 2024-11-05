@@ -1,5 +1,5 @@
 "use client";
-import { message, Pagination } from "antd";
+import { Form, message, Pagination } from "antd";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,6 @@ import { CategoryFilter } from "./components/CategoryFilter";
 import { PriceFilter } from "./components/PriceFilter";
 import { ProductGrid } from "./components/ProductGrid";
 
-// Type definitions
 interface PriceRange {
   id: number;
   label: string;
@@ -42,18 +41,18 @@ const ProductPage: React.FC = () => {
   const loading = useSelector(ProductSelectors.isLoading);
 
   // State
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    0, 10000000000,
-  ]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000000]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRangeId, setSelectedRangeId] = useState(0);
 
+  // Form for editing
+  const [form] = Form.useForm();
+
   // Refs
   const isFromCategoryChange = useRef(false);
 
-  // Constants
   const priceRanges: PriceRange[] = [
     { id: 0, label: "All Prices", min: 0, max: 10000000000 },
     { id: 1, label: "Under 10M", min: 0, max: 10000000 },
@@ -63,12 +62,10 @@ const ProductPage: React.FC = () => {
     { id: 5, label: "Over 40M", min: 40000000, max: 100000000 },
   ];
 
-  // Fetch initial data
   useEffect(() => {
     dispatch(CategoryActions.fetchCategories());
   }, [dispatch]);
 
-  // Product fetching logic
   const fetchProducts = useCallback(
     (params: FetchProductsParams) => {
       dispatch(ProductActions.fetchPaginatedProducts(params));
@@ -83,9 +80,9 @@ const ProductPage: React.FC = () => {
     [fetchProducts]
   );
 
-  // Handlers
   const handleCategoryChange = useCallback(
     (categoryId: string) => {
+      console.log("🚀 ~ categoryId:", categoryId)
       setSelectedCategory(categoryId);
       setCurrentPage(1);
       isFromCategoryChange.current = true;
@@ -110,27 +107,36 @@ const ProductPage: React.FC = () => {
     }
   };
 
+  const handleEditButtonClick = async ({ id, data }: any) => {
+    form.setFieldsValue(id);
+    try {
+      await dispatch(CategoryActions.updateCategory({ id: id, data: data }));
+      message.success("Category updated successfully");
+    } catch (error) {
+      message.error("Failed to update category");
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await dispatch(CategoryActions.deleteCategory({ id: categoryId }));
+      dispatch(CategoryActions.fetchCategories());
+      message.success("Category deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete category");
+    }
+  };
+
   const handlePriceRangeChange = useCallback((range: PriceRange) => {
     setSelectedRangeId(range.id);
     setPriceRange([range.min, range.max]);
   }, []);
 
-  const handleAddProduct = async (productData: any) => {
-    try {
-       dispatch(ProductActions.createProduct({ data: productData }));
-       fetchProducts({
-        page: currentPage,
-        limit: pageSize,
-        minPrice: priceRange[0],
-        maxPrice: priceRange[1],
-        categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
-      });
-    } catch (error) {
-      console.error("Error adding product:", error);
-    }
-  };
+  const handlePaginationChange = useCallback((page: number, size: number) => {
+    setCurrentPage(page);
+    setPageSize(size);
+  }, []);
 
-  // Effect for fetching products
   useEffect(() => {
     if (isFromCategoryChange.current) {
       isFromCategoryChange.current = false;
@@ -148,68 +154,65 @@ const ProductPage: React.FC = () => {
     return () => {
       debouncedFetchProducts.cancel();
     };
-  }, [
-    priceRange,
-    currentPage,
-    pageSize,
-    selectedCategory,
-    debouncedFetchProducts,
-  ]);
-
-  // Pagination handler
-  const handlePaginationChange = useCallback((page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-  }, []);
-
+  }, [priceRange, currentPage, pageSize, selectedCategory, debouncedFetchProducts]);
+  const handleAddProduct = async (productData: any) => {
+    try {
+      dispatch(ProductActions.createProduct({ data: productData }));
+      fetchProducts({
+        page: currentPage,
+        limit: pageSize,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
+      });
+    } catch (error) {
+      console.error("Error adding product:", error);
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-8">
         <div className="space-y-6">
-          <>
-            <BreadcrumbNav
-              onCategoryChange={handleCategoryChange}
-              selectedCategory={selectedCategory}
-              categories={categories}
-              loading={loading}
-            />
+          <BreadcrumbNav
+            onCategoryChange={handleCategoryChange}
+            selectedCategory={selectedCategory}
+            categories={categories}
+            loading={loading} />
 
+          {Array.isArray(categories) ? (
             <CategoryFilter
               categories={categories}
               selectedCategory={selectedCategory}
               onCategoryChange={handleCategoryChange}
               onAddCategory={handleAddCategory}
+              onEditCategory={handleEditButtonClick} // Pass edit handler
+              onDeleteCategory={handleDeleteCategory} // Pass delete handler
               loading={loading}
-            />
-            <PriceFilter
-              priceRanges={priceRanges}
-              selectedRangeId={selectedRangeId}
-              onPriceChange={handlePriceRangeChange}
-              loading={loading}
-            />
+            />) : (
+            <div>Error loading categories.</div>
+          )}
 
-            <ProductGrid
-              items={pageSize}
-              products={allProducts}
-              loading={loading}
-              categories={categories}
-              onAddProduct={handleAddProduct}
-            />
 
-            {totalProducts > pageSize && allProducts?.length > 0 && (
-              <div className="flex justify-center mt-8">
-                <Pagination
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={totalProducts}
-                  onChange={handlePaginationChange}
-                  className="bg-white p-4 rounded-lg shadow-sm"
-                  showSizeChanger
-                  showQuickJumper
-                />
-              </div>
-            )}
-          </>
+          <PriceFilter priceRanges={priceRanges} selectedRangeId={selectedRangeId} onPriceChange={handlePriceRangeChange} loading={loading} />
+          {Array.isArray(allProducts) ? (
+            <ProductGrid onAddProduct={handleAddProduct} items={pageSize} products={allProducts} loading={loading} categories={categories} />
+          ) : (
+            <div>Error loading products.</div>
+          )}
+
+          {totalProducts > pageSize && allProducts?.length > 0 && (
+            <div className="flex justify-center mt-8">
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={totalProducts}
+                onChange={handlePaginationChange}
+                className="bg-white p-4 rounded-lg shadow-sm"
+                showSizeChanger
+                showQuickJumper
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

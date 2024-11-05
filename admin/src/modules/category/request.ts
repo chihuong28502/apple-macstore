@@ -10,7 +10,6 @@ export const CategoryRequest = {
     return MSTFetch.post("/categories", data);
   },
   getCategoryById(id: string) {
-    return MSTFetch.get(`/categories/${id}`);
   },
 
   updateCategory(id: string, data: any) {
@@ -19,6 +18,4 @@ export const CategoryRequest = {
   deleteCategory(id: string) {
     return MSTFetch.delete(`/categories/delete/${id}`);
   },
- 
-
 };
