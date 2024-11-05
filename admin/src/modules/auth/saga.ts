@@ -1,11 +1,11 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 import jwt from 'jsonwebtoken';
-import { toast } from "react-toastify";
 import { call, delay, put, takeLeading } from "redux-saga/effects";
 
 import { AppAction } from "@/core/components/AppSlice";
 
+import { message } from "antd";
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
 
@@ -24,9 +24,9 @@ const getUserIdFromToken = () => {
 // Utility function to handle API errors
 function* handleApiError(error: any, onFail: (error: any) => void) {
   if (error instanceof AxiosError) {
-    toast.error(error?.response?.data?.error || "API error occurred.");
+    message.error(error?.response?.data?.error || "API error occurred.");
   } else {
-    toast.error("An unexpected error occurred.");
+    message.error("An unexpected error occurred.");
   }
   onFail && onFail(error);
 }
@@ -46,7 +46,7 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
         yield put(AuthActions.setUser(response.data));
         onSuccess(data?.user);
       } else {
-        toast.error("Failed to retrieve user ID from token.");
+        message.error("Failed to retrieve user ID from token.");
         yield put(AuthActions.getInfoUser({}));
       }
     } else {
@@ -119,10 +119,10 @@ function* refreshToken(): Generator<any, void, any> {
         throw new Error("Unable to decode user ID from access token.");
       }
     } else {
-      toast.error("Hãy đăng nhập");
+      message.error("Hãy đăng nhập");
     }
   } catch (error) {
-    toast.error("Hãy đăng nhập");
+    message.error("Hãy đăng nhập");
   }
 }
 // Root saga for authentication

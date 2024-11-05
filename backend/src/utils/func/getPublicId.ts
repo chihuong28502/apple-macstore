@@ -1,10 +1,5 @@
-export function extractPublicId(imageUrl: string): string {
-  // Tách chuỗi bằng dấu "/" và lấy phần trước đuôi ".jpg" (hoặc ".png", v.v.)
-  const parts = imageUrl.split('/');
-  const fileName = parts[parts.length - 1]; // Lấy tên file (wb7gpvzhncukmfgwxpte.jpg)
-  
-  // Cắt bỏ phần đuôi .jpg (hoặc bất kỳ phần mở rộng nào khác)
-  const publicId = fileName.split('.')[0];
-  
-  return publicId;
-}
+export const extractPublicId = (url: string): string => {
+  // Sử dụng biểu thức chính quy để lấy phần "APPLE_STORE/brvezk0zg9mtnby06pe0"
+  const match = url.match(/\/upload\/(?:v\d+\/)?([^\.]+)/);
+  return match ? match[1] : '';
+};

@@ -5,6 +5,7 @@ import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
 import { CategoryRequest } from "./request";
 import { CategoryActions } from "./slice";
 import { CategoryType } from "./type";
+import { message } from "antd";
 interface DeleteCategoryResponse {
   success: boolean;
   message?: string;
@@ -17,7 +18,7 @@ function* createCategory({ payload }: PayloadAction<{ data: CategoryType }>) {
     yield put(CategoryActions.setLoading(false));
     if (response.success) {
       
-      toast.success("Tạo Category thành công");
+      message.success("Tạo Category thành công");
     } else {
     }
   } catch (e) {
