@@ -3,12 +3,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 import * as Yup from "yup";
-
-import CustomButton from "@/app/components/Button"
+import CustomButton from "@/app/components/Button";
 import { VALIDATE } from "@/core/validate/validate";
 import { AuthActions } from "@/modules/auth/slice";
+import { message } from "antd";
 
 // Định nghĩa kiểu cho formData và errors
 interface FormData {
@@ -73,11 +72,11 @@ function Page() {
         AuthActions.register({
           data: formattedData,
           onSuccess: (rs: any) => {
-            toast.success("Đăng ký thành công");
+            message.success("Đăng ký thành công");
             route.push("login");
           },
           onFail: (message: any, data: any) => {
-            toast.error("Đăng ký thất bại");
+            message.error("Đăng ký thất bại");
           },
         })
       );
@@ -116,11 +115,10 @@ function Page() {
                         First Name
                       </label>
                       <input
-                        className={`w-full px-3 py-2 text-sm leading-tight text-gray-700  border ${
-                          errors.firstName
+                        className={`w-full px-3 py-2 text-sm leading-tight text-gray-700  border ${errors.firstName
                             ? "border-red-500"
                             : "border-gray-200"
-                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                          } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                         id="firstName"
                         name="firstName"
                         type="text"
@@ -139,9 +137,8 @@ function Page() {
                         Last Name
                       </label>
                       <input
-                        className={`w-full px-3 py-2 text-sm leading-tight text-gray-700  border ${
-                          errors.lastName ? "border-red-500" : "border-gray-200"
-                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                        className={`w-full px-3 py-2 text-sm leading-tight text-gray-700  border ${errors.lastName ? "border-red-500" : "border-gray-200"
+                          } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                         id="lastName"
                         name="lastName"
                         type="text"
@@ -160,9 +157,8 @@ function Page() {
                         Phone
                       </label>
                       <input
-                        className={`w-full px-3 py-2 text-sm leading-tight text-gray-700  border ${
-                          errors.phone ? "border-red-500" : "border-gray-200"
-                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                        className={`w-full px-3 py-2 text-sm leading-tight text-gray-700  border ${errors.phone ? "border-red-500" : "border-gray-200"
+                          } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                         id="phone"
                         name="phone"
                         type="text"
@@ -180,9 +176,8 @@ function Page() {
                       Email
                     </label>
                     <input
-                      className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${
-                        errors.email ? "border-red-500" : "border-gray-200"
-                      } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                      className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${errors.email ? "border-red-500" : "border-gray-200"
+                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                       id="email"
                       name="email"
                       type="email"
@@ -199,9 +194,8 @@ function Page() {
                       Username
                     </label>
                     <input
-                      className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${
-                        errors.username ? "border-red-500" : "border-gray-200"
-                      } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                      className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${errors.username ? "border-red-500" : "border-gray-200"
+                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                       id="username"
                       name="username"
                       type="text"
@@ -219,9 +213,8 @@ function Page() {
                         Password
                       </label>
                       <input
-                        className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${
-                          errors.password ? "border-red-500" : "border-gray-200"
-                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                        className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${errors.password ? "border-red-500" : "border-gray-200"
+                          } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                         id="password"
                         name="password"
                         type="password"
@@ -240,11 +233,10 @@ function Page() {
                         Confirm Password
                       </label>
                       <input
-                        className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${
-                          errors.confirmPassword
+                        className={`w-full px-3 py-2 mb-3 text-sm leading-tight text-gray-700  border ${errors.confirmPassword
                             ? "border-red-500"
                             : "border-gray-200"
-                        } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
+                          } rounded shadow appearance-none focus:outline-none focus:shadow-outline`}
                         id="confirmPassword"
                         name="confirmPassword"
                         type="password"

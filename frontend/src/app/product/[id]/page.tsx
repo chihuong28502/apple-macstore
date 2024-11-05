@@ -1,14 +1,13 @@
 "use client";
+import { getCache } from "@/cache/cacheLocal";
 import { extractColorCode, extractColorName } from "@/lib/utils";
+import { AuthSelectors } from "@/modules/auth/slice";
+import { CartActions } from "@/modules/cart/slice";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomizationOptions from "../components/CustomizationOptions";
-import { CartActions } from "@/modules/cart/slice";
-import { AuthSelectors } from "@/modules/auth/slice";
-import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
-import socket from "@/lib/socket/socket";
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const dispatch = useDispatch();
@@ -24,15 +23,12 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    const productFromLocalStorageString = localStorage.getItem('productById');
-    if (productFromLocalStorageString) {
-      const productFromLocalStorage: any = JSON.parse(productFromLocalStorageString);
-      if (productId === productFromLocalStorage._id) {
-        dispatch(ProductActions.setProduct(productFromLocalStorage));
-        return;
-      }
+    const cachedProduct = getCache('productById');
+    if (cachedProduct && cachedProduct._id === productId) {
+      dispatch(ProductActions.setProduct(cachedProduct));
+      return;
     }
-    dispatch(ProductActions.fetchProductById(productId));
+    dispatch(ProductActions.fetchProductById(productId))
   }, [dispatch, productId]);
 
 

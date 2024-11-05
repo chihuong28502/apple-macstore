@@ -1,6 +1,6 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { put, takeLeading } from "redux-saga/effects";
-
+import { setCache } from "@/cache/cacheLocal";
 import { ProductRequest } from "./request";
 import { ProductActions } from "./slice";
 interface DeleteProductResponse {
@@ -33,7 +33,7 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
     yield put(ProductActions.setLoading(false));
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
-      localStorage.setItem('productById', JSON.stringify(response.data));
+      setCache('productById', response.data);
       onSuccess(response.data);
     } else {
       onFail(response);

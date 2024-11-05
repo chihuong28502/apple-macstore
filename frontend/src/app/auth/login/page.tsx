@@ -3,13 +3,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 import * as Yup from "yup";
-
 import CustomButton from "@/app/components/Button";
 import { VALIDATE } from "@/core/validate/validate";
 import { AuthActions } from "@/modules/auth/slice";
-
+import { message } from "antd";
 import { InputField } from "./components/InputField";
 
 function Page() {
@@ -37,11 +35,11 @@ function Page() {
             email,
             password,
             onSuccess: (rs: any) => {
-              toast.success("Đăng nhập thành công");
+              message.success("Đăng nhập thành công");
               window.location.replace("/");
             },
             onFail: (message: any, data: any) => {
-              toast.error("Đăng nhập thất bại");
+              message.error("Đăng nhập thất bại");
             },
           })
         );

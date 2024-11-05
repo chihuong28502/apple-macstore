@@ -71,7 +71,7 @@ function* deleteCategory({ payload }: any) {
       throw rs.message;
     }
   } catch (error: any) {
-    toast.error(error);
+    message.error(error);
   }
 }
 export function* CategorySaga() {
