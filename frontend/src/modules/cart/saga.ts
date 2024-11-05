@@ -1,11 +1,11 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { put, takeLeading } from "redux-saga/effects";
-
+import { message } from "antd";
 import { CartRequest } from "./request";
 import { CartActions } from "./slice";
-import { toast } from "react-toastify";
+
 function* fetchdCartById({ payload }: PayloadAction<any>) {
-  const {  onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
+  const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(CartActions.setLoading(true));
 
@@ -31,7 +31,7 @@ function* addItemtByCart({ payload }: PayloadAction<any>) {
     if (response.success) {
       const response: { success: boolean; data: any } = yield CartRequest.getCartById(id);
       yield put(CartActions.setCart(response.data));
-      toast.success("Cart successfully added")
+      message.success("Cart successfully added")
       onSuccess(response.data);
     } else {
       onFail(response);
