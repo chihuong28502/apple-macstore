@@ -69,38 +69,39 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     return transformedStock;
   };
 
-  const transformImages = (images: IImage[]) => {
-    return images.map((img) => img.image);
-  };
-
   const processUpdatedImages = (values: IProduct): IImage[] => {
-    return (values.images as IImage[]).map((imgData: IImage) => ({
-      image: typeof imgData === "string" ? imgData : imgData.image,
-    }));
+    return (values.images as IImage[]).map((imgData: IImage) => {
+      // Nếu imgData là một chuỗi, có nghĩa là đây là một URL
+      if (typeof imgData === "string") {
+        return { image: imgData }; // Giả sử bạn không cần publicId cho ảnh mới upload
+      }
+
+      // Đảm bảo rằng publicId được giữ lại cho các hình ảnh cũ
+      return {
+        image: imgData.image, // URL hình ảnh
+        publicId: imgData.publicId, // Giữ lại publicId
+      };
+    });
   };
 
   const processUpdatedStock = (stockItems: IStockItem[]): IStock => {
     const updatedStock: IStock = {};
 
     stockItems.forEach((item) => {
-      // Tách key thành color, storage và size
       const [color, storage, size] = item.key.split("-");
 
-      // Kiểm tra tồn tại color trong updatedStock
       if (!updatedStock[color]) {
         updatedStock[color] = {};
       }
 
-      // Kiểm tra tồn tại storage trong updatedStock[color]
       if (!updatedStock[color][storage]) {
         updatedStock[color][storage] = {};
       }
 
-      // Thêm quantity và price vào updatedStock[color][storage][size]
       updatedStock[color][storage][size] = {
         quantity: item.quantity,
         price: item.price,
-        basePrice:item.basePrice,
+        basePrice: item.basePrice,
       };
     });
 
@@ -131,8 +132,15 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
         return file;
       })
     );
+
+    // Kết hợp danh sách hình ảnh cũ với các hình ảnh mới
+    const combinedImages = [ ...updatedFileList].map((file) => ({
+      image: file.url,
+      publicId: file.publicId || undefined, // Chỉ giữ publicId nếu có
+    }));
+
     setFileList(updatedFileList);
-    form.setFieldsValue({ images: updatedFileList.map((file) => file.url) });
+    form.setFieldsValue({ images: combinedImages });
   };
 
   const handleRemoveImage = (index: number) => {
@@ -157,10 +165,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           },
         })
       );
-      alert("Product updated successfully!");
     } catch (error) {
-      console.error("Error updating product:", error);
-      alert("Error updating product");
     } finally {
       setIsSubmitting(false);
     }
@@ -175,6 +180,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     if (productById?.images) {
       const initialFileList = productById.images.map((img: IImage, index: number) => ({
         uid: String(index),
+        publicId: img.publicId,
         name: `image-${index}`,
         status: "done",
         url: img.image,
@@ -190,7 +196,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       const transformedStock = transformStock(productById.stock as IStock);
       form.setFieldsValue({
         ...productById,
-        images: transformImages(productById.images),
+        images: productById.images,
         stock: transformedStock,
       });
     }
@@ -257,78 +263,68 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 </Upload>
               </Form.Item>
 
-              <Form.Item name={["specifications", "models"]} label="models">
-                <Select mode="tags" placeholder="Enter models" />
+              <Form.Item name={["specifications", "colors"]} label="colors">
+                <Select mode="tags" placeholder="Enter colors" />
               </Form.Item>
-              <Form.Item name={["specifications", "storageOptions"]} label="storageOptions">
-                <Select mode="tags" placeholder="Enter storageOptions" />
+              <Form.Item name={["specifications", "storageOptions"]} label="Storage Options">
+                <Select mode="tags" placeholder="Enter storage options" />
               </Form.Item>
               <Form.Item name={["specifications", "ramOptions"]} label="ramOptions">
                 <Select mode="tags" placeholder="Enter ramOptions" />
               </Form.Item>
-              <Form.Item name={["specifications", "colors"]} label="colors">
-                <Select mode="tags" placeholder="Enter colors" />
-              </Form.Item>
             </div>
           </div>
 
-          <Form.List name="stock">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, fieldKey, ...restField }) => (
-                  <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
-                    <Form.Item
-                      {...restField}
-                      name={[name, "key"]}
-                      fieldKey={[fieldKey as any, "key"]}
-                      rules={[{ required: true, message: "Missing stock item" }]}
-                    >
-                      <Input placeholder="Color-Model-Size" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "quantity"]}
-                      fieldKey={[fieldKey as any, "quantity"]}
-                      rules={[{ required: true, message: "Missing quantity" }]}
-                    >
-                      <InputNumber placeholder="Quantity" min={0} />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "price"]}
-                      fieldKey={[fieldKey as any, "price"]}
-                      rules={[{ required: true, message: "Missing price" }]}
-                    >
-                      <InputNumber placeholder="Price" min={0} />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, "basePrice"]}
-                      fieldKey={[fieldKey as any, "basePrice"]}
-                      rules={[{ required: true, message: "Missing basePrice" }]}
-                    >
-                      <InputNumber placeholder="basePrice" min={0} />
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add()}
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Add Stock Item
-                  </Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
+          <Form.Item
+            name="stock"
+            label="Stock"
+            rules={[{ required: true, message: "Please enter stock items" }]}
+          >
+            <Form.List name="stock">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, fieldKey, ...restField }) => (
+                    <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                      <Form.Item
+                        {...restField}
+                        name={[name, "key"]}
+                        fieldKey={[fieldKey as any, "key"]}
+                        rules={[{ required: true, message: "Missing key" }]}
+                      >
+                        <Input placeholder="Enter stock item key" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "quantity"]}
+                        fieldKey={[fieldKey as any, "quantity"]}
+                        rules={[{ required: true, message: "Missing quantity" }]}
+                      >
+                        <InputNumber placeholder="Quantity" min={0} />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, "price"]}
+                        fieldKey={[fieldKey as any, "price"]}
+                        rules={[{ required: true, message: "Missing price" }]}
+                      >
+                        <InputNumber placeholder="Price" min={0} />
+                      </Form.Item>
+                      <MinusCircleOutlined onClick={() => remove(name)} />
+                    </Space>
+                  ))}
+                  <Form.Item>
+                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                      Add Stock Item
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
+          </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              Save
+              Update Product
             </Button>
           </Form.Item>
         </Form>

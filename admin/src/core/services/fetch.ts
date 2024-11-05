@@ -1,10 +1,10 @@
 'use client'
 import axios, { AxiosInstance } from "axios";
-import { toast } from 'react-toastify';
 
 import { AuthUtils } from "@/lib/localAuth";
 import { AuthActions } from "@/modules/auth/slice";
 
+import { message } from "antd";
 import CONST from "./const";
 import { store } from "./store";
 
@@ -47,31 +47,31 @@ const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
               originalRequest._retry = true;
               try {
                 const dispatch = store.dispatch;
-                 dispatch(AuthActions.refreshToken());
+                dispatch(AuthActions.refreshToken());
               } catch (err) {
-                toast.error("Hết phiên làm việc, hãy thực hiện đăng nhập.");
+                message.error("Hết phiên làm việc, hãy thực hiện đăng nhập.");
               }
             }
             return Promise.reject(error);
 
           case 403:
-            toast.error("Bạn không có quyền");
+            message.error("Bạn không có quyền");
             return Promise.reject(error);
           case 404:
-            toast.error("Not Found.");
+            message.error("Not Found.");
             return Promise.reject(error);
 
           case 500:
-            toast.error("Server Error.");
+            message.error("Server Error.");
             return Promise.reject(error);
 
           default:
-            toast.error("Unexpected Error");
+            message.error("Unexpected Error");
             return Promise.reject(error);
         }
       } else {
         // Xử lý khi không có phản hồi từ server (ví dụ: mất kết nối)
-        toast.error("Network Error");
+        message.error("Network Error");
       }
 
       return Promise.reject(error);

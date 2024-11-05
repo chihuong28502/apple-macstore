@@ -63,6 +63,7 @@ export class CloudinaryService {
       const result = await cloudinary.uploader.destroy(publicId, {
         resource_type: resourceType,
       });
+      console.log("🚀 ~ CloudinaryService ~ result:", result)
       return { success: result.result === 'ok' }; // Kiểm tra xem kết quả có phải là 'ok' không
     } catch (error) {
       console.error(`Error deleting media: ${error.message}`); // Thêm câu lệnh log lỗi

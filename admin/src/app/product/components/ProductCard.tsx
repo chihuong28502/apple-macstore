@@ -28,10 +28,7 @@ function Product({ product,currentPage }: any) {
         dispatch(
           ProductActions.deleteProduct({
             id: product?._id,
-            currentPage:currentPage,
-            onSuccess: () => {
-              toast.success("Xóa thành công")
-            },
+            currentPage:currentPage
           })
         );
       } catch (error) {

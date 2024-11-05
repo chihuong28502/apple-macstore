@@ -5,11 +5,16 @@ import { Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomizationOptions from "../components/CustomizationOptions";
+import { CartActions } from "@/modules/cart/slice";
+import { AuthSelectors } from "@/modules/auth/slice";
+import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
+import socket from "@/lib/socket/socket";
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const dispatch = useDispatch();
   const productId = params.id;
   const productById = useSelector(ProductSelectors.product);
+  const auth = useSelector(AuthSelectors.user)
 
   const [mainImage, setMainImage] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
@@ -114,14 +119,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     if (selectedStock && selectedStock.price) {
       const productToAdd = {
         id: productId,
-        color: selectedColor,
-        ram: selectedRam,
-        storage: selectedStorage,
-        price: selectedStock.price,
-        quantity: quantity > selectedStock.quantity ? selectedStock.quantity : quantity, // Giới hạn số lượng
+        quantity: quantity > selectedStock.quantity ? selectedStock.quantity : quantity,
+        stockId: selectedStock._id
       };
-      console.log("🚀 ~ productToAdd:", productToAdd)
-      // dispatch(ProductActions.addToCart(productToAdd)); // Dispatch action thêm vào giỏ hàng
+      dispatch(CartActions.addProductToCart({
+        id: auth._id,
+        item: productToAdd
+      }));
     }
   };
 
@@ -137,7 +141,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       setQuantity(quantity - 1);
     }
   };
-
   return (
     <div className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">

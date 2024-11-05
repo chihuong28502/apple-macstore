@@ -2,6 +2,7 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
 
+import { message } from "antd";
 import { ProductRequest } from "./request";
 import { ProductActions } from "./slice";
 interface DeleteProductResponse {
@@ -17,6 +18,7 @@ function* createProduct({ payload }: PayloadAction<any>) {
     yield put(ProductActions.setLoading(false));
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
+      message.success("Thêm sản phẩm thành công")
       onSuccess(response.data);
     } else {
       onFail(response);
@@ -75,13 +77,14 @@ function* updateProduct({ payload }: PayloadAction<any>): Generator<any, void, u
 
     if (response.success) {
       yield put(ProductActions.fetchPaginatedProducts({ page: 1, limit: 8 })); // Giả sử bạn muốn tải lại danh sách sản phẩm
+      message.success("Chỉnh sửa sản phẩm thành công")
       onSuccess(response.data);
     } else {
       onFail(response);
     }
   } catch (error: any) {
     onFail(error);
-    toast.error(error.message || "Cập nhật sản phẩm thất bại");
+    message.error(error.message || "Cập nhật sản phẩm thất bại");
   }
 }
 
@@ -92,12 +95,13 @@ function* deleteProduct({ payload }: any) {
     const rs: DeleteProductResponse = yield ProductRequest.deleteProduct(id);
     if (rs.success) {
       yield put(ProductActions.fetchPaginatedProducts({ page: 1, limit: 8 }));
+      message.success("Delete Product successfully");
       onSuccess();
     } else {
       throw rs.message;
     }
   } catch (error: any) {
-    toast.error(error);
+    message.error(error);
   }
 }
 export function* ProductSaga() {

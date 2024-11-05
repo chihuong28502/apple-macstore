@@ -8,6 +8,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schema/product.schema';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { extractPublicId } from 'src/utils/func/getPublicId';
 
 @Injectable()
 export class ProductService {
@@ -33,7 +34,6 @@ export class ProductService {
       // Lọc những kết quả hợp lệ (không phải null)
       const validUploads = uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
   
-      // Tạo sản phẩm với danh sách ảnh đã upload
       const createdProduct = new this.productModel({
         ...createProductDto,
         images: validUploads, 
@@ -214,41 +214,79 @@ export class ProductService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<ResponseDto<Product>> {
+    console.log("🚀 ~ ProductService ~ updateProductDto:", updateProductDto)
     try {
-      const updatedProduct = await this.productModel
-        .findByIdAndUpdate(id, updateProductDto, { new: true })
-        .exec();
-      if (!updatedProduct) {
-        throw new NotFoundException(`Product with ID "${id}" not found`);
+      // Lấy sản phẩm hiện tại từ DB
+      const existingProduct = await this.productModel.findById(id).exec();
+      if (!existingProduct) {
+        throw new NotFoundException(`Không tìm thấy sản phẩm với ID "${id}"`);
       }
+  
+      // Kiểm tra và upload các ảnh mới (nếu cần)
+      const uploadedImages = await Promise.all(
+        updateProductDto.images.map(async (image: any) => {
+          if (!image.image.startsWith('https://res.cloudinary.com/')) {
+            // Tách base64 phần cần thiết
+            const base64Str = image.image.split(',')[1];
+            const buffer = Buffer.from(base64Str, 'base64');
+            const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
+            return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
+          }
+          return image; // Nếu ảnh đã có trên Cloudinary, giữ nguyên
+        })
+      );
+  
+      // Lọc những ảnh hợp lệ (không phải null)
+      const validUploads = uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
+  
+      // Xóa những ảnh bị loại bỏ khỏi Cloudinary
+      const updatedImagePublicIds = validUploads.map(img => img.publicId);
+      const imagesToDelete = existingProduct.images.filter(img => !updatedImagePublicIds.includes(img.publicId));
+  
+      // Gọi deleteMedia cho từng publicId hợp lệ
+      const deleteMediaPromises = imagesToDelete.map(async image => {
+        // Kiểm tra nếu ảnh không có `publicId`, lấy từ URL
+        const publicId = image.publicId || extractPublicId(image.image);
+        return this.cloudinaryService.deleteMedia(publicId, 'image');
+      });
+      await Promise.all(deleteMediaPromises);
+  
+      // Cập nhật sản phẩm với thông tin mới
+      const updatedProduct = await this.productModel
+        .findByIdAndUpdate(id, { ...updateProductDto, images: validUploads }, { new: true })
+        .exec();
+  
       return {
         success: true,
-        message: 'Product updated successfully',
+        message: 'Cập nhật sản phẩm thành công',
         data: updatedProduct,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Failed to update product: ${error.message}`,
+        message: `Cập nhật sản phẩm thất bại: ${error.message}`,
         data: null,
       };
     }
   }
+  
+  
 
   async remove(id: string): Promise<ResponseDto<Product>> {
     try {
       const productToDelete = await this.productModel.findById(id).exec();
       if (!productToDelete) {
-        throw new NotFoundException(`Product with ID "${id}" not found`);
+        throw new NotFoundException(`Không tìm thấy sản phẩm với ID "${id}"`);
       }
   
-      // Lọc ra các publicId hợp lệ (sử dụng _id trong trường hợp này)
-      const validImagePublicIds = productToDelete.images
-        .map(image => image.publicId) // Lấy _id từ từng image
-        .filter(publicId => publicId); // Lọc những publicId không hợp lệ (undefined hoặc null)
+      // Lọc ra các publicId hợp lệ hoặc lấy từ URL nếu cần
+      const validImagePublicIds = productToDelete.images.map(image => {
+        // Nếu không có publicId, trích xuất từ URL
+        return image.publicId || extractPublicId(image.image);
+      });
   
       // Gọi deleteMedia cho từng publicId hợp lệ
-      const deleteMediaPromises = validImagePublicIds.map(async (publicId) => {
+      const deleteMediaPromises = validImagePublicIds.map(async publicId => {
         return this.cloudinaryService.deleteMedia(publicId, 'image');
       });
   
@@ -265,14 +303,15 @@ export class ProductService {
       await this.productModel.findByIdAndDelete(id).exec();
       return {
         success: true,
-        message: 'Product deleted successfully',
+        message: 'Xóa sản phẩm thành công',
       };
     } catch (error) {
       return {
         success: false,
-        message: `Failed to delete product: ${error.message}`,
+        message: `Xóa sản phẩm thất bại: ${error.message}`,
       };
     }
   }
+  
   
 }

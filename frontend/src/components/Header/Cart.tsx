@@ -1,58 +1,105 @@
 "use client";
-import { ConfigProvider, Dropdown, MenuProps } from "antd";
+import { Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
 import _ from "lodash";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoCartOutline } from "react-icons/io5";
 
-import { useAppDispatch, useAppSelector } from "@/core/services/hook";
+import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
+import { useDispatch } from "react-redux";
+import { CartActions, CartSelectors } from "@/modules/cart/slice";
+import Image from "next/image";
 
 const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
+  const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
-  const dispatch = useAppDispatch();
+  const cart = useAppSelector(CartSelectors.cart);
+  console.log("🚀 ~ cart:", cart)
+
+  useEffect(() => {
+    if (auth?._id) {
+      dispatch(CartActions.fetchCartById(auth._id));
+    }
+  }, [auth?._id, dispatch]);
+
   const { resolvedTheme } = useTheme();
 
-
   const getMenuItems = (): MenuProps["items"] => {
-    if (_.isEmpty(auth)) {
+    if (_.isEmpty(cart?.items)) {
       return [
         {
-          label: "123",
-          key: "login",
+          label: (
+            <div className="flex justify-center items-center p-4">
+              <Empty description="Giỏ hàng trống" />
+            </div>
+          ),
+          key: "empty",
         },
       ];
     } else {
-      return [
-        {
-          label: '1st menu item',
-          key: '1',
-        },
-        {
-          label: '2nd menu item',
-          key: '2',
-        },
-        {
-          label: '3rd menu item',
-          key: '3',
-        },
+      return cart.items.map((item: any) => {
+        const { productId, quantity } = item;
+        const stockInfo = productId.stock;
+
+        const color = Object.keys(stockInfo)[0];
+        const ram = Object.keys(stockInfo[color])[0];
+        const storage = Object.keys(stockInfo[color][ram])[0];
+        const price = stockInfo[color][ram][storage].price;
+
+        return {
+          label: (
+            <Card className="my-2  mx-auto w-full" hoverable bordered={false} style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <Row gutter={[16, 16]} align="middle">
+                <Col span={5} style={{ textAlign: "center" }}>
+                  <Image
+                    src={productId.images[0].image} // Lấy ảnh đầu tiên
+                    alt={productId.name}
+                    width={80} // Đặt chiều rộng của ảnh
+                    height={80} // Đặt chiều cao của ảnh
+                    className="object-cover rounded" // Bảo đảm ảnh được cắt đúng tỷ lệ và bo góc
+                  />
+                </Col>
+                <Col span={13}>
+                  <span className="font-bold text-lg block">{productId.name}</span> {/* Tên sản phẩm */}
+                  <span className="text-gray-500 block">{`Màu: ${color}`}</span> {/* Màu sắc, RAM và lưu trữ */}
+                  <span className="text-lg font-semibold text-red-600">{`${price.toLocaleString()}₫`}</span> {/* Số lượng x Giá */}
+                </Col>
+                <Col span={6} className="text-right">
+                  <div className="text-gray-500 block">{`RAM: ${ram}`}</div> {/* Màu sắc, RAM và lưu trữ */}
+                  <div className="text-gray-500 block w-full">{`Lưu trữ: ${storage}`}</div> {/* Màu sắc, RAM và lưu trữ */}
+                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div> {/* Màu sắc, RAM và lưu trữ */}
+                </Col>
+              </Row>
+            </Card>
+          ),
+          key: item._id,
+        };
+      }).concat([
         {
           label: (
-            <div className="text-fontColor flex flex-col items-center justify-center">
-              {/* <div className="size-10 min-w-10 min-h-10 max-w-10 max-h-10">
-                <img src={auth?.snippet?.thumbnails?.default?.url} alt="" className="rounded-full w-full h-full object-cover" />
-              </div> */}
-              <span>{auth?.email}</span>
+            <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
+              <span className="font-bold">{`Tổng: ${cart.items.reduce((acc: any, item: any) => {
+                const stockInfo = item.productId.stock;
+                const color = Object.keys(stockInfo)[0]; // Lấy key màu đầu tiên
+                const ram = Object.keys(stockInfo[color])[0]; // Lấy key RAM đầu tiên
+                const storage = Object.keys(stockInfo[color][ram])[0]; // Lấy key Storage đầu tiên
+                const price = Number(stockInfo[color][ram][storage].price); // Ép kiểu giá thành number
+                return acc + (price * item.quantity); // Cộng giá vào tổng
+              }, 0).toLocaleString()}₫`}</span>
+              <Button type="primary" style={{ marginLeft: '10px' }}>
+                Thanh toán
+              </Button>
             </div>
           ),
-          key: "0",
+          key: "total",
         }
-      ];
+      ]);
     }
   };
+
 
   return (
     <ConfigProvider

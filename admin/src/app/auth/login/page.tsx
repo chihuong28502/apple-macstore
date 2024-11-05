@@ -10,6 +10,7 @@ import { VALIDATE } from "@/core/validate/validate";
 import { AuthActions } from "@/modules/auth/slice";
 
 import { InputField } from "./components/InputField";
+import { message } from "antd";
 
 function Page() {
   const dispatch = useDispatch();
@@ -32,11 +33,11 @@ function Page() {
             username,
             password,
             onSuccess: (rs: any) => {
-              toast.success("Đăng nhập thành công");
+              message.success("Đăng nhập thành công");
               window.location.replace("/");
             },
             onFail: (message: any, data: any) => {
-              toast.error("Đăng nhập thất bại");
+              message.error("Đăng nhập thất bại");
             },
           })
         );

@@ -1,5 +1,5 @@
 "use client";
-import { message,Pagination } from "antd";
+import { message, Pagination } from "antd";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -104,7 +104,7 @@ const ProductPage: React.FC = () => {
   const handleAddCategory = async (newCategory: CategoryType) => {
     try {
       await dispatch(CategoryActions.createCategory({ data: newCategory }));
-      dispatch(CategoryActions.fetchCategories()); 
+      dispatch(CategoryActions.fetchCategories());
     } catch (error) {
       message.error("Failed to add category");
     }
@@ -115,14 +115,10 @@ const ProductPage: React.FC = () => {
     setPriceRange([range.min, range.max]);
   }, []);
 
-  const handleAddProduct =  (productData:any) => {
-    console.log("🚀 ~ productData:", productData)
+  const handleAddProduct = async (productData: any) => {
     try {
-       dispatch(ProductActions.createProduct({data:productData}));
-
-      message.success("Product added successfully");
-
-      fetchProducts({
+       dispatch(ProductActions.createProduct({ data: productData }));
+       fetchProducts({
         page: currentPage,
         limit: pageSize,
         minPrice: priceRange[0],
@@ -130,7 +126,6 @@ const ProductPage: React.FC = () => {
         categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
       });
     } catch (error) {
-      message.error("Failed to add product");
       console.error("Error adding product:", error);
     }
   };

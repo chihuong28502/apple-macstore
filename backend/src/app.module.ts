@@ -17,6 +17,7 @@ import { UsersModule } from './user/user.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './taskSchedule/tasks.module';
 import { NotifyModule } from './notify/notify.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { NotifyModule } from './notify/notify.module';
     ProductModule,
     OrderModule,
     NotifyModule,
+    CartModule
   ],
   providers: [
     AppService,
