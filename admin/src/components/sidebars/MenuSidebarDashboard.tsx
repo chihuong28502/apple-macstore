@@ -103,7 +103,7 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       >
         <Menu
           selectedKeys={[pathname]}
-          mode="inline"
+          mode="inline" 
           className="bg-transparent"
           inlineCollapsed={collapsed}
           items={items}

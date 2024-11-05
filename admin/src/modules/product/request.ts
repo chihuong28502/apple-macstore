@@ -2,7 +2,6 @@ import MSTFetch from "@/core/services/fetch";
 
 export const ProductRequest = {
   createProduct(data: any) {
-    console.log("🚀 ~ request data:", data)
     return MSTFetch.post("/products", data);
   },
 

@@ -126,7 +126,6 @@ export class CartService {
 
   private getStockById(stock: any, stockId: string): any {
     if (!stock || (typeof stock === 'object' && Object.keys(stock).length === 0)) {
-      console.log("🚀 ~ CartService ~ No stock data available.");
       return null;
     }
     const isMap = stock instanceof Map;
@@ -154,16 +153,13 @@ export class CartService {
             if (storageItem._id.toString() === stockId.toString()) {
               return { [color]: { [ram]: { [storage]: storageItem } } };
             } else {
-              console.log("🚀 ~ CartService ~ Non-matching stock ID:", storageItem._id.toString());
             }
           } else {
-            console.log("🚀 ~ CartService ~ storageItem is invalid or missing _id:", storageItem);
           }
         }
       }
     }
 
-    console.log("🚀 ~ CartService ~ Stock ID not found in the provided stock data:", stockId);
     return null;
   }
 

@@ -32,6 +32,8 @@ export namespace ProductPage {
   }
 
   export interface CategoryFilterProps {
+    onEditCategory?: any,
+    onDeleteCategory?: any,
     onAddCategory?: any
     categories: Category[]; // Mảng các danh mục (Category)
     selectedCategory: string; // Danh mục đang được chọn
@@ -47,7 +49,7 @@ export namespace ProductPage {
   }
 
   export interface ProductGridProps {
-    onAddProduct?:any
+    onAddProduct?: any
     categories?: Category[]
     products: Product[];
     items?: number;

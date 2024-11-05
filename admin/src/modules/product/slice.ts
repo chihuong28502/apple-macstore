@@ -58,8 +58,6 @@ const ProductSlice = createSlice({
     },
 
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => {
-      console.log(payload);
-      
      },
     deleteProduct: (state: any, { payload: any }) => {
     },

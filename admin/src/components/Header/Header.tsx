@@ -12,6 +12,7 @@ import { AuthSelectors } from "@/modules/auth/slice";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
 import SearchComponent from "../Search/Search";
 import User from "./User";
+import SideBar from "../sidebars/Sidebar";
 
 type Props = {
   isMobile: boolean;
@@ -26,18 +27,13 @@ const Header = () => {
   return (
     <div className="p-6 bg-layout z-20">
       <div className="h-12 flex md:justify-between justify-end">
-        <div className="h-full flex flex-grow ">
+        <div className="h-full flex flex-grow justify-between ">
           <Link href={"/"} className="flex items-center mr-11">
             <SVGLogo className="text-fontColor" />
           </Link>
-          <div className="flex flex-grow items-center justify-end lg:justify-between">
-            <div className="w-full max-w-lg  xl:max-w-3xl mx-auto px-4 block">
-              <SearchComponent />
-            </div>
-            <div className="flex items-center gap-5">
-              {auth && <User />}
-              {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
-            </div>
+          <div className="flex items-center gap-5">
+            {auth && <User />}
+            {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
           </div>
         </div>
       </div>

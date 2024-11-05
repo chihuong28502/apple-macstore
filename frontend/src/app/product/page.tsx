@@ -30,9 +30,6 @@ const ProductPage: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(8);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedRangeId, setSelectedRangeId] = useState<number>(0);
-  const [localCategoryPath, setLocalCategoryPath] = useState<
-    ProductPage.Category[]
-  >([]);
   const isFromCategoryChange = useRef<boolean>(false);
 
   const priceRanges: ProductPage.PriceRange[] = [
