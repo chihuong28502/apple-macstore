@@ -25,14 +25,9 @@ const page: React.FC = () => {
   );
 
   const handleAddCategory = async (newCategory: CategoryType) => {
-    try {
-      await dispatch(CategoryActions.createCategory({ data: newCategory }));
-      message.success("Category added successfully");
-      setIsModalVisible(false);
-      form.resetFields(); // Reset form after adding successfully
-    } catch (error) {
-      message.error("Failed to add category");
-    }
+    await dispatch(CategoryActions.createCategory({ data: newCategory }));
+    setIsModalVisible(false);
+    form.resetFields();
   };
 
   const handleEditButtonClick = async (category: any) => {
@@ -45,7 +40,7 @@ const page: React.FC = () => {
     });
 
     setEditCategory(category);
-    setIsModalVisible(true); // Open the edit modal
+    setIsModalVisible(true);
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
@@ -71,7 +66,7 @@ const page: React.FC = () => {
       const values = await form.validateFields();
       const breadcrumbsArray = values.breadcrumbs.split(" > ");
       const categoryData = { ...values, breadcrumbs: breadcrumbsArray };
-
+  
       if (editCategory) {
         // Update category
         await dispatch(
@@ -80,15 +75,15 @@ const page: React.FC = () => {
             data: categoryData,
           })
         );
-        message.success("Category updated successfully");
       } else {
-        // Add new category
         await handleAddCategory(categoryData);
       }
+      handleCancel();
     } catch (error) {
-      message.error("Có lỗi xảy ra khi xử lý danh mục");
+      console.error("Error:", error);
     }
   };
+  
 
   const handleCancel = () => {
     setIsModalVisible(false);
@@ -103,7 +98,7 @@ const page: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-8">
+      <div className=" mx-auto p-8">
         <div className="space-y-6">
           <App>
             {/* Filter Input */}

@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Category, CategoryDocument } from './schema/category.schema';
+import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { ResponseDto } from 'src/utils/dto/response.dto';
+import { Category, CategoryDocument } from './schema/category.schema';
 
 @Injectable()
 export class CategoryService {
@@ -74,7 +74,6 @@ export class CategoryService {
     }
   }
 
-  // Update a category
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,
@@ -105,28 +104,43 @@ export class CategoryService {
     }
   }
 
-  // Remove a category
   async remove(id: string): Promise<ResponseDto<Category>> {
     try {
-      const deletedCategory = await this.categoryModel.findByIdAndDelete(id).exec();
-      if (!deletedCategory) {
-        return {
-          success: false,
-          message: `Category with ID "${id}" not found`,
-          data: null,
-        };
-      }
+      // Lấy tất cả các category con của category này
+      const allCategories = await this.getAllChildCategories(id);
+      // Thêm cả category chính vào danh sách cần xóa
+      const categoriesToDelete = [...allCategories, { _id: id }];
+      // Xóa tất cả các category con và category chính
+      await this.categoryModel.deleteMany({
+        _id: { $in: categoriesToDelete.map((category) => category._id) },
+      }).exec();
+
+      // Trả về phản hồi thành công
       return {
         success: true,
         message: 'Category deleted successfully',
-        data: deletedCategory,
+        data: [],
       };
     } catch (error) {
+      console.error("Error deleting category:", error);
       return {
         success: false,
         message: 'Failed to delete category',
         data: null,
       };
     }
+  }
+
+  private async getAllChildCategories(parentId: string): Promise<CategoryDocument[]> {
+    const children = await this.categoryModel.find({ parentCategoryId: parentId }).exec();
+    let allChildren = [...children];
+
+    // Đệ quy tìm category con của các category con
+    for (let child of children) {
+      const childCategories = await this.getAllChildCategories(child._id.toString());
+      allChildren = [...allChildren, ...childCategories];
+    }
+
+    return allChildren;
   }
 }

@@ -1,7 +1,16 @@
 import MSTFetch from "@/core/services/fetch";
 
 export const CustomerRequest = {
-  getByCustomer() {
-    return MSTFetch.get("/customer");
+  getAllCustomer() {
+    return MSTFetch.get("/user");
+  },
+  getCustomerById(id: any) {
+    return MSTFetch.get(`/user/${id}`);
+  },
+  updateCustomerById(id: string, data: any) {
+    return MSTFetch.put(`/user/update/${id}`, data);
+  }, 
+  deleteCustomer(id: string) {
+    return MSTFetch.delete(`/user/delete/${id}`);
   },
 };

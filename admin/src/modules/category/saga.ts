@@ -25,23 +25,7 @@ function* createCategory({ payload }: PayloadAction<{ data: CategoryType }>) {
   }
 }
 
-function* fetchCategoryById({ payload }: PayloadAction<any>) {
-  const { id, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
-  try {
-    yield put(CategoryActions.setLoading(true));
-    const response: { success: boolean; data: any } = yield CategoryRequest.getCategoryById(payload);
-    yield put(CategoryActions.setLoading(false));
-    if (response.success) {
-      message.success("Tạo danh mục thành công");
-      yield put(CategoryActions.setCategoryById(response.data));
-      onSuccess(response.data);
-    } else {
-      onFail(response);
-    }
-  } catch (e) {
-    onFail(e);
-  }
-}
+
 
 function* fetchCategories() {
   try {
@@ -98,7 +82,6 @@ function* updateCategory({ payload }: PayloadAction<{ id: string; data: any; onS
 
 export function* CategorySaga() {
   yield takeLeading(CategoryActions.fetchCategories, fetchCategories);
-  yield takeLeading(CategoryActions.fetchCategoryById, fetchCategoryById);
   yield takeLatest(CategoryActions.deleteCategory, deleteCategory)
   yield takeLatest(CategoryActions.updateCategory, updateCategory)
   yield takeLeading(CategoryActions.createCategory, createCategory)
