@@ -22,12 +22,6 @@ const CategorySlice = createSlice({
   reducers: {
     createCategory: (state: CategoryState, { payload }: PayloadAction<any>) => {
     },
-    fetchCategoryById: (
-      state: CategoryState,
-      { payload }: PayloadAction<string>
-    ) => {
-      state.isLoading = true;
-    },
     updateCategory: (state: CategoryState, { payload }: PayloadAction<any>) => { },
     deleteCategory: (state: any, { payload: any }) => {
     },
