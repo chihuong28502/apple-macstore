@@ -12,6 +12,7 @@ import { BreadcrumbNav } from "./components/BreadcrumbNav";
 import { CategoryFilter } from "./components/CategoryFilter";
 import { PriceFilter } from "./components/PriceFilter";
 import { ProductGrid } from "./components/ProductGrid";
+import { useRouter } from "next/navigation";
 
 interface PriceRange {
   id: number;
@@ -33,6 +34,7 @@ const DEBOUNCE_DELAY = 500;
 
 const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
+  const route = useRouter();
 
   // Selectors
   const allProducts = useSelector(ProductSelectors.productList);
@@ -101,7 +103,6 @@ const ProductPage: React.FC = () => {
   const handleAddCategory = async (newCategory: CategoryType) => {
     try {
       await dispatch(CategoryActions.createCategory({ data: newCategory }));
-      dispatch(CategoryActions.fetchCategories());
     } catch (error) {
       message.error("Failed to add category");
     }
@@ -111,7 +112,6 @@ const ProductPage: React.FC = () => {
     form.setFieldsValue(id);
     try {
       await dispatch(CategoryActions.updateCategory({ id: id, data: data }));
-      message.success("Category updated successfully");
     } catch (error) {
       message.error("Failed to update category");
     }
@@ -121,7 +121,6 @@ const ProductPage: React.FC = () => {
     try {
       await dispatch(CategoryActions.deleteCategory({ id: categoryId }));
       dispatch(CategoryActions.fetchCategories());
-      message.success("Category deleted successfully");
     } catch (error) {
       message.error("Failed to delete category");
     }

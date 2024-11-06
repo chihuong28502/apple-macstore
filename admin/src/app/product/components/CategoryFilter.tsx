@@ -69,10 +69,8 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
 
       if (isEditMode && editingCategory) {
         await onEditCategory({ id: editingCategory._id, data: categoryData });
-        message.success("Cập nhật danh mục thành công");
       } else {
         await onAddCategory(categoryData);
-        message.success("Thêm danh mục thành công");
       }
 
       form.resetFields();

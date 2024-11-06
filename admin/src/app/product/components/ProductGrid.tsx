@@ -80,7 +80,6 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
         };
 
         await onAddProduct(productData);
-        message.success("Sản phẩm đã được thêm thành công!");
         form.resetFields();
         setImageFiles([]);
         setIsModalOpen(false);

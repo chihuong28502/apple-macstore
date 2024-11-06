@@ -17,8 +17,7 @@ function* createCategory({ payload }: PayloadAction<{ data: CategoryType }>) {
     const response: { success: boolean; data: any } = yield CategoryRequest.createCategory(data);
     yield put(CategoryActions.setLoading(false));
     if (response.success) {
-
-      message.success("Tạo Category thành công");
+      message.success("Thêm danh mục thành công");
     } else {
     }
   } catch (e) {
@@ -32,6 +31,7 @@ function* fetchCategoryById({ payload }: PayloadAction<any>) {
     const response: { success: boolean; data: any } = yield CategoryRequest.getCategoryById(payload);
     yield put(CategoryActions.setLoading(false));
     if (response.success) {
+      message.success("Tạo danh mục thành công");
       yield put(CategoryActions.setCategoryById(response.data));
       onSuccess(response.data);
     } else {
@@ -85,8 +85,8 @@ function* updateCategory({ payload }: PayloadAction<{ id: string; data: any; onS
     const rs = yield CategoryRequest.updateCategory(id, data);
 
     if (rs.success) {
+      message.success("Sửa danh mục thành công");
       const response = yield CategoryRequest.getAllCategories();
-      message.success("Xóa danh mục thành công");
       yield put(CategoryActions.setCategories(response.data));
       if (onSuccess) onSuccess();
     } else {

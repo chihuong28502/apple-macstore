@@ -1,5 +1,4 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { toast } from "react-toastify";
 import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
 
 import { message } from "antd";
@@ -21,6 +20,7 @@ function* createProduct({ payload }: PayloadAction<any>) {
       message.success("Thêm sản phẩm thành công")
       onSuccess(response.data);
     } else {
+      message.error("Thêm sản phẩm thất bại")
       onFail(response);
     }
   } catch (e) {
@@ -84,7 +84,7 @@ function* updateProduct({ payload }: PayloadAction<any>): Generator<any, void, u
     }
   } catch (error: any) {
     onFail(error);
-    message.error(error.message || "Cập nhật sản phẩm thất bại");
+    message.error("Cập nhật sản phẩm thất bại");
   }
 }
 
@@ -95,9 +95,10 @@ function* deleteProduct({ payload }: any) {
     const rs: DeleteProductResponse = yield ProductRequest.deleteProduct(id);
     if (rs.success) {
       yield put(ProductActions.fetchPaginatedProducts({ page: 1, limit: 8 }));
-      message.success("Delete Product successfully");
+      message.success("Xóa sản phẩm thành công");
       onSuccess();
     } else {
+      message.error("Xóa sản phẩm thất bại")
       throw rs.message;
     }
   } catch (error: any) {

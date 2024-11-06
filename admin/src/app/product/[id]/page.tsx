@@ -3,6 +3,7 @@ import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, Select, Space, Upload } from "antd";
 import { UploadFile } from "antd/lib/upload/interface";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -46,6 +47,7 @@ interface IProduct {
 
 export default function EditProductPage({ params }: { params: { id: string } }) {
   const dispatch = useDispatch();
+  const route = useRouter()
   const productById = useSelector(ProductSelectors.product);
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -134,7 +136,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     );
 
     // Kết hợp danh sách hình ảnh cũ với các hình ảnh mới
-    const combinedImages = [ ...updatedFileList].map((file) => ({
+    const combinedImages = [...updatedFileList].map((file) => ({
       image: file.url,
       publicId: file.publicId || undefined, // Chỉ giữ publicId nếu có
     }));
@@ -165,6 +167,8 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           },
         })
       );
+      route.push('/product')
+
     } catch (error) {
     } finally {
       setIsSubmitting(false);
