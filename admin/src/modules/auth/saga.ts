@@ -24,7 +24,7 @@ const getUserIdFromToken = () => {
 // Utility function to handle API errors
 function* handleApiError(error: any, onFail: (error: any) => void) {
   if (error instanceof AxiosError) {
-    message.error(error?.response?.data?.error || "API error occurred.");
+    message.error("API error occurred.");
   } else {
     message.error("An unexpected error occurred.");
   }

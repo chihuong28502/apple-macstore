@@ -61,6 +61,7 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   };
 
   const handleSubmit = async (values: any) => {
+    console.log("🚀 ~ values:", values)
     try {
       const categoryData = {
         name: values.name,

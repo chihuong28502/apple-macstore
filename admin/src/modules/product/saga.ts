@@ -102,7 +102,7 @@ function* deleteProduct({ payload }: any) {
       throw rs.message;
     }
   } catch (error: any) {
-    message.error(error);
+    message.error("Xóa sản phẩm thất bại");
   }
 }
 export function* ProductSaga() {

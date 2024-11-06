@@ -1,5 +1,4 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { toast } from "react-toastify";
 import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
 
 import { CategoryRequest } from "./request";
@@ -15,9 +14,11 @@ function* createCategory({ payload }: PayloadAction<{ data: CategoryType }>) {
   try {
     yield put(CategoryActions.setLoading(true));
     const response: { success: boolean; data: any } = yield CategoryRequest.createCategory(data);
-    yield put(CategoryActions.setLoading(false));
     if (response.success) {
       message.success("Thêm danh mục thành công");
+      const response: { success: boolean; data: any[] } = yield CategoryRequest.getAllCategories();
+      yield put(CategoryActions.setCategories(response.data));
+      yield put(CategoryActions.setLoading(false));
     } else {
     }
   } catch (e) {
@@ -61,18 +62,17 @@ function* fetchCategories() {
 function* deleteCategory({ payload }: any) {
   try {
     yield delay(100);
-    const { id, onSuccess } = payload;
+    const { id } = payload;
     const rs: DeleteCategoryResponse = yield CategoryRequest.deleteCategory(id);
-    if (rs.success) {
+    if (rs.success === true) {
       const response: { success: boolean; data: any[] } = yield CategoryRequest.getAllCategories();
       message.success("Xóa danh mục thành công");
       yield put(CategoryActions.setCategories(response.data));
-      onSuccess();
     } else {
-      throw rs.message;
+      message.error("Xóa danh mục thất bại");
     }
   } catch (error: any) {
-    message.error(error);
+    message.error("Xóa danh mục thất bại Catch");
   }
 }
 
@@ -90,10 +90,11 @@ function* updateCategory({ payload }: PayloadAction<{ id: string; data: any; onS
       yield put(CategoryActions.setCategories(response.data));
       if (onSuccess) onSuccess();
     } else {
+      message.error("Sửa danh mục thất bại");
       throw new Error(rs.message);
     }
   } catch (error: any) {
-    message.error(error.message || "An error occurred while updating the category.");
+    message.error("An error occurred while updating the category.");
   }
 }
 
