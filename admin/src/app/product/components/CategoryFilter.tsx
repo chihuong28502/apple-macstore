@@ -72,7 +72,6 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
       } else {
         await onAddCategory(categoryData);
       }
-
       form.resetFields();
       setIsModalOpen(false);
       setIsEditMode(false);
@@ -87,7 +86,7 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
         const children = getChildrenCategories(category._id);
         return {
           label: (
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3">
               <Link
                 onClick={() => onCategoryChange(category._id)}
                 href={`/product?categoryId=${category._id}`}
@@ -95,20 +94,18 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
               >
                 {category.name}
               </Link>
-              <Space className="flex items-center bg-slate-300 rounded-md shadow-sm">
+              <Space className="flex bg-slate-500 rounded-md shadow-sm">
                 <button
-                  className="flex items-center py-1 text-green-600 hover:bg-green-100 rounded-md transition"
+                  className="flex p-2 text-green-600 hover:bg-green-100 rounded-md transition"
                   onClick={() => handleEditCategory(category)}
                 >
-                  <EditOutlined className="mr-1" />
-                  Sửa
+                  <EditOutlined />
                 </button>
                 <button
-                  className="flex items-center py-1 text-red-600 hover:bg-red-100 rounded-md transition"
+                  className="flex p-2 text-red-600 hover:bg-red-100 rounded-md transition"
                   onClick={() => handleDeleteCategory(category._id)}
                 >
-                  <DeleteOutlined className="mr-1" />
-                  Xóa
+                  <DeleteOutlined />
                 </button>
               </Space>
             </div>
@@ -121,39 +118,37 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <Space direction="vertical" size="middle" className="flex flex-row">
+    <div className="flex flex-wrap w-full gap-6 mb-8">
+      <Space direction="vertical" size="middle" className="flex flex-row flex-wrap justify-between">
         {categories
           .filter((category) => category.parentCategoryId === null)
           .map((category) => (
             <Dropdown
               key={category._id}
-              overlay={<Menu items={renderDropdownMenu(category._id)} />}
+              menu={{ items: renderDropdownMenu(category._id) }}
               trigger={["hover", "click"]}
             >
-              <div className="flex items-center">
+              <div className="flex items-center justify-between">
                 <Button
-                  onClick={() => onCategoryChange(category._id)}
                   className="flex items-center text-blue-600 hover:text-blue-800 font-semibold"
                 >
-                  {category.name} <DownOutlined className="ml-2" />
+                  {category.name}
+                  <Space className="bg-slate-500 rounded-md flex items-center">
+                    <button
+                      className="flex items-center text-green-600 hover:bg-green-100 rounded-md p-2 transition"
+                      onClick={() => handleEditCategory(category)}
+                    >
+                      <EditOutlined />
+                    </button>
+                    <button
+                      className="flex items-center text-red-600 hover:bg-red-100 rounded-md p-2 transition"
+                      onClick={() => handleDeleteCategory(category._id)}
+                    >
+                      <DeleteOutlined />
+                    </button>
+                  </Space>
+                  <DownOutlined />
                 </Button>
-                <Space className="bg-slate-500 rounded-md">
-                  <button
-                    className="flex items-center text-green-600 hover:bg-green-100 rounded-md px-2 py-1  transition"
-                    onClick={() => handleEditCategory(category)}
-                  >
-                    <EditOutlined  />
-                    Sửa
-                  </button>
-                  <button
-                    className="flex items-center text-red-600 hover:bg-red-100 rounded-md px-2 py-1 transition"
-                    onClick={() => handleDeleteCategory(category._id)}
-                  >
-                    <DeleteOutlined  />
-                    Xóa
-                  </button>
-                </Space>
               </div>
             </Dropdown>
           ))}

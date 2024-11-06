@@ -84,7 +84,6 @@ const ProductPage: React.FC = () => {
 
   const handleCategoryChange = useCallback(
     (categoryId: string) => {
-      console.log("🚀 ~ categoryId:", categoryId)
       setSelectedCategory(categoryId);
       setCurrentPage(1);
       isFromCategoryChange.current = true;
