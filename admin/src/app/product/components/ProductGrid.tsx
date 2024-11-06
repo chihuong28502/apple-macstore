@@ -1,12 +1,10 @@
 "use client";
+import SkeletonOne from "@/components/loadingOne";
+import { type ProductPage } from "@/type/product.page.type";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, message, Modal, Select } from "antd";
 import imageCompression from 'browser-image-compression';
 import { useState } from "react";
-
-import SkeletonOne from "@/components/loadingOne";
-import { type ProductPage } from "@/type/product.page.type";
-
 import Product from "./ProductCard";
 import { StockInput } from "./StockInput";
 
@@ -85,7 +83,6 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
         setIsModalOpen(false);
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
       message.error("Có lỗi xảy ra khi thêm sản phẩm");
     }
   };

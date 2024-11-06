@@ -1,10 +1,9 @@
 "use client";
+import { type ProductPage } from "@/type/product.page.type";
 import { HomeOutlined } from "@ant-design/icons";
 import { Breadcrumb, Card, Skeleton } from "antd";
 import Link from "next/link";
 import React from "react";
-
-import { type ProductPage } from "@/type/product.page.type";
 
 export const BreadcrumbNav: React.FC<ProductPage.BreadcrumbNavProps> = ({
   selectedCategory,

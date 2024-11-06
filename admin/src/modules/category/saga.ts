@@ -88,10 +88,8 @@ function* updateCategory({ payload }: PayloadAction<{ id: string; data: any; onS
       message.success("Sửa danh mục thành công");
       const response = yield CategoryRequest.getAllCategories();
       yield put(CategoryActions.setCategories(response.data));
-      if (onSuccess) onSuccess();
     } else {
       message.error("Sửa danh mục thất bại");
-      throw new Error(rs.message);
     }
   } catch (error: any) {
     message.error("An error occurred while updating the category.");

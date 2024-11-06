@@ -66,9 +66,10 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
     yield put(AppAction.hideLoading());
 
     if (res.success) {
+      message.error("Đăng ký thành công")
       onSuccess(res);
     } else {
-      onFail(res);
+      message.error("Đăng ký thất bại")
     }
   } catch (error: any) {
     yield* handleApiError(error, onFail);
@@ -78,19 +79,16 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
 
 // Saga for retrieving user info
 function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { onSuccess = () => { }, onError = () => { } } = payload;
   try {
     const userId = getUserIdFromToken();
     if (userId) {
       const response = yield call(AuthRequest.getUserInfo, userId);
       yield put(AuthActions.setUser(response.data));
-      onSuccess();
     } else {
       yield put(AuthActions.getInfoUser({}));
     }
   } catch (error) {
     yield put(AuthActions.getInfoUser({}));
-    onError(error);
   }
 }
 

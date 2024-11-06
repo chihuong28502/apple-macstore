@@ -1,18 +1,17 @@
 "use client";
-import { Form, message, Pagination } from "antd";
+import { App, Pagination } from "antd";
 import { debounce } from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { CategoryActions, CategorySelectors } from "@/modules/category/slice";
-import { CategoryType } from "@/modules/category/type";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 
+import { useRouter } from "next/navigation";
 import { BreadcrumbNav } from "./components/BreadcrumbNav";
 import { CategoryFilter } from "./components/CategoryFilter";
 import { PriceFilter } from "./components/PriceFilter";
 import { ProductGrid } from "./components/ProductGrid";
-import { useRouter } from "next/navigation";
 
 interface PriceRange {
   id: number;
@@ -34,9 +33,6 @@ const DEBOUNCE_DELAY = 500;
 
 const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
-  const route = useRouter();
-
-  // Selectors
   const allProducts = useSelector(ProductSelectors.productList);
   const totalProducts = useSelector(ProductSelectors.totalProducts);
   const categories = useSelector(CategorySelectors.categories);
@@ -48,9 +44,6 @@ const ProductPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRangeId, setSelectedRangeId] = useState(0);
-
-  // Form for editing
-  const [form] = Form.useForm();
 
   // Refs
   const isFromCategoryChange = useRef(false);
@@ -98,32 +91,6 @@ const ProductPage: React.FC = () => {
     },
     [fetchProducts, pageSize, priceRange]
   );
-
-  const handleAddCategory = async (newCategory: CategoryType) => {
-    try {
-      await dispatch(CategoryActions.createCategory({ data: newCategory }));
-    } catch (error) {
-      message.error("Failed to add category");
-    }
-  };
-
-  const handleEditButtonClick = async ({ id, data }: any) => {
-    form.setFieldsValue(id);
-    try {
-      await dispatch(CategoryActions.updateCategory({ id: id, data: data }));
-    } catch (error) {
-      message.error("Failed to update category");
-    }
-  };
-
-  const handleDeleteCategory = async (categoryId: string) => {
-    try {
-      await dispatch(CategoryActions.deleteCategory({ id: categoryId }));
-      dispatch(CategoryActions.fetchCategories());
-    } catch (error) {
-      message.error("Failed to delete category");
-    }
-  };
 
   const handlePriceRangeChange = useCallback((range: PriceRange) => {
     setSelectedRangeId(range.id);
@@ -178,22 +145,24 @@ const ProductPage: React.FC = () => {
             loading={loading} />
 
           {Array.isArray(categories) ? (
-            <CategoryFilter
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
-              onAddCategory={handleAddCategory}
-              onEditCategory={handleEditButtonClick} // Pass edit handler
-              onDeleteCategory={handleDeleteCategory} // Pass delete handler
-              loading={loading}
-            />) : (
+            <App>
+              <CategoryFilter
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={handleCategoryChange}
+                loading={loading}
+              />
+            </App>
+          ) : (
             <div>Error loading categories.</div>
           )}
 
 
           <PriceFilter priceRanges={priceRanges} selectedRangeId={selectedRangeId} onPriceChange={handlePriceRangeChange} loading={loading} />
           {Array.isArray(allProducts) ? (
-            <ProductGrid onAddProduct={handleAddProduct} items={pageSize} products={allProducts} loading={loading} categories={categories} />
+            <App>
+              <ProductGrid onAddProduct={handleAddProduct} items={pageSize} products={allProducts} loading={loading} categories={categories} />
+            </App>
           ) : (
             <div>Error loading products.</div>
           )}

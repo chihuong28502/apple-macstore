@@ -8,15 +8,17 @@ type Props = {
 };
 const SideBar = ({ collapsed }: Props) => {
   return (
-    <motion.div
-      className="h-full bg-layout pt-3 overflow-y-auto"
-      initial={{ width: 80 }}
-      style={{
-        overflow: "hidden", 
-      }}
-    >
-        <MenuSidebarDashboard collapsed={collapsed} />
-    </motion.div>
+    // <motion.div
+    //   className="h-full bg-layout pt-3 overflow-y-auto"
+    //   initial={{ width: 80 }}
+    //   style={{
+    //     overflow: "hidden", 
+    //   }}
+    // >
+    //     <MenuSidebarDashboard collapsed={collapsed} />
+    // </motion.div>
+    
+    <MenuSidebarDashboard collapsed={collapsed} />
   );
 };
 

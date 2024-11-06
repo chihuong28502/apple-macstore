@@ -30,8 +30,8 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
     {
       key: "",
       icon: (
-        <Tooltip title="Dashboard" placement="right">
-          <div className="flex items-center w-full h-full cursor-pointer">
+        <Tooltip title="Dashboard" placement="bottom">
+          <div className="flex items-center w-full px-2 h-full cursor-pointer">
             <MdDashboardCustomize />
           </div>
         </Tooltip>
@@ -41,8 +41,8 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
     {
       key: "/product",
       icon: (
-        <Tooltip title="Products" placement="right">
-          <div className="w-full">
+        <Tooltip title="Products" placement="bottom">
+          <div className="w-full px-2">
             <FaShirt />
           </div>
         </Tooltip>
@@ -52,8 +52,8 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
     {
       key: "/user",
       icon: (
-        <Tooltip title="Users" placement="right">
-          <div className="w-full">
+        <Tooltip title="Users" placement="bottom">
+          <div className="w-full px-2">
             <FaUser className="flex justify-center" />
           </div>
         </Tooltip>
@@ -63,8 +63,8 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
     {
       key: "/category",
       icon: (
-        <Tooltip title="Categories" placement="right">
-          <div className="w-full">
+        <Tooltip title="Categories" placement="bottom">
+          <div className="w-full px-2">
             <FaCalculator />
           </div>
         </Tooltip>
@@ -74,8 +74,8 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
     {
       key: "/promotion",
       icon: (
-        <Tooltip title="Promotions" placement="right">
-          <div>
+        <Tooltip title="Promotions" placement="bottom">
+          <div className="w-full px-2">
             <FaPowerOff />
           </div>
         </Tooltip>
@@ -103,20 +103,12 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       >
         <Menu
           selectedKeys={[pathname]}
-          mode="inline" 
+          mode="horizontal" 
           className="bg-transparent"
           inlineCollapsed={collapsed}
           items={items}
         />
       </ConfigProvider>
-      <div
-        className={cn(
-          "flex items-center h-10 my-0.5 z-0 justify-center",
-          collapsed ? "justify-center" : "justify-center"
-        )}
-      >
-        <DarkModeSwitch />
-      </div>
     </>
   );
 };

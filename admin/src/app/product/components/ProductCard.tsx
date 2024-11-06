@@ -1,13 +1,12 @@
 "use client";
+import { ProductActions } from "@/modules/product/slice";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons
 import { useDispatch } from "react-redux";
 
-import { ProductActions } from "@/modules/product/slice";
-
-function Product({ product,currentPage }: any) {
-  const dispatch= useDispatch()
+function Product({ product, currentPage }: any) {
+  const dispatch = useDispatch()
   const router = useRouter();
 
   const handleNextProductDetail = () => {
@@ -15,19 +14,19 @@ function Product({ product,currentPage }: any) {
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     router.push(`product/${product._id}`);
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
       // Thêm logic xóa sản phẩm ở đây
       try {
         dispatch(
           ProductActions.deleteProduct({
             id: product?._id,
-            currentPage:currentPage
+            currentPage: currentPage
           })
         );
       } catch (error) {

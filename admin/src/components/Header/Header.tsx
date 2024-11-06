@@ -1,18 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import React from "react";
-import { FaRegUserCircle } from "react-icons/fa";
-
-import { SVGLogo } from "@/asset/svg";
-import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-
+import React from "react";
+import { FaRegUserCircle } from "react-icons/fa";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
-import SearchComponent from "../Search/Search";
-import User from "./User";
 import SideBar from "../sidebars/Sidebar";
+import User from "./User";
 
 type Props = {
   isMobile: boolean;
@@ -25,12 +19,10 @@ type Props = {
 const Header = () => {
   const auth = useAppSelector(AuthSelectors.user);
   return (
-    <div className="p-6 bg-layout z-20">
+    <div className="p-3 bg-layout z-20 overflow-hidden">
       <div className="h-12 flex md:justify-between justify-end">
-        <div className="h-full flex flex-grow justify-between ">
-          <Link href={"/"} className="flex items-center mr-11">
-            <SVGLogo className="text-fontColor" />
-          </Link>
+        <div className="h-full flex flex-grow justify-center">
+        <SideBar collapsed={false} />
           <div className="flex items-center gap-5">
             {auth && <User />}
             {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
