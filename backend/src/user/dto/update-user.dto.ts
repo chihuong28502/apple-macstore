@@ -1,14 +1,10 @@
 export class UpdateUserDto {
-  readonly username?: string;
-  readonly email?: string;
-  readonly password?: string;
-  readonly role?: string;  // 'customer', 'admin', 'expert'
-  readonly profile?: {
+  username?: string;
+  email?: string;
+  role?: string;
+  profile?: {
     firstName?: string;
     lastName?: string;
     phoneNumber?: string;
-    shoeSize?: number;
-    footType?: string;
-    activityGoal?: string;
   };
 }
