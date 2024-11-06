@@ -1,22 +1,19 @@
-import React from 'react';
-import { Table, Button } from 'antd';
+import { Button, Table } from 'antd';
 
 function Categories({ categories, loading, onEdit, onDelete }: any) {
-  // Sắp xếp danh mục: các danh mục không có cha sẽ được xếp lên đầu
   const sortedCategories = [...categories].sort((a: any, b: any) => {
     if (a.parentCategoryId === null && b.parentCategoryId !== null) {
-      return -1; // a không có cha, đưa lên đầu
+      return -1;
     }
     if (a.parentCategoryId !== null && b.parentCategoryId === null) {
-      return 1; // b không có cha, đưa lên đầu
+      return 1;
     }
-    return 0; // nếu cả 2 đều có hoặc không có cha thì giữ nguyên thứ tự
+    return 0;
   });
 
-  // Tạo một bảng tra cứu cho tên danh mục cha dựa trên `parentCategoryId`
   const parentCategories = categories.reduce((acc: any, category: any) => {
     if (category._id && category.name) {
-      acc[category._id] = category.name;  // Lưu trữ tên danh mục theo ID
+      acc[category._id] = category.name;
     }
     return acc;
   }, {});
@@ -28,11 +25,10 @@ function Categories({ categories, loading, onEdit, onDelete }: any) {
       key: 'name',
     },
     {
-      title: 'Parent Category',
+      title: 'Category cha',
       dataIndex: 'parentCategoryId',
       key: 'parentCategoryId',
       render: (parentCategoryId: any) => {
-        // Lấy tên danh mục cha (nếu có)
         return parentCategoryId ? parentCategories[parentCategoryId] : 'No Parent';
       }
     },
@@ -46,15 +42,15 @@ function Categories({ categories, loading, onEdit, onDelete }: any) {
       title: 'Actions',
       key: 'actions',
       render: (_: any, category: any) => (
-        <div>
-          <Button 
+        <div className='flex justify-center'>
+          <Button
             onClick={() => onEdit(category)}
-            type="primary" 
+            type="primary"
             className="mr-2"
           >
             Edit
           </Button>
-          <Button 
+          <Button
             onClick={() => onDelete(category._id)}
           >
             Delete
@@ -65,8 +61,9 @@ function Categories({ categories, loading, onEdit, onDelete }: any) {
   ];
 
   return (
-    <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4">
+    <div className="overflow-x-auto bg-white shadow-md rounded-lg">
       <Table
+        bordered
         rowKey="_id"
         columns={columns}
         dataSource={sortedCategories}
