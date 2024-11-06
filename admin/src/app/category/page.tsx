@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Categories from "./Categories";
 
-const CategoryControlPagedd : React.FC = () => {
+const CategoryControlPage : React.FC = () => {
   const dispatch = useDispatch();
   const categories = useSelector(CategorySelectors.categories);
   const loading = useSelector(ProductSelectors.isLoading);
