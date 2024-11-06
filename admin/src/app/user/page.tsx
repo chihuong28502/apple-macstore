@@ -8,11 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import Categories from "./components/UserList";
 import { CustomerActions, CustomerSelectors } from "@/modules/customer/slice";
 
-const page: React.FC = () => {
+const UserControlPage: React.FC = () => {
   const dispatch = useDispatch();
   const categories = useSelector(CategorySelectors.categories);
   const customers = useSelector(CustomerSelectors.customer);
-  console.log("🚀 ~ customers:", customers)
   const loading = useSelector(ProductSelectors.isLoading);
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -183,4 +182,4 @@ const page: React.FC = () => {
   );
 };
 
-export default page;
+export default UserControlPage;

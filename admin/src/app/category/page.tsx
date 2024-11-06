@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Categories from "./Categories";
 
-const page: React.FC = () => {
+const CategoryControlPagedd : React.FC = () => {
   const dispatch = useDispatch();
   const categories = useSelector(CategorySelectors.categories);
   const loading = useSelector(ProductSelectors.isLoading);
@@ -179,4 +179,4 @@ const page: React.FC = () => {
   );
 };
 
-export default page;
+export default CategoryControlPage ;
