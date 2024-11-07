@@ -17,7 +17,6 @@ const Cart = () => {
   const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
   const cart = useAppSelector(CartSelectors.cart);
-  console.log("🚀 ~ cart:", cart)
 
   useEffect(() => {
     if (auth?._id) {

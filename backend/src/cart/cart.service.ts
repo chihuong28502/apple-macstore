@@ -95,20 +95,21 @@ export class CartService {
         };
       }
 
-      // Lọc stock dựa trên stockId
-      cart.items = cart.items.map(item => {
-        const productId = item.productId;
-        const stockId = item.stockId;
-        const stock = this.getStockById(productId.stock, stockId); // Gọi hàm để lấy stock
+      cart.items = cart.items
+        .filter(item => item.productId && item.productId.isPublic) // Lọc sản phẩm `isPublic: true`
+        .map(item => {
+          const productId = item.productId;
+          const stockId = item.stockId;
+          const stock = this.getStockById(productId.stock, stockId);
 
-        return {
-          ...item,
-          productId: {
-            ...productId,
-            stock: stock
-          }
-        };
-      });
+          return {
+            ...item,
+            productId: {
+              ...productId,
+              stock: stock
+            }
+          };
+        });
 
       return {
         success: true,
@@ -128,33 +129,34 @@ export class CartService {
     if (!stock || (typeof stock === 'object' && Object.keys(stock).length === 0)) {
       return null;
     }
+    // Kiểm tra xem stock có phải Map hay không
     const isMap = stock instanceof Map;
+
+    // Duyệt qua các màu, RAM và dung lượng
     for (const colorKey of (isMap ? stock.keys() : Object.keys(stock))) {
       const color = isMap ? colorKey : stock[colorKey];
       const ramData = isMap ? stock.get(colorKey) : stock[colorKey];
-      if (!ramData || typeof ramData !== "object") {
-        continue;
-      }
+
+      if (!ramData || typeof ramData !== 'object') continue;
+
       for (const ramKey of (isMap ? ramData.keys() : Object.keys(ramData))) {
         const ram = isMap ? ramKey : ramData[ramKey];
-
         const storageData = isMap ? ramData.get(ramKey) : ramData[ramKey];
 
-        if (!storageData || typeof storageData !== "object") {
-          continue;
-        }
+        if (!storageData || typeof storageData !== 'object') continue;
 
         for (const storageKey of (isMap ? storageData.keys() : Object.keys(storageData))) {
           const storage = isMap ? storageKey : storageData[storageKey];
           const storageItem = isMap ? storageData.get(storageKey) : storageData[storageKey];
-          // Kiểm tra sự tồn tại của storageItem
-          if (storageItem && storageItem._id) {
-            // So sánh ID sau khi chuyển sang string
-            if (storageItem._id.toString() === stockId.toString()) {
-              return { [color]: { [ram]: { [storage]: storageItem } } };
-            } else {
-            }
+
+          // Kiểm tra nếu storageItem tồn tại và có _id, và so sánh _id
+          if (storageItem && storageItem._id && storageItem._id.toString() == stockId.toString()) {
+            console.log("🚀 ~ CartService ~ stockId.toString():", stockId.toString())
+            console.log("🚀 ~ CartService ~ storageItem._id.toString():", storageItem._id.toString())
+            return { [color]: { [ram]: { [storage]: storageItem } } };
           } else {
+            return { [color]: { [ram]: { [storage]: storageItem } } };
+
           }
         }
       }
@@ -162,7 +164,6 @@ export class CartService {
 
     return null;
   }
-
 
 
   async update(userId: string, items: Array<{ productId: string; quantity: number }>): Promise<ResponseDto<Cart>> {

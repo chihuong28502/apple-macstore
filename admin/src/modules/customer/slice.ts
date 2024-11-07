@@ -21,6 +21,9 @@ const CustomerSlice = createSlice({
     setCustomer: (state: CustomerState, { payload }: PayloadAction<any>) => {
       state.customer = payload;
     },
+    updateCustomer: (state: CustomerState, { payload }: PayloadAction<any>) => { },
+    deleteCustomer: (state: any, { payload: any }) => {
+    },
   },
 });
 

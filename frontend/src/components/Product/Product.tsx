@@ -10,10 +10,12 @@ function Product({ product }: any) {
   return (
     <div
       key={product?._id}
-      onClick={handleNextProductDetail}
-      className="bg-gray-100 shadow-md p-2 rounded-lg group overflow-hidden cursor-pointer relative z-10 hover:bg-gray-200"
-    >
-      <div className="w-full overflow-hidden mx-auto aspect-w-16 aspect-h-8 transition-transform duration-300 ease-in-out transform group-hover:-translate-y-2">
+      onClick={product?.isPublic !== false ? handleNextProductDetail : undefined}
+      className={`${product?.isPublic === false
+        ? 'cursor-not-allowed opacity-50 bg-gray-300'
+        : ''
+        } bg-gray-100 shadow-md p-2 rounded-lg group overflow-hidden cursor-pointer relative z-10 hover:bg-gray-200`}>
+      <div className="w-full overflow-hidden  mx-auto aspect-w-16 aspect-h-8 transition-transform duration-300 ease-in-out transform group-hover:-translate-y-2">
         <img
           src={product?.images[0].image}
           alt={product?.name}

@@ -8,6 +8,9 @@ export class Product {
   @Prop({ required: true })
   name: string;  // Tên sản phẩm (MacBook, Mac mini, iMac)
 
+  @Prop()
+  isPublic: boolean;
+
   @Prop({ required: true })
   description: string;  // Mô tả sản phẩm
 
@@ -62,12 +65,6 @@ export class Product {
     default: new Map(),
   })
   stock: Map<string, Map<string, Map<string, { quantity: number; price: number; basePrice: number }>>>;
-
-  @Prop({ default: Date.now })
-  createdAt: Date;
-
-  @Prop({ default: Date.now })
-  updatedAt: Date;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

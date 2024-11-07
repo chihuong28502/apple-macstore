@@ -12,7 +12,7 @@ export class CreateProductDto {
     ramOptions: string[];  // Các tùy chọn RAM
     colors: string[];  // Các màu sắc
   };  // Thông số kỹ thuật
-
+  isPublic:boolean;
   reviewsCount?: number;  // Số lượng đánh giá
   averageRating?: number;  // Đánh giá trung bình
 

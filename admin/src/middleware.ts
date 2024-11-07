@@ -21,7 +21,6 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("accessToken")?.value;
 
-  // Giải mã token để lấy quyền của người dùng
   let userRole = null;
   if (accessToken) {
     const decodedToken = decodeToken(accessToken);

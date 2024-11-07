@@ -9,7 +9,7 @@ export const ProductRequest = {
     return MSTFetch.get(`/products/${id}`);
   },
   getAllProducts({ page, limit, categoryId, minPrice, maxPrice }: { page: number; limit: number; categoryId?: string; minPrice?: number; maxPrice?: number }) {
-    let url = `/products?page=${page || 1}&limit=${limit || 8}&minPrice=${minPrice || 0}&maxPrice=${maxPrice || 100000000}`;
+    let url = `/products?page=${page || 1}&limit=${limit || 8}&isPublic=${1}&minPrice=${minPrice || 0}&maxPrice=${maxPrice || 100000000}`;
     if (categoryId) {
       url += `&categoryId=${categoryId}`;
     }

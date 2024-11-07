@@ -248,6 +248,16 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <Form.Item name="tags" label="Tags">
                 <Select mode="tags" placeholder="Enter tags" />
               </Form.Item>
+              <Form.Item
+                name="isPublic"
+                label="Công khai"
+                rules={[{ required: true, message: "Vui lòng chọn trạng thái công khai" }]}
+              >
+                <Select placeholder="Chọn trạng thái">
+                  <Select.Option value={true}>Công khai</Select.Option>
+                  <Select.Option value={false}>Không công khai</Select.Option>
+                </Select>
+              </Form.Item>
             </div>
 
             <div>

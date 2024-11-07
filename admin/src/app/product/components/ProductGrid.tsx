@@ -56,7 +56,6 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
         const stockValue = form.getFieldValue('stock');
 
         if (!stockValue || typeof stockValue !== 'object') {
-          console.error("Invalid stock data:", stockValue);
           message.error("Thông tin tồn kho không hợp lệ");
           return;
         }
@@ -72,8 +71,9 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
             ramOptions: specifications.ramOptions,
             colors: specifications.colors,
           },
-          stock: stockValue, // Sử dụng trực tiếp giá trị từ StockInput
+          stock: stockValue,
           reviewsCount: 0,
+          isPublic: true,
           averageRating: 0,
         };
 
@@ -138,6 +138,16 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
               placeholder="Nhập giá bán"
               min={0}
             />
+          </Form.Item>
+          <Form.Item
+            name="isPublic"
+            label="Công khai"
+            rules={[{ required: true, message: "Vui lòng chọn trạng thái công khai" }]}
+          >
+            <Select placeholder="Chọn trạng thái">
+              <Select.Option value={true}>Công khai</Select.Option>
+              <Select.Option value={false}>Không công khai</Select.Option>
+            </Select>
           </Form.Item>
 
           <Form.Item
