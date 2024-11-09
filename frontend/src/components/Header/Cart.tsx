@@ -1,22 +1,23 @@
 "use client";
-import { Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
+import { Badge, Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
 import _ from "lodash";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoCartOutline } from "react-icons/io5";
 
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-import { useDispatch } from "react-redux";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import Image from "next/image";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 
 const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
   const cart = useAppSelector(CartSelectors.cart);
+  const router = useRouter()
 
   useEffect(() => {
     if (auth?._id) {
@@ -25,6 +26,9 @@ const Cart = () => {
   }, [auth?._id, dispatch]);
 
   const { resolvedTheme } = useTheme();
+  const handleClickPayment = () => {
+    router.push('/cart')
+  }
 
   const getMenuItems = (): MenuProps["items"] => {
     if (_.isEmpty(cart?.items)) {
@@ -50,7 +54,7 @@ const Cart = () => {
 
         return {
           label: (
-            <Card className="my-2  mx-auto w-full" hoverable bordered={false} style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <Card className="my-2  mx-auto w-full" hoverable bordered={false} style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} >
               <Row gutter={[16, 16]} align="middle">
                 <Col span={5} style={{ textAlign: "center" }}>
                   <Image
@@ -88,7 +92,7 @@ const Cart = () => {
                 const price = Number(stockInfo[color][ram][storage].price); // Ép kiểu giá thành number
                 return acc + (price * item.quantity); // Cộng giá vào tổng
               }, 0).toLocaleString()}₫`}</span>
-              <Button type="primary" style={{ marginLeft: '10px' }}>
+              <Button onClick={handleClickPayment} type="primary" style={{ marginLeft: '10px' }}>
                 Thanh toán
               </Button>
             </div>
@@ -98,7 +102,6 @@ const Cart = () => {
       ]);
     }
   };
-
 
   return (
     <ConfigProvider
@@ -117,8 +120,13 @@ const Cart = () => {
         menu={{ items: getMenuItems() }}
         trigger={["click"]}
       >
-        <div className="cursor-pointer p-1.5 pl-0 text-fontColor">
-          <IoCartOutline className="size-5" />
+        <div className="cursor-pointer p-1.5 pl-0 text-fontColor flex items-center">
+          <Badge
+            style={{ fontSize: '0.8rem', fontWeight: 650, width: '16px', height: '16px', lineHeight: '16px', padding: '0' }}
+            count={cart?.items?.length} overflowCount={99} color="red">
+            <IoCartOutline
+              className="size-5 text-fontColor" />
+          </Badge>
         </div>
       </Dropdown>
     </ConfigProvider>

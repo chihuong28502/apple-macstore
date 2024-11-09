@@ -172,7 +172,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                       style={{ backgroundColor: colorCode }}
                       type="button"
                       onClick={() => handleColorClick(color)}
-                      className={`rounded-full p-3 !text-black border-2 transition-all duration-300 ${selectedColor === color ? "border-white" : ""}`}
+                      className={`rounded-full p-3 border-2 transition-all duration-300 ${selectedColor === color ? "border-fontColor" : ""}`}
                     />
                   </Tooltip>
                 );

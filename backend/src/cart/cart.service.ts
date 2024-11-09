@@ -96,7 +96,6 @@ export class CartService {
       }
 
       cart.items = cart.items
-        .filter(item => item.productId && item.productId.isPublic) // Lọc sản phẩm `isPublic: true`
         .map(item => {
           const productId = item.productId;
           const stockId = item.stockId;
@@ -151,17 +150,12 @@ export class CartService {
 
           // Kiểm tra nếu storageItem tồn tại và có _id, và so sánh _id
           if (storageItem && storageItem._id && storageItem._id.toString() == stockId.toString()) {
-            console.log("🚀 ~ CartService ~ stockId.toString():", stockId.toString())
-            console.log("🚀 ~ CartService ~ storageItem._id.toString():", storageItem._id.toString())
             return { [color]: { [ram]: { [storage]: storageItem } } };
           } else {
-            return { [color]: { [ram]: { [storage]: storageItem } } };
-
           }
         }
       }
     }
-
     return null;
   }
 

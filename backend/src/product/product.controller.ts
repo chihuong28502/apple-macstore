@@ -31,7 +31,17 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @Res() res: Response
   ) {
+    console.log("🚀 ~ ProductController ~ createProductDto:", createProductDto)
     const result = await this.productService.create(createProductDto);
+    return res.status(result.success ? 201 : 400).json(result);
+  }
+
+  @Post(":id/variant")
+  async createVariant(
+    @Body() createVariant: any,
+    @Res() res: Response
+  ) {
+    const result = await this.productService.createVariant(createVariant);
     return res.status(result.success ? 201 : 400).json(result);
   }
 
@@ -51,8 +61,8 @@ export class ProductController {
     @Query('categoryId') categoryId: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number
+    @Query('minPrice') minPrice: number = 0,
+    @Query('maxPrice') maxPrice: number = 10000000000
   ) {
     const result = await this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
     return res.status(result.success ? 200 : 500).json(result);

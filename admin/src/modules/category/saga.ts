@@ -1,6 +1,5 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
-
 import { CategoryRequest } from "./request";
 import { CategoryActions } from "./slice";
 import { CategoryType } from "./type";
@@ -24,8 +23,6 @@ function* createCategory({ payload }: PayloadAction<{ data: CategoryType }>) {
   } catch (e) {
   }
 }
-
-
 
 function* fetchCategories() {
   try {
@@ -63,7 +60,7 @@ function* deleteCategory({ payload }: any) {
 function* updateCategory({ payload }: PayloadAction<{ id: string; data: any; onSuccess: () => void }>): Generator<any, void, any> {
   try {
     yield delay(100);
-    const { id, data, onSuccess } = payload;
+    const { id, data } = payload;
 
     // Pass both `id` and `data` as separate arguments
     const rs = yield CategoryRequest.updateCategory(id, data);
