@@ -23,5 +23,18 @@ export const ProductRequest = {
       url += `&categoryId=${categoryId}`;
     }
     return MSTFetch.get(url);
-  }
+  },
+  /// VARIANTS
+  addVariantByProduct(data: any) {
+    return MSTFetch.post(`/products/variant`, data);
+  },
+  updateVariant(id: string, data: any) {
+    return MSTFetch.put(`/products/variant/update/${id}`, data);
+  },
+  getVariantByProduct(productId: string) {
+    return MSTFetch.get(`/products/variant?productId=${productId}`);
+  },
+  deleteVariant(id: string) {
+    return MSTFetch.delete(`/products/variant/delete/${id}`);
+  },
 };

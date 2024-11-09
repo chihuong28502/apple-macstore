@@ -1,4 +1,4 @@
-import { createSlice,PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "@/core/services/store";
 
@@ -8,12 +8,15 @@ type ProductState = {
   productList: any[];
   totalProducts: number; // Tổng số sản phẩm cho phân trang
   isLoading: boolean;
+  variant: any[],
+
 
 };
 
 const initialState: ProductState = {
   product: null,
   productList: [],
+  variant: [],
   totalProducts: 0,
   isLoading: false,
 };
@@ -58,13 +61,28 @@ const ProductSlice = createSlice({
     },
 
     updateProduct: (state: ProductState, { payload }: PayloadAction<any>) => {
-     },
+    },
     deleteProduct: (state: any, { payload: any }) => {
     },
-
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
-    }
+    },
+
+    //VARIANT
+    createVariantByProduct: (state: any, { payload }: PayloadAction<any>) => { },
+    fetchVariantByProductId: (
+      state: any,
+      { payload }: PayloadAction<string>
+    ) => {
+      state.isLoading = true;
+    },
+    setVariant: (state: any, { payload }: PayloadAction<any>) => {
+      state.variant = payload.variants;
+    },
+    updateVariant: (state: any, { payload }: PayloadAction<any>) => {
+    },
+    deleteVariant: (state: any, { payload: any }) => {
+    },
   },
 });
 
@@ -75,6 +93,7 @@ export const ProductActions = ProductSlice.actions;
 
 export const ProductSelectors = {
   product: (state: RootState) => state.product.product,
+  variant: (state: RootState) => state.product.variant,
   productList: (state: RootState) => state.product.productList,
   totalProducts: (state: RootState) => state.product.totalProducts,
   isLoading: (state: RootState) => state.product.isLoading,

@@ -12,6 +12,9 @@ export class Variant {
   color: string;
 
   @Prop({ required: true })
+  colorCode: string;
+
+  @Prop({ required: true })
   ram: string;
 
   @Prop({ required: true })

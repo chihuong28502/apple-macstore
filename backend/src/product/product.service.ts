@@ -28,7 +28,6 @@ export class ProductService {
           const base64Str = base64.split(',')[1];
           const buffer = Buffer.from(base64Str, 'base64');
           const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
-
           return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
         })
       );
@@ -58,32 +57,6 @@ export class ProductService {
     }
   }
 
-  async createVariant(createVariant: any): Promise<ResponseDto<Product>> {
-    try {
-      const { productId } = createVariant;
-      const variantData = new this.variantModel(
-        {
-          ...createVariant,
-          productId
-        })
-      // Lưu sản phẩm vào database
-      await variantData.save();
-
-      return {
-        success: true,
-        message: 'variantData created successfully',
-        data: variantData,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to create product: ' + error.message,
-        data: null,
-      };
-    }
-  }
-
-
   async createMultiple(createMultipleProductsDto: CreateMultipleProductsDto): Promise<ResponseDto<Product[]>> {
     try {
       const createdProducts = await this.productModel.insertMany(createMultipleProductsDto.products);
@@ -101,7 +74,7 @@ export class ProductService {
     }
   }
 
-  async getAll(
+  async getAllProducts(
     page: number,
     categoryId?: string,
     limit?: number,
@@ -345,6 +318,90 @@ export class ProductService {
       return {
         success: false,
         message: `Xóa sản phẩm thất bại: ${error.message}`,
+      };
+    }
+  }
+
+  // VARIANT
+
+  async getAllVariants(
+    productId?: string,
+  ): Promise<ResponseDto<any>> {
+    try {
+      const variants = await this.variantModel.find({ productId: productId })
+      return {
+        success: true,
+        message: 'variants retrieved successfully',
+        data: { variants: variants },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to retrieve variants',
+        data: { variants: [] },
+      };
+    }
+  }
+
+  async createVariant(createVariant: any): Promise<ResponseDto<any>> {
+    try {
+      const { productId } = createVariant;
+      const variantData = new this.variantModel(
+        {
+          ...createVariant,
+          productId
+        })
+      // Lưu sản phẩm vào database
+      await variantData.save();
+
+      return {
+        success: true,
+        message: 'variantData created successfully',
+        data: variantData,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create product: ' + error.message,
+        data: null,
+      };
+    }
+  }
+
+  async updateVariant(
+    id: string,
+    updateVariant: any,
+  ): Promise<ResponseDto<any>> {
+    try {
+      const updatedVariant = await this.variantModel
+        .findByIdAndUpdate(id, { ...updateVariant }, { new: true })
+        .exec();
+
+      return {
+        success: true,
+        message: 'Cập nhật variant thành công',
+        data: updatedVariant,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Cập nhật variant thất bại: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async removeVariant(id: string): Promise<ResponseDto<any>> {
+    try {
+      await this.variantModel.findByIdAndDelete(id).exec();
+      return {
+        success: true,
+        message: 'Xóa variant thành công',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Xóa variant thất bại: ${error.message}`,
       };
     }
   }
