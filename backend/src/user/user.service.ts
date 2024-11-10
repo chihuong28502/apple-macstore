@@ -76,7 +76,6 @@ export class UserService {
 
   // Update user information and return the updated user, excluding sensitive fields
   async update(id: string, updateUserDto: UpdateUserDto): Promise<ResponseDto<User>> {
-    console.log("🚀 ~ UserService ~ updateUserDto:", updateUserDto)
 
     try {
       // Separate profile-related fields
@@ -92,8 +91,6 @@ export class UserService {
         .findByIdAndUpdate(id, updateData, { new: true })
         .select('-password -__v -createdAt') // Exclude password, version, and createdAt
         .exec();
-
-      console.log("🚀 ~ UserService ~ updatedUser:", updatedUser);
 
       if (!updatedUser) {
         throw new NotFoundException(`User with ID "${id}" not found`);

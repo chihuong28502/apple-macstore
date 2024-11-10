@@ -9,4 +9,14 @@ export const CartRequest = {
       item: item,
     });
   },
+  updateCart({ userId, items }: any) {
+    return MSTFetch.put(`/cart/update/${userId}`, {
+      items: items,
+    });
+  }, deleteItemByCard({ userId, items }: any) {
+    const itemsArray = Array.isArray(items) ? items : [items];
+    return MSTFetch.delete(`/cart/delete/${userId}`, {
+      data: { items: itemsArray }
+    });
+  },
 };

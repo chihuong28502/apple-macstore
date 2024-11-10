@@ -161,7 +161,6 @@ function* fetchVariantByProductId({ payload }: PayloadAction<any>) {
 }
 
 function* deleteVariant({ payload }: any) {
-  console.log("🚀 ~ payload:", payload)
   try {
     yield delay(100);
     const rs: DeleteProductResponse = yield ProductRequest.deleteVariant(payload.id);

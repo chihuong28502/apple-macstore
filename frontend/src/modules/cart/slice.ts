@@ -31,8 +31,19 @@ const CartSlice = createSlice({
     },
     addProductToCart(state, action: PayloadAction<{ id: string; item: any }>) {
       const { id, item } = action.payload;
-      console.log("🚀 ~ id, item:", id, item)
-      // Logic để thêm sản phẩm vào giỏ hàng
+    },
+    updateCartItemQuantity(
+      state,
+      action: PayloadAction<{ userId: string; productId: string; variantId: string; quantity: number }>
+    ) {
+      const { productId, variantId, quantity } = action.payload;
+      const item = state.cart.items.find(
+        (item: any) => item.productId === productId && item.variantId === variantId
+      );
+
+      if (item) {
+        item.quantity = quantity;
+      }
     },
     fetchCart: (state: CartState) => { state.isLoading = true; },
     setCart: (state: CartState, { payload }: PayloadAction<any[]>) => {
@@ -41,6 +52,16 @@ const CartSlice = createSlice({
     setCartById: (state: CartState, { payload }: PayloadAction<any[]>) => {
       state.cartById = payload;
     },
+    deleteItemCard: (state: CartState, { payload }: PayloadAction<{ userId: string; productId: string; variantId: string; }>) => {
+      // Ensure state.cartById exists before trying to filter items
+      if (state.cartById && state.cartById.items) {
+        state.cartById.items = state.cartById.items.filter(
+          (item: any) =>
+            item.productId !== payload.productId || item.variantId !== payload.variantId
+        );
+      }
+    },
+
   },
 });
 

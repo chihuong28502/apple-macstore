@@ -2,18 +2,18 @@
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
-import { Button, Card, Col, Empty, Row } from "antd";
-import _ from "lodash";
+import { Button, Card, Col, Empty, Row, Tooltip } from "antd";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-
+import { FaTrashAlt } from "react-icons/fa";
 import Image from "next/image";
 
 function CartCheckout() {
   const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
   const cart = useAppSelector(CartSelectors.cart);
+  const [quantitys, setQuantity] = useState()
   const router = useRouter();
 
   useEffect(() => {
@@ -22,39 +22,41 @@ function CartCheckout() {
     }
   }, [auth?._id, dispatch]);
 
-  const handleQuantityChange = (productId: any, quantity: any) => {
-    // Cập nhật số lượng giỏ hàng trong Redux store
+  const handleQuantityChange = (productId: string, variantId: string, quantity: number) => {
     if (quantity > 0) {
-      // dispatch(CartActions.updateCartItemQuantity({ productId, quantity }));
+      // Cập nhật số lượng giỏ hàng trong Redux store
+      dispatch(
+        CartActions.updateCartItemQuantity({
+          userId: auth._id,
+          productId,
+          variantId,
+          quantity,
+        })
+      );
+
     }
   };
 
-  const handleRemoveItem = (productId: any) => {
+  const handleRemoveItem = (productId: string, variantId: string) => {
     // Xóa sản phẩm khỏi giỏ hàng
-    // dispatch(CartActions.removeCartItem({ productId }));
+    dispatch(CartActions.deleteItemCard({
+      userId: auth._id,
+      productId,
+      variantId,
+    }));
   };
 
   const getMenuItems = (cart: any) => {
-    if (_.isEmpty(cart?.items)) {
-      return [
-        {
-          label: (
-            <div className="flex justify-center items-center p-4">
-              <Empty description="Giỏ hàng trống" />
-            </div>
-          ),
-          key: "empty",
-        },
-      ];
+    if (!cart?.items?.length) {
+      return (
+        <div className="flex justify-center items-center p-4">
+          <Empty description="Giỏ hàng trống" />
+        </div>
+      );
     } else {
       return cart.items.map((item: any) => {
-        const { productId, quantity } = item;
-        const stockInfo = productId.stock;
-        const color = Object.keys(stockInfo)[0];
-        const ram = Object.keys(stockInfo[color])[0];
-        const storage = Object.keys(stockInfo[color][ram])[0];
-        const price = stockInfo[color][ram][storage].price;
-
+        const { productId, variantId, quantity } = item;
+        const { color, ram, ssd, price, stock } = variantId;
         return (
           <Card
             key={productId._id || item._id}
@@ -83,29 +85,36 @@ function CartCheckout() {
               </Col>
               <Col span={6} className="text-right">
                 <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
-                <div className="text-gray-500 block w-full">{`Lưu trữ: ${storage}`}</div>
-                <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
-                <Button
-                  size="small"
-                  onClick={() => handleQuantityChange(productId._id, quantity + 1)} // Tăng số lượng
-                >
-                  +
-                </Button>
-                <Button
-                  size="small"
-                  onClick={() => handleQuantityChange(productId._id, quantity - 1)} // Giảm số lượng
-                  disabled={quantity <= 1}
-                >
-                  -
-                </Button>
-                <Button
-                  size="small"
-                  type="link"
-                  danger
-                  onClick={() => handleRemoveItem(productId._id)} // Xóa sản phẩm
-                >
-                  Xóa
-                </Button>
+                <div className="text-gray-500 block w-full">{`Lưu trữ: ${ssd}`}</div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    size="small"
+                    onClick={() => handleQuantityChange(productId._id, variantId._id, quantity + 1)} // Tăng số lượng
+                    disabled={Number(quantity) >= Number(stock)}
+                  >
+                    +
+                  </Button>
+                  <span className="text-gray-500 flex items-center">{`${quantity}`}</span>
+
+                  <Button
+                    size="small"
+                    onClick={() => handleQuantityChange(productId._id, variantId._id, quantity - 1)} // Giảm số lượng
+                    disabled={quantity <= 1}
+                  >
+                    -
+                  </Button>
+                </div>
+                <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div>
+                <Tooltip title='Xóa' placement="bottom">
+                  <Button
+                    size="small"
+                    type="link"
+                    danger
+                    onClick={() => handleRemoveItem(productId._id, variantId._id)} // Xóa sản phẩm
+                  >
+                    <FaTrashAlt />
+                  </Button>
+                </Tooltip>
               </Col>
             </Row>
           </Card>

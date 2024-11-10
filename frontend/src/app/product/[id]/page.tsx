@@ -133,8 +133,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }
   };
   
-
-
   const handleIncreaseQuantity = () => {
     const selectedStock = getStockForSelectedOptions();
     if (quantity < (selectedStock?.stock || 0)) {

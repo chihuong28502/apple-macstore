@@ -78,7 +78,6 @@ export class ProductController {
     @Body() createProductDto: CreateProductDto,
     @Res() res: Response
   ) {
-    console.log("🚀 ~ ProductController ~ createProductDto:", createProductDto)
     const result = await this.productService.create(createProductDto);
     return res.status(result.success ? 201 : 400).json(result);
   }
