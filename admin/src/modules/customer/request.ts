@@ -8,7 +8,6 @@ export const CustomerRequest = {
     return MSTFetch.get(`/user/${id}`);
   },
   updateCustomerById(id: string, data: any) {
-    "🚀 ~ data:", data)
     return MSTFetch.put(`/user/update/${id}`, data);
   }, 
   deleteCustomer(id: string) {
