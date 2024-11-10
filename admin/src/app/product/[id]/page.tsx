@@ -265,9 +265,6 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <Form.Item name="description" label="Description">
                 <TextArea rows={4} placeholder="Enter product description" />
               </Form.Item>
-              <Form.Item name="tags" label="tags">
-                <Input placeholder="Enter product tags" />
-              </Form.Item>
 
               <Form.Item name="reviewsCount" label="reviewsCount">
                 <Input placeholder="Enter product reviewsCount" />

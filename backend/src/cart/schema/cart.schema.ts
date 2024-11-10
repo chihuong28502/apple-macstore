@@ -2,12 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type CartItem = {
-  productId: Types.ObjectId; // hoặc Schema.Types.ObjectId
-  stockId: Types.ObjectId;    // hoặc Schema.Types.ObjectId
+  productId: Types.ObjectId;  // id của sản phẩm
+  variantId: Types.ObjectId;  // id của biến thể sản phẩm
   quantity: number;
 };
 
 export type CartDocument = Cart & Document;
+
 @Schema({ timestamps: true })
 export class Cart {
   @Prop({ required: true })
@@ -15,10 +16,10 @@ export class Cart {
 
   @Prop({
     required: true,
-    type: [{ 
+    type: [{
       productId: { type: MongooseSchema.Types.ObjectId, ref: 'Product', required: true },
-      quantity: { type: Number, required: true },
-      stockId: { type: MongooseSchema.Types.ObjectId, ref: 'Product.stock', required: true } // Đảm bảo rằng nó tham chiếu đúng
+      variantId: { type: MongooseSchema.Types.ObjectId, ref: 'Variant', required: true },
+      quantity: { type: Number, required: true }
     }]
   })
   items: CartItem[];

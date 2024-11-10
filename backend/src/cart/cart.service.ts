@@ -37,35 +37,40 @@ export class CartService {
     }
   }
 
-  async addItem(userId: string, item: { id: string; quantity: number; stockId: string }): Promise<ResponseDto<Cart>> {
+  async addItem(userId: string, item: any): Promise<ResponseDto<Cart>> {
     try {
-      const cart = await this.cartModel.findOne({ userId });
+      let cart = await this.cartModel.findOne({ userId });
+  
+      // Nếu không tìm thấy giỏ hàng, tạo giỏ hàng mới
       if (!cart) {
-        return {
-          success: false,
-          message: 'Cart not found for user',
-          data: null,
-        };
+        cart = new this.cartModel({ userId, items: [] });
       }
-
-      const productId = new Types.ObjectId(item.id);
-      const stockId = new Types.ObjectId(item.stockId);
-
-      const existingItemIndex = cart.items.findIndex((i: any) => {
-        if (i.productId && i.stockId) {
-          return i.productId.equals(productId) && i.stockId.equals(stockId);
-        }
-        return false;
-      });
-
+  
+      const productId = new Types.ObjectId(item.productId);
+      const variantId = new Types.ObjectId(item.variantId);
+  
+      const existingItemIndex = cart.items.findIndex((i: any) => 
+        i.productId.equals(productId) && i.variantId.equals(variantId)
+      );
+  
+      // Nếu sản phẩm đã tồn tại trong giỏ hàng, cập nhật số lượng
       if (existingItemIndex > -1) {
         cart.items[existingItemIndex].quantity += item.quantity;
       } else {
-        cart.items.push({ productId, quantity: item.quantity, stockId }); // Đảm bảo stockId có mặt khi thêm mục mới
+        // Nếu sản phẩm chưa có trong giỏ hàng, thêm mới
+        cart.items.push({
+          productId, 
+          variantId, 
+          quantity: item.quantity
+        });
       }
-
+  
+      // Lưu giỏ hàng đã cập nhật
       const updatedCart = await cart.save();
-      this.cartsGateway.sendEventAddCart(updatedCart)
+  
+      // Gửi sự kiện giỏ hàng đã được cập nhật
+      this.cartsGateway.sendEventAddCart(updatedCart);
+  
       return {
         success: true,
         message: 'Item added to cart successfully',
@@ -79,37 +84,23 @@ export class CartService {
       };
     }
   }
+  
 
   async findByUserId(userId: string): Promise<ResponseDto<Cart>> {
     try {
-      const cart: any = await this.cartModel.findOne({ userId })
-        .populate('items.productId', '-createdAt -updatedAt -__v -specifications -tags -price')
-        .select('-createdAt -updatedAt -__v')
-        .exec();
-
+      const cart = await this.cartModel
+        .findOne({ userId })
+        .populate('items.productId', 'name description images')  // Lấy thông tin sản phẩm
+        .populate('items.variantId', 'color colorCode ram ssd price stock status'); // Lấy thông tin biến thể
+  
       if (!cart) {
         return {
           success: false,
-          message: 'Cart not found',
+          message: 'Cart not found for user',
           data: null,
         };
       }
-
-      cart.items = cart.items
-        .map(item => {
-          const productId = item.productId;
-          const stockId = item.stockId;
-          const stock = this.getStockById(productId.stock, stockId);
-
-          return {
-            ...item,
-            productId: {
-              ...productId,
-              stock: stock
-            }
-          };
-        });
-
+  
       return {
         success: true,
         message: 'Cart retrieved successfully',
@@ -123,42 +114,6 @@ export class CartService {
       };
     }
   }
-
-  private getStockById(stock: any, stockId: string): any {
-    if (!stock || (typeof stock === 'object' && Object.keys(stock).length === 0)) {
-      return null;
-    }
-    // Kiểm tra xem stock có phải Map hay không
-    const isMap = stock instanceof Map;
-
-    // Duyệt qua các màu, RAM và dung lượng
-    for (const colorKey of (isMap ? stock.keys() : Object.keys(stock))) {
-      const color = isMap ? colorKey : stock[colorKey];
-      const ramData = isMap ? stock.get(colorKey) : stock[colorKey];
-
-      if (!ramData || typeof ramData !== 'object') continue;
-
-      for (const ramKey of (isMap ? ramData.keys() : Object.keys(ramData))) {
-        const ram = isMap ? ramKey : ramData[ramKey];
-        const storageData = isMap ? ramData.get(ramKey) : ramData[ramKey];
-
-        if (!storageData || typeof storageData !== 'object') continue;
-
-        for (const storageKey of (isMap ? storageData.keys() : Object.keys(storageData))) {
-          const storage = isMap ? storageKey : storageData[storageKey];
-          const storageItem = isMap ? storageData.get(storageKey) : storageData[storageKey];
-
-          // Kiểm tra nếu storageItem tồn tại và có _id, và so sánh _id
-          if (storageItem && storageItem._id && storageItem._id.toString() == stockId.toString()) {
-            return { [color]: { [ram]: { [storage]: storageItem } } };
-          } else {
-          }
-        }
-      }
-    }
-    return null;
-  }
-
 
   async update(userId: string, items: Array<{ productId: string; quantity: number }>): Promise<ResponseDto<Cart>> {
     try {

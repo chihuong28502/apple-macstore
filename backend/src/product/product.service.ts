@@ -21,7 +21,7 @@ export class ProductService {
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
-  async create(createProductDto: CreateProductDto): Promise<ResponseDto<Product>> {
+  async create(createProductDto: any): Promise<ResponseDto<Product>> {
     try {
       const uploadedImages = await Promise.all(
         createProductDto.images.map(async (base64: any) => {

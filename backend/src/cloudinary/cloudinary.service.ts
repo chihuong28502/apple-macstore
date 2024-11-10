@@ -40,6 +40,7 @@ export class CloudinaryService {
         );
         stream.pipe(uploadStream);
       });
+      console.log(result);
 
       return {
         success: true,

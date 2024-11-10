@@ -25,7 +25,7 @@ function CartCheckout() {
   const handleQuantityChange = (productId: any, quantity: any) => {
     // Cập nhật số lượng giỏ hàng trong Redux store
     if (quantity > 0) {
-      dispatch(CartActions.updateCartItemQuantity({ productId, quantity }));
+      // dispatch(CartActions.updateCartItemQuantity({ productId, quantity }));
     }
   };
 
