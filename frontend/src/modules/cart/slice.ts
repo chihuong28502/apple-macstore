@@ -7,13 +7,15 @@ type CartState = {
   _id?: string;
   cart?: any;
   isLoading: boolean;
-  cartById?: any
+  cartById?: any;
+  cartSelected: any
 };
 
 const initialState: CartState = {
   cart: null,
   isLoading: false,
-  cartById: null
+  cartById: null,
+  cartSelected: []
 };
 
 const CartSlice = createSlice({
@@ -61,7 +63,9 @@ const CartSlice = createSlice({
         );
       }
     },
-
+    setCartSelected: (state: CartState, { payload }: PayloadAction<any[]>) => {
+      state.cartSelected = payload;
+    },
   },
 });
 
@@ -73,5 +77,6 @@ export const CartActions = CartSlice.actions;
 export const CartSelectors = {
   cart: (state: RootState) => state.cart.cart,
   cartById: (state: RootState) => state.cart.cartById,
+  cartSelected: (state: RootState) => state.cart.cartSelected,
   isLoading: (state: RootState) => state.cart.isLoading,
 };
