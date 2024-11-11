@@ -9,28 +9,47 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomizationOptions from "../components/CustomizationOptions";
 
+interface Variant {
+  color: string;
+  colorCode: string;
+  ram: string;
+  ssd: string;
+  price: number;
+  stock: number;
+  _id: string;
+}
+
+interface Image {
+  image: string;
+}
+
+interface Product {
+  name: string;
+  description: string;
+  images: Image[];
+  variants: Variant[];
+}
+
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const dispatch = useDispatch();
   const productId = params.id;
-  const productById = useSelector(ProductSelectors.product);
-  const auth = useSelector(AuthSelectors.user)
+  const productById: Product | undefined = useSelector(ProductSelectors.product);
+  const auth = useSelector(AuthSelectors.user);
 
   const [mainImage, setMainImage] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [selectedRam, setSelectedRam] = useState<string | undefined>(undefined);
   const [selectedStorage, setSelectedStorage] = useState<string | undefined>(undefined);
-  const [isFirstSelection, setIsFirstSelection] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    const cachedProduct = getCache('productById');
+    const cachedProduct = getCache("productById");
     if (cachedProduct && cachedProduct._id === productId) {
       dispatch(ProductActions.setProduct(cachedProduct));
       return;
-    }
-    dispatch(ProductActions.fetchProductById(productId))
+    } 
+    dispatch(ProductActions.fetchProductById(productId));
   }, [dispatch, productId]);
-
 
   useEffect(() => {
     if (productById?.images?.length) {
@@ -42,92 +61,81 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   const handleColorClick = (color: string) => {
     setSelectedColor(color);
-    if (isFirstSelection) {
-      resetSelections();
-      setIsFirstSelection(false);
-    }
-    setQuantity(1); // Reset quantity về 1 khi thay đổi màu sắc
+    resetSelections();
+    setQuantity(1);
   };
 
   const handleRamClick = (ram: string) => {
     setSelectedRam(ram);
-    setQuantity(1); // Reset quantity về 1 khi thay đổi RAM
+    setQuantity(1);
   };
 
   const handleStorageClick = (storage: string) => {
     setSelectedStorage(storage);
-    setQuantity(1); // Reset quantity về 1 khi thay đổi dung lượng lưu trữ
+    setQuantity(1);
   };
-
 
   const resetSelections = () => {
     setSelectedRam(undefined);
     setSelectedStorage(undefined);
   };
 
-  const getStockForSelectedOptions = () => {
-    return selectedColor && selectedRam && selectedStorage
-      ? productById?.stock?.[selectedColor]?.[selectedRam]?.[selectedStorage] || {}
-      : {};
+  const getVariantsForSelectedColor = () => {
+    return productById?.variants?.filter((variant: Variant) => variant.color === selectedColor) || [];
   };
 
   const availableRamsForSelectedColor = () => {
-    return selectedColor ? productById?.specifications?.ramOptions || [] : [];
+    const variants = getVariantsForSelectedColor();
+    const rams = Array.from(new Set(variants.map((variant: Variant) => variant.ram)));
+    return rams;
   };
 
   const availableStorageForSelectedRamAndColor = () => {
-    return selectedColor && selectedRam
-      ? Object.keys(productById?.stock?.[selectedColor]?.[selectedRam] || {})
-      : [];
+    const variants = getVariantsForSelectedColor();
+    const storages = Array.from(
+      new Set(variants.filter((variant: Variant) => variant.ram === selectedRam).map((variant: Variant) => variant.ssd))
+    );
+    return storages;
   };
 
-  useEffect(() => {
-    const colors = productById?.specifications?.colors || [];
-    if (colors.length > 0) {
-      setSelectedColor(colors[0]);
-      const rams = availableRamsForSelectedColor();
-      if (rams.length > 0) setSelectedRam(rams[0]);
-      const storages = availableStorageForSelectedRamAndColor();
-      if (storages.length > 0) setSelectedStorage(storages[0]);
-    }
-  }, [productById]);
-
-  useEffect(() => {
-    if (selectedColor) {
-      const rams = availableRamsForSelectedColor();
-      if (rams.length > 0 && selectedRam === undefined) {
-        setSelectedRam(rams[0]);
-      }
-    }
-  }, [selectedColor]);
-
-  useEffect(() => {
-    if (selectedColor && selectedRam) {
-      const storages = availableStorageForSelectedRamAndColor();
-      if (storages.length > 0 && selectedStorage === undefined) {
-        setSelectedStorage(storages[0]);
-      }
-    }
-  }, [selectedColor, selectedRam]);
+  const getStockForSelectedOptions = () => {
+    return getVariantsForSelectedColor().find(
+      (variant: Variant) => variant.ram === selectedRam && variant.ssd === selectedStorage
+    );
+  };
 
   const handleAddToCart = () => {
+    // Kiểm tra nếu đã chọn đầy đủ màu sắc, RAM và lưu trữ
+    if (!selectedColor || !selectedRam || !selectedStorage) {
+      alert("Please select color, RAM, and storage before adding to the cart.");
+      return;
+    }
+  
+    // Tìm variant tương ứng với các lựa chọn
     const selectedStock = getStockForSelectedOptions();
-    if (selectedStock && selectedStock.price) {
+  
+    if (selectedStock) {
+      // Tạo sản phẩm cần thêm vào giỏ hàng với chỉ productId, variantId và quantity
       const productToAdd = {
-        id: productId,
-        quantity: quantity > selectedStock.quantity ? selectedStock.quantity : quantity,
-        stockId: selectedStock._id
+        productId: productId, // ID sản phẩm
+        variantId: selectedStock._id, // ID variant (stockId)
+        quantity: quantity > selectedStock.stock ? selectedStock.stock : quantity, // Số lượng, giới hạn với số tồn kho
       };
-      dispatch(CartActions.addProductToCart({
-        id: auth._id,
-        item: productToAdd
-      }));
+  
+      dispatch(
+        CartActions.addProductToCart({
+          id: auth._id, // ID người dùng
+          item: productToAdd, // Sản phẩm cần thêm
+        })
+      );
+    } else {
+      alert("The selected variant is out of stock.");
     }
   };
-
+  
   const handleIncreaseQuantity = () => {
     const selectedStock = getStockForSelectedOptions();
-    if (quantity < (selectedStock?.quantity || 0)) {
+    if (quantity < (selectedStock?.stock || 0)) {
       setQuantity(quantity + 1);
     }
   };
@@ -137,6 +145,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       setQuantity(quantity - 1);
     }
   };
+
   return (
     <div className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">
@@ -147,7 +156,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             className="w-3/4 rounded-lg object-cover shadow-lg"
           />
           <div className="w-20 flex flex-col gap-3">
-            {productById?.images?.map((image: { image: string }, index: number) => (
+            {productById?.images?.map((image: Image, index: number) => (
               <img
                 key={index}
                 src={image.image}
@@ -161,23 +170,22 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         <div>
           <h2 className="text-2xl font-bold text-fontColor">{productById?.name}</h2>
           <p className="text-[#d02525]">{productById?.description}</p>
-          <div className="mt-5 flex items-center gap-3">
-            <h3 className="text-xl font-bold text-fontColor">Colors:</h3>
-            <div className="flex flex-wrap gap-2">
-              {productById?.specifications?.colors?.map((color: string) => {
-                const colorCode: any = extractColorCode(color);
-                return (
-                  <Tooltip title={extractColorName(color)} key={color}>
-                    <button
-                      style={{ backgroundColor: colorCode }}
-                      type="button"
-                      onClick={() => handleColorClick(color)}
-                      className={`rounded-full p-3 !text-black border-2 transition-all duration-300 ${selectedColor === color ? "border-white" : ""}`}
-                    />
-                  </Tooltip>
-                );
-              })}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <h3 className="text-xl font-bold text-fontColor">Colors: </h3>
+            {Array.from(
+              new Map(
+                productById?.variants?.map((variant: Variant) => [variant.color, variant.colorCode])
+              )
+            ).map(([color, colorCode]) => (
+              <Tooltip title={color} key={color}>
+                <button
+                  type="button"
+                  onClick={() => handleColorClick(color)}
+                  className={`rounded-full p-3 border-2 transition-all duration-300 ${selectedColor === color ? "border-fontColor" : ""}`}
+                  style={{ backgroundColor: colorCode }}
+                />
+              </Tooltip>
+            ))}
           </div>
 
           {selectedColor && (
@@ -210,7 +218,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                         currency: "VND",
                       })}
                     </p>
-                    <p className="text-[#999]">Tồn kho: {selectedStock.quantity} sản phẩm</p>
+                    <p className="text-[#999]">Tồn kho: {selectedStock.stock} sản phẩm</p>
                   </>
                 ) : null;
               })()}

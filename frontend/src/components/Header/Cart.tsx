@@ -1,23 +1,21 @@
 "use client";
-import { Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
-import _ from "lodash";
+import { Badge, Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoCartOutline } from "react-icons/io5";
-
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-import { useDispatch } from "react-redux";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import Image from "next/image";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 
 const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
   const cart = useAppSelector(CartSelectors.cart);
-  console.log("🚀 ~ cart:", cart)
+  const router = useRouter();
 
   useEffect(() => {
     if (auth?._id) {
@@ -27,8 +25,12 @@ const Cart = () => {
 
   const { resolvedTheme } = useTheme();
 
+  const handleClickPayment = () => {
+    router.push('/cart'); // Navigate to the cart page
+  };
+
   const getMenuItems = (): MenuProps["items"] => {
-    if (_.isEmpty(cart?.items)) {
+    if (!cart?.items || cart?.items.length === 0) {
       return [
         {
           label: (
@@ -41,36 +43,41 @@ const Cart = () => {
       ];
     } else {
       return cart.items.map((item: any) => {
-        const { productId, quantity } = item;
-        const stockInfo = productId.stock;
-
-        const color = Object.keys(stockInfo)[0];
-        const ram = Object.keys(stockInfo[color])[0];
-        const storage = Object.keys(stockInfo[color][ram])[0];
-        const price = stockInfo[color][ram][storage].price;
+        const { productId, variantId, quantity } = item;
+        const { images, name, description } = productId;
+        const { color, ram, ssd, price, stock } = variantId;
 
         return {
           label: (
-            <Card className="my-2  mx-auto w-full" hoverable bordered={false} style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <Card
+              className="my-2 mx-auto w-full"
+              hoverable
+              bordered={false}
+              style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+            >
               <Row gutter={[16, 16]} align="middle">
                 <Col span={5} style={{ textAlign: "center" }}>
                   <Image
-                    src={productId.images[0].image} // Lấy ảnh đầu tiên
-                    alt={productId.name}
-                    width={80} // Đặt chiều rộng của ảnh
-                    height={80} // Đặt chiều cao của ảnh
-                    className="object-cover rounded" // Bảo đảm ảnh được cắt đúng tỷ lệ và bo góc
+                    src={images[0].image} // Use the first image
+                    alt={name}
+                    width={80}
+                    height={80}
+                    className="object-cover rounded"
                   />
                 </Col>
                 <Col span={13}>
-                  <span className="font-bold text-lg block">{productId.name}</span> {/* Tên sản phẩm */}
-                  <span className="text-gray-500 block">{`Màu: ${color}`}</span> {/* Màu sắc, RAM và lưu trữ */}
-                  <span className="text-lg font-semibold text-red-600">{`${price.toLocaleString()}₫`}</span> {/* Số lượng x Giá */}
+                  <span className="font-bold text-lg block">{name}</span>
+                  {/* <span className="text-gray-500 block">{`Mô tả: ${description}`}</span> */}
+                  <span className="text-gray-500 block">{`Màu: ${color}`}</span>
+                  <span className="text-lg font-semibold text-red-600">
+                    {`${price.toLocaleString()}₫`}
+                  </span>
                 </Col>
                 <Col span={6} className="text-right">
-                  <div className="text-gray-500 block">{`RAM: ${ram}`}</div> {/* Màu sắc, RAM và lưu trữ */}
-                  <div className="text-gray-500 block w-full">{`Lưu trữ: ${storage}`}</div> {/* Màu sắc, RAM và lưu trữ */}
-                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div> {/* Màu sắc, RAM và lưu trữ */}
+                  <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
+                  <div className="text-gray-500 block w-full">{`SSD: ${ssd}`}</div>
+                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
+                  {/* <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div> */}
                 </Col>
               </Row>
             </Card>
@@ -81,15 +88,13 @@ const Cart = () => {
         {
           label: (
             <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
-              <span className="font-bold">{`Tổng: ${cart.items.reduce((acc: any, item: any) => {
-                const stockInfo = item.productId.stock;
-                const color = Object.keys(stockInfo)[0]; // Lấy key màu đầu tiên
-                const ram = Object.keys(stockInfo[color])[0]; // Lấy key RAM đầu tiên
-                const storage = Object.keys(stockInfo[color][ram])[0]; // Lấy key Storage đầu tiên
-                const price = Number(stockInfo[color][ram][storage].price); // Ép kiểu giá thành number
-                return acc + (price * item.quantity); // Cộng giá vào tổng
-              }, 0).toLocaleString()}₫`}</span>
-              <Button type="primary" style={{ marginLeft: '10px' }}>
+              <span className="font-bold">
+                {`Tổng: ${cart.items.reduce((acc: any, item: any) => {
+                  const { price } = item.variantId;
+                  return acc + (price * item.quantity);
+                }, 0).toLocaleString()}₫`}
+              </span>
+              <Button onClick={handleClickPayment} type="primary" style={{ marginLeft: '10px' }}>
                 Thanh toán
               </Button>
             </div>
@@ -99,7 +104,6 @@ const Cart = () => {
       ]);
     }
   };
-
 
   return (
     <ConfigProvider
@@ -118,8 +122,13 @@ const Cart = () => {
         menu={{ items: getMenuItems() }}
         trigger={["click"]}
       >
-        <div className="cursor-pointer p-1.5 pl-0 text-fontColor">
-          <IoCartOutline className="size-5" />
+        <div className="cursor-pointer p-1.5 pl-0 text-fontColor flex items-center">
+          <Badge
+            style={{ fontSize: '0.8rem', fontWeight: 650, width: '16px', height: '16px', lineHeight: '16px', padding: '0' }}
+            count={cart?.items?.length} overflowCount={99} color="red"
+          >
+            <IoCartOutline className="size-5 text-fontColor" />
+          </Badge>
         </div>
       </Dropdown>
     </ConfigProvider>

@@ -40,7 +40,7 @@ const Header = () => {
             <div className=" mx-5">
               {auth && <Cart />}
             </div>
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-1">
               {auth && <User />}
               {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}
               {auth && <NotificationPopover />}

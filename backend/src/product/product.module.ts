@@ -5,13 +5,18 @@ import { ProductController } from './product.controller';
 import { Product, ProductSchema } from './schema/product.schema';
 import { CategoryModule } from 'src/category/category.module';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { Variant, VariantSchema } from './schema/variants.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
-    CategoryModule 
+    MongooseModule.forFeature([
+      { name: Product.name, schema: ProductSchema },
+      { name: Variant.name, schema: VariantSchema }
+
+    ]),
+    CategoryModule
   ],
-  providers: [ProductService,CloudinaryService],
+  providers: [ProductService, CloudinaryService],
   controllers: [ProductController],
   exports: [ProductService],
 })

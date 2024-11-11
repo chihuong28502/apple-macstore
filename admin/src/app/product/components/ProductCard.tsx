@@ -2,15 +2,15 @@
 import { ProductActions } from "@/modules/product/slice";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { FaEdit, FaTrash } from "react-icons/fa"; // Import icons
+import { FaEdit, FaTrash, FaAddressCard } from "react-icons/fa"; // Import icons
 import { useDispatch } from "react-redux";
 
 function Product({ product, currentPage }: any) {
   const dispatch = useDispatch()
   const router = useRouter();
 
-  const handleNextProductDetail = () => {
-    router.push(`product/${product._id}`);
+  const handleAddVariant = () => {
+    router.push(`product/variant/${product._id}`);
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -38,15 +38,22 @@ function Product({ product, currentPage }: any) {
   return (
     <div
       key={product?._id}
-      onClick={handleNextProductDetail}
-      className="bg-gray-100 shadow-md p-2 rounded-lg group overflow-hidden cursor-pointer relative z-10 hover:bg-gray-200"
-    >
+      className={`${product?.isPublic === false
+        ? 'opacity-50 bg-gray-300'
+        : ''
+        } bg-gray-100 shadow-md p-2 rounded-lg group overflow-hidden cursor-pointer relative z-10 hover:bg-gray-200`}>
       <div className="absolute top-2 right-2 flex gap-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={handleAddVariant}
+          className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors duration-200"
+        >
+          <FaAddressCard size={16} className="z-20" />
+        </button>
         <button
           onClick={handleEdit}
           className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors duration-200"
         >
-          <FaEdit size={16} />
+          <FaEdit size={16} className="z-20" />
         </button>
         <button
           onClick={handleDelete}

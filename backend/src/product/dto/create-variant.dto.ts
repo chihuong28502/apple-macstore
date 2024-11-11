@@ -1,4 +1,4 @@
-export class UpdateProductDto {
+export class CreateProductDto {
   name: string;  // Tên sản phẩm
   description: string;  // Mô tả sản phẩm
   price: number;  // Giá bán
@@ -12,11 +12,10 @@ export class UpdateProductDto {
     ramOptions: string[];  // Các tùy chọn RAM
     colors: string[];  // Các màu sắc
   };  // Thông số kỹ thuật
-  isPublic: boolean;
-
+  isPublic:boolean;
   reviewsCount?: number;  // Số lượng đánh giá
   averageRating?: number;  // Đánh giá trung bình
 
-  stock: Map<string, Map<string, { quantity: number; price: number, basePrice: number }>>;  // Tồn kho
+  stock: Map<string, Map<string, { quantity: number; price: number ,basePrice: number}>>;  // Tồn kho
 
 }

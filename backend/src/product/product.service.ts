@@ -1,47 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/category/schema/category.schema';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
+import { extractPublicId } from 'src/utils/func/getPublicId';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schema/product.schema';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { extractPublicId } from 'src/utils/func/getPublicId';
+import { Variant, VariantDocument } from './schema/variants.schema';
+import { populate } from 'dotenv';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+    @InjectModel(Variant.name) private variantModel: Model<VariantDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
-  async create(createProductDto: CreateProductDto): Promise<ResponseDto<Product>> {
+  async create(createProductDto: any): Promise<ResponseDto<Product>> {
     try {
-      // Tải lên tất cả ảnh từ danh sách base64
       const uploadedImages = await Promise.all(
         createProductDto.images.map(async (base64: any) => {
-          const base64Str = base64.split(',')[1]; 
+          const base64Str = base64.split(',')[1];
           const buffer = Buffer.from(base64Str, 'base64');
           const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
-          
-          return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null; 
+          return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
         })
       );
-  
+
       // Lọc những kết quả hợp lệ (không phải null)
       const validUploads = uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
-  
+
       const createdProduct = new this.productModel({
         ...createProductDto,
-        images: validUploads, 
+        images: validUploads,
       });
-  
+
       // Lưu sản phẩm vào database
       await createdProduct.save();
-  
+
       return {
         success: true,
         message: 'Product created successfully',
@@ -55,7 +56,6 @@ export class ProductService {
       };
     }
   }
-  
 
   async createMultiple(createMultipleProductsDto: CreateMultipleProductsDto): Promise<ResponseDto<Product[]>> {
     try {
@@ -74,7 +74,7 @@ export class ProductService {
     }
   }
 
-  async getAll(
+  async getAllProducts(
     page: number,
     categoryId?: string,
     limit?: number,
@@ -152,7 +152,6 @@ export class ProductService {
           }
         }
       }
-
       // Thêm danh sách danh mục vào filter
       if (categoryIds.length > 0) {
         filter.categoryId = { $in: categoryIds }; // Lọc sản phẩm theo các danh mục
@@ -192,14 +191,27 @@ export class ProductService {
 
   async findOne(id: string): Promise<ResponseDto<Product>> {
     try {
-      const product = await this.productModel.findById(id).exec();
-      if (!product) {
+      const product = await this.productModel.aggregate([
+        {
+          $match: { _id: new Types.ObjectId(id) }  // Tìm sản phẩm theo ID
+        },
+        {
+          $lookup: {
+            from: "variants",  // Tên của collection Variant
+            localField: "_id",  // Trường của Product mà bạn muốn nối
+            foreignField: "productId",  // Trường trong Variant mà bạn muốn nối
+            as: "variants"  // Kết quả sẽ được lưu trong trường variants
+          }
+        }
+      ]);
+
+      if (product.length === 0) {
         throw new NotFoundException(`Product with ID "${id}" not found`);
       }
       return {
         success: true,
-        message: 'Product retrieved successfully',
-        data: product,
+        message: 'Product Get One successfully',
+        data: product[0]
       };
     } catch (error) {
       return {
@@ -214,14 +226,13 @@ export class ProductService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<ResponseDto<Product>> {
-    console.log("🚀 ~ ProductService ~ updateProductDto:", updateProductDto)
     try {
       // Lấy sản phẩm hiện tại từ DB
       const existingProduct = await this.productModel.findById(id).exec();
       if (!existingProduct) {
         throw new NotFoundException(`Không tìm thấy sản phẩm với ID "${id}"`);
       }
-  
+
       // Kiểm tra và upload các ảnh mới (nếu cần)
       const uploadedImages = await Promise.all(
         updateProductDto.images.map(async (image: any) => {
@@ -235,14 +246,14 @@ export class ProductService {
           return image; // Nếu ảnh đã có trên Cloudinary, giữ nguyên
         })
       );
-  
+
       // Lọc những ảnh hợp lệ (không phải null)
       const validUploads = uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
-  
+
       // Xóa những ảnh bị loại bỏ khỏi Cloudinary
       const updatedImagePublicIds = validUploads.map(img => img.publicId);
       const imagesToDelete = existingProduct.images.filter(img => !updatedImagePublicIds.includes(img.publicId));
-  
+
       // Gọi deleteMedia cho từng publicId hợp lệ
       const deleteMediaPromises = imagesToDelete.map(async image => {
         // Kiểm tra nếu ảnh không có `publicId`, lấy từ URL
@@ -250,12 +261,12 @@ export class ProductService {
         return this.cloudinaryService.deleteMedia(publicId, 'image');
       });
       await Promise.all(deleteMediaPromises);
-  
+
       // Cập nhật sản phẩm với thông tin mới
       const updatedProduct = await this.productModel
         .findByIdAndUpdate(id, { ...updateProductDto, images: validUploads }, { new: true })
         .exec();
-  
+
       return {
         success: true,
         message: 'Cập nhật sản phẩm thành công',
@@ -269,8 +280,6 @@ export class ProductService {
       };
     }
   }
-  
-  
 
   async remove(id: string): Promise<ResponseDto<Product>> {
     try {
@@ -278,27 +287,27 @@ export class ProductService {
       if (!productToDelete) {
         throw new NotFoundException(`Không tìm thấy sản phẩm với ID "${id}"`);
       }
-  
+
       // Lọc ra các publicId hợp lệ hoặc lấy từ URL nếu cần
       const validImagePublicIds = productToDelete.images.map(image => {
         // Nếu không có publicId, trích xuất từ URL
         return image.publicId || extractPublicId(image.image);
       });
-  
+
       // Gọi deleteMedia cho từng publicId hợp lệ
       const deleteMediaPromises = validImagePublicIds.map(async publicId => {
         return this.cloudinaryService.deleteMedia(publicId, 'image');
       });
-  
+
       // Chờ cho tất cả các promise được hoàn thành
       const deleteMediaResults = await Promise.all(deleteMediaPromises);
-  
+
       // Kiểm tra xem tất cả các ảnh đã được xóa thành công
       const allDeleted = deleteMediaResults.every(result => result.success);
       if (!allDeleted) {
         throw new Error('Some media files failed to delete');
       }
-  
+
       // Xóa sản phẩm
       await this.productModel.findByIdAndDelete(id).exec();
       return {
@@ -312,6 +321,88 @@ export class ProductService {
       };
     }
   }
-  
-  
+
+  // VARIANT
+
+  async getAllVariants(
+    productId?: string,
+  ): Promise<ResponseDto<any>> {
+    try {
+      const variants = await this.variantModel.find({ productId: productId })
+      return {
+        success: true,
+        message: 'variants retrieved successfully',
+        data: { variants: variants },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to retrieve variants',
+        data: { variants: [] },
+      };
+    }
+  }
+
+  async createVariant(createVariant: any): Promise<ResponseDto<any>> {
+    try {
+      const { productId } = createVariant;
+      const variantData = new this.variantModel(
+        {
+          ...createVariant,
+          productId
+        })
+      // Lưu sản phẩm vào database
+      await variantData.save();
+
+      return {
+        success: true,
+        message: 'variantData created successfully',
+        data: variantData,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create product: ' + error.message,
+        data: null,
+      };
+    }
+  }
+
+  async updateVariant(
+    id: string,
+    updateVariant: any,
+  ): Promise<ResponseDto<any>> {
+    try {
+      const updatedVariant = await this.variantModel
+        .findByIdAndUpdate(id, { ...updateVariant }, { new: true })
+        .exec();
+
+      return {
+        success: true,
+        message: 'Cập nhật variant thành công',
+        data: updatedVariant,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Cập nhật variant thất bại: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async removeVariant(id: string): Promise<ResponseDto<any>> {
+    try {
+      await this.variantModel.findByIdAndDelete(id).exec();
+      return {
+        success: true,
+        message: 'Xóa variant thành công',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Xóa variant thất bại: ${error.message}`,
+      };
+    }
+  }
 }

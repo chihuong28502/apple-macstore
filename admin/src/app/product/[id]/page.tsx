@@ -86,29 +86,29 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     });
   };
 
-  const processUpdatedStock = (stockItems: IStockItem[]): IStock => {
-    const updatedStock: IStock = {};
+  // const processUpdatedStock = (stockItems: IStockItem[]): IStock => {
+  //   const updatedStock: IStock = {};
 
-    stockItems.forEach((item) => {
-      const [color, storage, size] = item.key.split("-");
+  //   stockItems.forEach((item) => {
+  //     const [color, storage, size] = item.key.split("-");
 
-      if (!updatedStock[color]) {
-        updatedStock[color] = {};
-      }
+  //     if (!updatedStock[color]) {
+  //       updatedStock[color] = {};
+  //     }
 
-      if (!updatedStock[color][storage]) {
-        updatedStock[color][storage] = {};
-      }
+  //     if (!updatedStock[color][storage]) {
+  //       updatedStock[color][storage] = {};
+  //     }
 
-      updatedStock[color][storage][size] = {
-        quantity: item.quantity,
-        price: item.price,
-        basePrice: item.basePrice,
-      };
-    });
+  //     updatedStock[color][storage][size] = {
+  //       quantity: item.quantity,
+  //       price: item.price,
+  //       basePrice: item.basePrice,
+  //     };
+  //   });
 
-    return updatedStock;
-  };
+  //   return updatedStock;
+  // };
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -155,7 +155,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     setIsSubmitting(true);
     try {
       const updatedImages = processUpdatedImages(values);
-      const updatedStock = processUpdatedStock(values.stock);
+      // const updatedStock = processUpdatedStock(values.stock);
 
       await dispatch(
         ProductActions.updateProduct({
@@ -163,13 +163,14 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           data: {
             ...values,
             images: updatedImages,
-            stock: updatedStock,
+            // stock: updatedStock,
           },
         })
       );
       route.push('/product')
 
     } catch (error) {
+    console.log("🚀 ~ error:", error)
     } finally {
       setIsSubmitting(false);
     }
@@ -197,11 +198,11 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     if (productById) {
-      const transformedStock = transformStock(productById.stock as IStock);
+      // const transformedStock = transformStock(productById.stock as IStock);
       form.setFieldsValue({
         ...productById,
         images: productById.images,
-        stock: transformedStock,
+        // stock: transformedStock,
       });
     }
   }, [productById, form]);
@@ -248,11 +249,29 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <Form.Item name="tags" label="Tags">
                 <Select mode="tags" placeholder="Enter tags" />
               </Form.Item>
+              <Form.Item
+                name="isPublic"
+                label="Công khai"
+                rules={[{ required: true, message: "Vui lòng chọn trạng thái công khai" }]}
+              >
+                <Select placeholder="Chọn trạng thái">
+                  <Select.Option value={true}>Công khai</Select.Option>
+                  <Select.Option value={false}>Không công khai</Select.Option>
+                </Select>
+              </Form.Item>
             </div>
 
             <div>
               <Form.Item name="description" label="Description">
                 <TextArea rows={4} placeholder="Enter product description" />
+              </Form.Item>
+
+              <Form.Item name="reviewsCount" label="reviewsCount">
+                <Input placeholder="Enter product reviewsCount" />
+              </Form.Item>
+
+              <Form.Item name="averageRating" label="averageRating">
+                <Input placeholder="Enter product averageRating" />
               </Form.Item>
 
               <Form.Item name="images" label="Images">
@@ -267,7 +286,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 </Upload>
               </Form.Item>
 
-              <Form.Item name={["specifications", "colors"]} label="colors">
+              {/* <Form.Item name={["specifications", "colors"]} label="colors">
                 <Select mode="tags" placeholder="Enter colors" />
               </Form.Item>
               <Form.Item name={["specifications", "storageOptions"]} label="Storage Options">
@@ -275,11 +294,11 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               </Form.Item>
               <Form.Item name={["specifications", "ramOptions"]} label="ramOptions">
                 <Select mode="tags" placeholder="Enter ramOptions" />
-              </Form.Item>
+              </Form.Item> */}
             </div>
           </div>
 
-          <Form.Item
+          {/* <Form.Item
             name="stock"
             label="Stock"
             rules={[{ required: true, message: "Please enter stock items" }]}
@@ -324,11 +343,11 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 </>
               )}
             </Form.List>
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
-              Update Product
+              Thực hiện sửa
             </Button>
           </Form.Item>
         </Form>

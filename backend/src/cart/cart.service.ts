@@ -2,9 +2,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Cart, CartDocument } from './schema/cart.schema';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CartsGateway } from './cart.gateway';
+import { Cart, CartDocument } from './schema/cart.schema';
 
 @Injectable()
 export class CartService {
@@ -37,35 +37,40 @@ export class CartService {
     }
   }
 
-  async addItem(userId: string, item: { id: string; quantity: number; stockId: string }): Promise<ResponseDto<Cart>> {
+  async addItem(userId: string, item: any): Promise<ResponseDto<Cart>> {
     try {
-      const cart = await this.cartModel.findOne({ userId });
+      let cart = await this.cartModel.findOne({ userId });
+
+      // Nếu không tìm thấy giỏ hàng, tạo giỏ hàng mới
       if (!cart) {
-        return {
-          success: false,
-          message: 'Cart not found for user',
-          data: null,
-        };
+        cart = new this.cartModel({ userId, items: [] });
       }
 
-      const productId = new Types.ObjectId(item.id);
-      const stockId = new Types.ObjectId(item.stockId);
+      const productId = new Types.ObjectId(item.productId);
+      const variantId = new Types.ObjectId(item.variantId);
 
-      const existingItemIndex = cart.items.findIndex((i: any) => {
-        if (i.productId && i.stockId) {
-          return i.productId.equals(productId) && i.stockId.equals(stockId);
-        }
-        return false;
-      });
+      const existingItemIndex = cart.items.findIndex((i: any) =>
+        i.productId.equals(productId) && i.variantId.equals(variantId)
+      );
 
+      // Nếu sản phẩm đã tồn tại trong giỏ hàng, cập nhật số lượng
       if (existingItemIndex > -1) {
         cart.items[existingItemIndex].quantity += item.quantity;
       } else {
-        cart.items.push({ productId, quantity: item.quantity, stockId }); // Đảm bảo stockId có mặt khi thêm mục mới
+        // Nếu sản phẩm chưa có trong giỏ hàng, thêm mới
+        cart.items.push({
+          productId,
+          variantId,
+          quantity: item.quantity
+        });
       }
 
+      // Lưu giỏ hàng đã cập nhật
       const updatedCart = await cart.save();
-      this.cartsGateway.sendEventAddCart(updatedCart)
+
+      // Gửi sự kiện giỏ hàng đã được cập nhật
+      this.cartsGateway.sendEventAddCart(updatedCart);
+
       return {
         success: true,
         message: 'Item added to cart successfully',
@@ -80,35 +85,21 @@ export class CartService {
     }
   }
 
+
   async findByUserId(userId: string): Promise<ResponseDto<Cart>> {
     try {
-      const cart: any = await this.cartModel.findOne({ userId })
-        .populate('items.productId', '-createdAt -updatedAt -__v -specifications -tags -price')
-        .select('-createdAt -updatedAt -__v')
-        .exec();
+      const cart = await this.cartModel
+        .findOne({ userId })
+        .populate('items.productId', 'name description images')  // Lấy thông tin sản phẩm
+        .populate('items.variantId', 'color colorCode ram ssd price stock status'); // Lấy thông tin biến thể
 
       if (!cart) {
         return {
           success: false,
-          message: 'Cart not found',
+          message: 'Cart not found for user',
           data: null,
         };
       }
-
-      // Lọc stock dựa trên stockId
-      cart.items = cart.items.map(item => {
-        const productId = item.productId;
-        const stockId = item.stockId;
-        const stock = this.getStockById(productId.stock, stockId); // Gọi hàm để lấy stock
-
-        return {
-          ...item,
-          productId: {
-            ...productId,
-            stock: stock
-          }
-        };
-      });
 
       return {
         success: true,
@@ -124,61 +115,43 @@ export class CartService {
     }
   }
 
-  private getStockById(stock: any, stockId: string): any {
-    if (!stock || (typeof stock === 'object' && Object.keys(stock).length === 0)) {
-      return null;
-    }
-    const isMap = stock instanceof Map;
-    for (const colorKey of (isMap ? stock.keys() : Object.keys(stock))) {
-      const color = isMap ? colorKey : stock[colorKey];
-      const ramData = isMap ? stock.get(colorKey) : stock[colorKey];
-      if (!ramData || typeof ramData !== "object") {
-        continue;
-      }
-      for (const ramKey of (isMap ? ramData.keys() : Object.keys(ramData))) {
-        const ram = isMap ? ramKey : ramData[ramKey];
-
-        const storageData = isMap ? ramData.get(ramKey) : ramData[ramKey];
-
-        if (!storageData || typeof storageData !== "object") {
-          continue;
-        }
-
-        for (const storageKey of (isMap ? storageData.keys() : Object.keys(storageData))) {
-          const storage = isMap ? storageKey : storageData[storageKey];
-          const storageItem = isMap ? storageData.get(storageKey) : storageData[storageKey];
-          // Kiểm tra sự tồn tại của storageItem
-          if (storageItem && storageItem._id) {
-            // So sánh ID sau khi chuyển sang string
-            if (storageItem._id.toString() === stockId.toString()) {
-              return { [color]: { [ram]: { [storage]: storageItem } } };
-            } else {
-            }
-          } else {
-          }
-        }
-      }
-    }
-
-    return null;
-  }
-
-
-
-  async update(userId: string, items: Array<{ productId: string; quantity: number }>): Promise<ResponseDto<Cart>> {
+  async update(userId: string, items: Array<{ productId: string; variantId: string; quantity: number }>): Promise<ResponseDto<Cart>> {
     try {
-      const updatedCart = await this.cartModel.findOneAndUpdate({ userId }, { items }, { new: true });
-      if (!updatedCart) {
+      const cart = await this.cartModel.findOne({ userId });
+      const { productId, variantId, quantity } = items as any
+      if (!cart) {
         return {
           success: false,
-          message: 'Cart not found for update',
+          message: 'Cart not found',
           data: null,
         };
       }
+
+      // Find the item to update
+      const item = cart.items.find(
+        (item) =>
+          item.productId.toString() === productId &&
+          item.variantId.toString() === variantId
+      );
+
+      if (!item) {
+        return {
+          success: false,
+          message: 'Item not found in cart',
+          data: null,
+        };
+      }
+
+      // Update the quantity
+      item.quantity = quantity;
+
+      // Save the cart with updated quantity
+      await cart.save();
+
       return {
         success: true,
-        message: 'Cart updated successfully',
-        data: updatedCart,
+        message: 'Quantity updated successfully',
+        data: cart,
       };
     } catch (error) {
       return {
@@ -188,4 +161,54 @@ export class CartService {
       };
     }
   }
+
+  async delete(userId: string, items: Array<{ productId: string; variantId: string }>): Promise<ResponseDto<Cart>> {
+    try {
+      // Kiểm tra nếu items là mảng
+      if (!Array.isArray(items)) {
+        return {
+          success: false,
+          message: 'Invalid items format. Expected an array.',
+          data: null,
+        };
+      }
+
+      // Tìm giỏ hàng của user
+      const cart = await this.cartModel.findOne({ userId });
+      if (!cart) {
+        return {
+          success: false,
+          message: 'Cart not found',
+          data: null,
+        };
+      }
+
+      // Lọc ra các item trong cart có productId và variantId khớp với items cần xóa
+      cart.items = cart.items.filter(
+        (cartItem) =>
+          !items.some(
+            (item) =>
+              cartItem.productId.toString() === item.productId &&
+              cartItem.variantId.toString() === item.variantId
+          )
+      );
+
+      // Cập nhật giỏ hàng sau khi xóa
+      await cart.save();
+
+      return {
+        success: true,
+        message: 'Items deleted successfully from cart',
+        data: cart,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to delete items from cart: ' + error.message,
+        data: null,
+      };
+    }
+  }
+
+
 }

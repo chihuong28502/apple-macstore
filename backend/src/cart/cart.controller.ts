@@ -1,5 +1,5 @@
 // src/cart/cart.controller.ts
-import { Controller, Post, Get, Put, Body, Param, Res } from '@nestjs/common';
+import { Controller, Post, Get, Put, Body, Param, Res, Delete } from '@nestjs/common';
 import { Response } from 'express';
 import { CartService } from './cart.service'; // Đảm bảo bạn đã import service cart
 import { ResponseDto } from 'src/utils/dto/response.dto';
@@ -30,9 +30,16 @@ export class CartController {
     return res.status(statusCode).json(result);
   }
 
-  @Put(':userId')
-  async update(@Param('userId') userId: string, @Body('items') items: Array<{ productId: string; quantity: number }>, @Res() res: Response) {
+  @Put('update/:userId')
+  async update(@Param('userId') userId: string, @Body('items') items: Array<{ productId: string; variantId: string; quantity: number }>, @Res() res: Response) {
     const result: ResponseDto<Cart> = await this.cartService.update(userId, items);
+    const statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
+    return res.status(statusCode).json(result);
+  }
+
+  @Delete('delete/:userId')
+  async delete(@Param('userId') userId: string, @Body('items') items: Array<{ productId: string; variantId: string; }>, @Res() res: Response) {
+    const result: ResponseDto<Cart> = await this.cartService.delete(userId, items);
     const statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
     return res.status(statusCode).json(result);
   }

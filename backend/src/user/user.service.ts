@@ -76,9 +76,19 @@ export class UserService {
 
   // Update user information and return the updated user, excluding sensitive fields
   async update(id: string, updateUserDto: UpdateUserDto): Promise<ResponseDto<User>> {
+
     try {
+      // Separate profile-related fields
+      const { firstName, lastName, phoneNumber, ...otherFields } = updateUserDto as any;
+
+      // Construct the update object with nested profile fields
+      const updateData = {
+        ...otherFields,
+        ...(firstName || lastName || phoneNumber ? { profile: { firstName, lastName, phoneNumber } } : {}),
+      };
+
       const updatedUser = await this.userModel
-        .findByIdAndUpdate(id, updateUserDto, { new: true })
+        .findByIdAndUpdate(id, updateData, { new: true })
         .select('-password -__v -createdAt') // Exclude password, version, and createdAt
         .exec();
 
@@ -98,6 +108,7 @@ export class UserService {
       };
     }
   }
+
 
   // Delete user by ID and return a success message
   async remove(id: string): Promise<ResponseDto<User>> {

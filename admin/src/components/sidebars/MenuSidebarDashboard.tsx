@@ -1,15 +1,11 @@
 "use client";
 import type { MenuProps } from "antd";
 import { ConfigProvider, Menu, Tooltip } from "antd";
-import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { FaCalculator, FaPowerOff, FaUser } from "react-icons/fa";
-import { FaShirt } from "react-icons/fa6";
+import { usePathname, useRouter } from "next/navigation";
+import { FaCalculator, FaUser, } from "react-icons/fa";
+import { FaCartShopping, FaShirt } from "react-icons/fa6";
 import { MdDashboardCustomize } from "react-icons/md";
-
-import { cn } from "@/lib/utils";
-
-import DarkModeSwitch from "../DarkModeSwitch";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -76,7 +72,7 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       icon: (
         <Tooltip title="Promotions" placement="bottom">
           <div className="w-full px-2">
-            <FaPowerOff />
+            <FaCartShopping />
           </div>
         </Tooltip>
       ),
@@ -103,7 +99,7 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       >
         <Menu
           selectedKeys={[pathname]}
-          mode="horizontal" 
+          mode="horizontal"
           className="bg-transparent"
           inlineCollapsed={collapsed}
           items={items}

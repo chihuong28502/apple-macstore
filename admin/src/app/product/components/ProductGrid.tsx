@@ -53,13 +53,12 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
   const handleSubmit = async (values: any) => {
     try {
       if (onAddProduct) {
-        const stockValue = form.getFieldValue('stock');
+        // const stockValue = form.getFieldValue('stock');
 
-        if (!stockValue || typeof stockValue !== 'object') {
-          console.error("Invalid stock data:", stockValue);
-          message.error("Thông tin tồn kho không hợp lệ");
-          return;
-        }
+        // if (!stockValue || typeof stockValue !== 'object') {
+        //   message.error("Thông tin tồn kho không hợp lệ");
+        //   return;
+        // }
 
         const productData = {
           ...values,
@@ -67,14 +66,13 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
           price: Number(values.price),
           images: imageFiles,
           tags: values.tags || [],
-          specifications: {
-            storageOptions: specifications.storageOptions,
-            ramOptions: specifications.ramOptions,
-            colors: specifications.colors,
-          },
-          stock: stockValue, // Sử dụng trực tiếp giá trị từ StockInput
-          reviewsCount: 0,
-          averageRating: 0,
+          // specifications: {
+          //   storageOptions: specifications.storageOptions,
+          //   ramOptions: specifications.ramOptions,
+          //   colors: specifications.colors,
+          // },
+          // stock: stockValue,
+          isPublic: true,
         };
 
         await onAddProduct(productData);
@@ -139,6 +137,16 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
               min={0}
             />
           </Form.Item>
+          <Form.Item
+            name="isPublic"
+            label="Công khai"
+            rules={[{ required: true, message: "Vui lòng chọn trạng thái công khai" }]}
+          >
+            <Select placeholder="Chọn trạng thái">
+              <Select.Option value={true}>Công khai</Select.Option>
+              <Select.Option value={false}>Không công khai</Select.Option>
+            </Select>
+          </Form.Item>
 
           <Form.Item
             label="Hình ảnh"
@@ -172,11 +180,11 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
             <Select mode="tags" placeholder="Nhập tags cho sản phẩm" />
           </Form.Item>
 
-          <Form.Item name={["specifications", "models"]} label="Dòng sản phẩm">
+          {/* <Form.Item name={["specifications", "models"]} label="Dòng sản phẩm">
             <Select mode="tags" placeholder="Nhập dòng sản phẩm" />
-          </Form.Item>
+          </Form.Item> */}
 
-          <Form.Item
+          {/* <Form.Item
             name={["specifications", "storageOptions"]}
             label="Tùy chọn dung lượng"
           >
@@ -190,9 +198,9 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
                 }))
               }
             />
-          </Form.Item>
+          </Form.Item> */}
 
-          <Form.Item
+          {/* <Form.Item
             name={["specifications", "ramOptions"]}
             label="Tùy chọn RAM"
           >
@@ -206,9 +214,9 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
                 }))
               }
             />
-          </Form.Item>
+          </Form.Item> */}
 
-          <Form.Item name={["specifications", "colors"]} label="Màu sắc">
+          {/* <Form.Item name={["specifications", "colors"]} label="Màu sắc">
             <Select
               mode="tags"
               placeholder="Nhập các màu sắc"
@@ -219,6 +227,22 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
                 }))
               }
             />
+          </Form.Item>  */}
+
+          <Form.Item
+            name="reviewsCount"
+            label="reviewsCount"
+            rules={[{ required: true, message: "Vui lòng nhập reviewsCount" }]}
+          >
+            <Input placeholder="Nhập reviewsCount" />
+          </Form.Item>
+
+          <Form.Item
+            name="averageRating"
+            label="averageRating"
+            rules={[{ required: true, message: "Vui lòng nhập averageRating" }]}
+          >
+            <Input placeholder="Nhập averageRating" />
           </Form.Item>
 
           <Form.Item
@@ -231,7 +255,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
         </div>
       </div>
 
-      {specifications.colors.length > 0 &&
+      {/* {specifications.colors.length > 0 &&
         specifications.ramOptions.length > 0 &&
         specifications.storageOptions.length > 0 && (
           <Form.Item name="stock" label="Số lượng tồn kho">
@@ -240,7 +264,7 @@ export const ProductGrid: React.FC<ProductPage.ProductGridProps> = ({
               onChange={(value) => form.setFieldsValue({ stock: value })}
             />
           </Form.Item>
-        )}
+        )} */}
 
       <Form.Item className="mb-0 flex justify-end">
         <Button onClick={() => setIsModalOpen(false)} className="mr-2">

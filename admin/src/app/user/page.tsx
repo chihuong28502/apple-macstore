@@ -1,64 +1,66 @@
 "use client";
-import { CategoryActions, CategorySelectors } from "@/modules/category/slice";
-import { CategoryType } from "@/modules/category/type";
 import { ProductSelectors } from "@/modules/product/slice";
-import { App, Form, Input, Modal, Select, Button, message } from "antd";
+import { App, Form, Input, Modal, Button, message } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Categories from "./components/UserList";
+import UserList from "./components/UserList";
 import { CustomerActions, CustomerSelectors } from "@/modules/customer/slice";
 
 const UserControlPage: React.FC = () => {
   const dispatch = useDispatch();
-  const categories = useSelector(CategorySelectors.categories);
-  const customers = useSelector(CustomerSelectors.customer);
+  const users = useSelector(CustomerSelectors.customer) || [];
   const loading = useSelector(ProductSelectors.isLoading);
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editCategory, setEditCategory] = useState<CategoryType | null | any>(null);
-  const [filter, setFilter] = useState<string>(""); // New state for filter
+  const [editUser, setEditUser] = useState<null | any>(null);
+  const [filter, setFilter] = useState<string>("");
+
   useEffect(() => {
-    dispatch(CategoryActions.fetchCategories());
     dispatch(CustomerActions.getCustomer({}));
   }, [dispatch]);
 
-  // Filter categories based on the filter string
-  const filteredCategories = categories.filter((category: any) =>
-    category.name.toLowerCase().includes(filter.toLowerCase())
-  );
+  const filteredUsers = Array.isArray(users)
+    ? users.filter((user: any) =>
+      user.username.toLowerCase().includes(filter.toLowerCase())
+    )
+    : [];
 
-  const handleAddCategory = async (newCategory: CategoryType) => {
-    await dispatch(CategoryActions.createCategory({ data: newCategory }));
+
+  const handleAddUser = async (newUser: any) => {
+    // await dispatch(CustomerActions.createUser({ data: newUser }));
     setIsModalVisible(false);
     form.resetFields();
   };
 
-  const handleEditButtonClick = async (category: any) => {
-    // Join breadcrumbs as a string
-    const breadcrumbsString = category.breadcrumbs.join(" > ");
+  const handleEditButtonClick = async (user: any) => {
     form.setFieldsValue({
-      name: category.name,
-      breadcrumbs: breadcrumbsString,
-      parentCategoryId: category.parentCategoryId,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      profile: {
+        firstName: user.profile?.firstName,
+        lastName: user.profile?.lastName,
+        phoneNumber: user.profile?.phoneNumber,
+      }
     });
 
-    setEditCategory(category);
+    setEditUser(user);
     setIsModalVisible(true);
   };
 
-  const handleDeleteCategory = async (categoryId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     Modal.confirm({
       title: "Xác nhận xóa",
-      content: "Bạn có chắc chắn muốn xóa danh mục này không?",
+      content: "Bạn có chắc chắn muốn xóa người dùng này không?",
       okText: "Xóa",
       okType: "danger",
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          await dispatch(CategoryActions.deleteCategory({ id: categoryId }));
-          dispatch(CategoryActions.fetchCategories());
+          await dispatch(CustomerActions.deleteCustomer({ id: userId }));
+          dispatch(CustomerActions.getCustomer({}));
         } catch (error) {
-          message.error("Có lỗi xảy ra khi xóa danh mục");
+          message.error("Có lỗi xảy ra khi xóa người dùng");
         }
       },
     });
@@ -67,19 +69,14 @@ const UserControlPage: React.FC = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      const breadcrumbsArray = values.breadcrumbs.split(" > ");
-      const categoryData = { ...values, breadcrumbs: breadcrumbsArray };
-
-      if (editCategory) {
-        // Update category
+      const userData = { ...values };
+      if (editUser) {
+        // Update user
         await dispatch(
-          CategoryActions.updateCategory({
-            id: editCategory._id,
-            data: categoryData,
-          })
+          CustomerActions.updateCustomer({ id: editUser._id, data: userData, })
         );
       } else {
-        await handleAddCategory(categoryData);
+        await handleAddUser(userData);
       }
       handleCancel();
     } catch (error) {
@@ -87,94 +84,91 @@ const UserControlPage: React.FC = () => {
     }
   };
 
-
   const handleCancel = () => {
     setIsModalVisible(false);
-    form.resetFields(); // Reset form when modal is closed
-    setEditCategory(null); // Clear edit category state
+    form.resetFields();
+    setEditUser(null);
   };
 
-  // Handle filter input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className=" mx-auto p-8">
+      <div className="mx-auto p-8">
         <div className="space-y-6">
           <App>
-            {/* Filter Input */}
             <Input
-              placeholder="Search Categories"
+              placeholder="Search Users"
               value={filter}
               onChange={handleFilterChange}
               style={{ width: 300, marginBottom: "20px" }}
             />
 
-            <Button
-              type="primary"
-              onClick={() => setIsModalVisible(true)}
-            >
-              Add Category
+            <Button type="primary" onClick={() => setIsModalVisible(true)}>
+              Add User
             </Button>
 
-            {Array.isArray(filteredCategories) && filteredCategories.length > 0 ? (
-              <Categories
-                categories={filteredCategories} // Pass filtered categories
+            {Array.isArray(filteredUsers) && filteredUsers.length > 0 ? (
+              <UserList
+                users={filteredUsers}
                 loading={loading}
                 onEdit={handleEditButtonClick}
-                onDelete={handleDeleteCategory}
+                onDelete={handleDeleteUser}
               />
             ) : (
-              <div>No categories found or error loading categories.</div>
+              <div>No users found or error loading users.</div>
             )}
           </App>
         </div>
       </div>
 
-      {/* Modal for adding or editing category */}
       <Modal
-        title={editCategory ? "Edit Category" : "Add Category"}
+        title={editUser ? "Edit User" : "Add User"}
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
-        okText={editCategory ? "Update" : "Add"}
+        okText={editUser ? "Update" : "Add"}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label="Category Name"
-            name="name"
-            rules={[{ required: true, message: "Please input the category name!" }]}
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input the username!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-            label="Category Breadcrumb"
-            name="breadcrumbs"
-            rules={[{ required: true, message: "Please input the category breadcrumbs!" }]}
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: "Please input the email!" }]}
           >
             <Input />
           </Form.Item>
-          <Form.Item name="parentCategoryId" label="Danh mục cha">
-            <Select placeholder="Chọn danh mục cha" allowClear>
-              {categories
-                .filter((cat: any) => cat.parentCategoryId === null)
-                .map((parentCat: any) => (
-                  <Select.OptGroup key={`parent-${parentCat._id}`} label={parentCat.name}>
-                    <Select.Option key={`opt-${parentCat._id}`} value={parentCat._id}>
-                      {parentCat.name}
-                    </Select.Option>
-                    {categories
-                      .filter((childCat: any) => childCat.parentCategoryId === parentCat._id)
-                      .map((childCat: any) => (
-                        <Select.Option key={childCat._id} value={childCat._id}>
-                          {`-- ${childCat.name}`}
-                        </Select.Option>
-                      ))}
-                  </Select.OptGroup>
-                ))}
-            </Select>
+          <Form.Item label="Role" name="role">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="First Name"
+            name={["profile", "firstName"]}
+            rules={[{ required: true, message: "Please input the first name!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Last Name"
+            name={["profile", "lastName"]}
+            rules={[{ required: true, message: "Please input the last name!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Phone Number"
+            name={["profile", "phoneNumber"]}
+            rules={[{ required: true, message: "Please input the phone number!" }]}
+          >
+            <Input />
           </Form.Item>
         </Form>
       </Modal>

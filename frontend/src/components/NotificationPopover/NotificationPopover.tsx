@@ -1,6 +1,6 @@
 'use client'
-import socket from "@/lib/socket/socket";
 import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
+import socket from "@/lib/socket/socket";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { NotifyActions, NotifySelectors } from "@/modules/notify/slice";
 import { Badge, ConfigProvider, Popover } from "antd";
@@ -83,18 +83,19 @@ const NotificationPopover = () => {
       className=""
       color={resolvedTheme === "dark" ? "#4b4b4b" : "#fff"}
     >
-      <div className="flex items-center p-3 bg-inputBackground rounded-lg cursor-pointer ">
-        {notifications?.length}
+      <div className="flex items-center p-3  rounded-lg cursor-pointer ">
         <ConfigProvider
           theme={{
             components: {
               Badge: {
-                dotSize: 8,
+                dotSize: 6,
               },
             },
           }}
         >
-          <Badge dot={true} size="default" title="Thông báo" offset={[-3, 2]}>
+          <Badge
+            style={{ fontSize: '0.8rem', fontWeight: 650, width: '16px', height: '16px', lineHeight: '16px', padding: '0' }}
+            count={notifications?.length} overflowCount={99} color="red">
             <IoNotificationsOutline className="size-5 text-fontColor" />
           </Badge>
         </ConfigProvider>

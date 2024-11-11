@@ -26,6 +26,53 @@ import { ProductService } from './product.service';
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
+  //VARIANT
+  @Public()
+  @Get('variant')
+  async getAllVariants(
+    @Res() res: Response,
+    @Query('productId') productId: string,
+  ) {
+    const result = await this.productService.getAllVariants(productId);
+    return res.status(result.success ? 200 : 500).json(result);
+  }
+  
+  @Post("variant")
+  async createVariant(
+    @Body() createVariant: any,
+    @Res() res: Response
+  ) {
+    const result = await this.productService.createVariant(createVariant);
+    return res.status(result.success ? 201 : 400).json(result);
+  }
+  @Put('variant/update/:id')
+  async updateVariant(
+    @Res() res: Response,
+    @Param('id') id: string,
+    @Body() updateVariantDto: any
+  ) {
+    const result = await this.productService.updateVariant(id, updateVariantDto);
+    let statusCode = 200;
+    if (!result.success) {
+      statusCode = result.message.includes('not found') ? 404 : 500;
+    }
+    return res.status(statusCode).json(result);
+  }
+
+  @Delete('variant/delete/:id')
+  async removeVariant(
+    @Res() res: Response,
+    @Param('id') id: string
+  ) {
+    const result = await this.productService.removeVariant(id);
+    let statusCode = 200;
+    if (!result.success) {
+      statusCode = result.message.includes('not found') ? 404 : 500;
+    }
+    return res.status(statusCode).json(result);
+  }
+  ////////////////////////////////////////////////////////////////
+
   @Post()
   async create(
     @Body() createProductDto: CreateProductDto,
@@ -51,10 +98,10 @@ export class ProductController {
     @Query('categoryId') categoryId: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number
+    @Query('minPrice') minPrice: number = 0,
+    @Query('maxPrice') maxPrice: number = 10000000000
   ) {
-    const result = await this.productService.getAll(page, categoryId, limit, minPrice, maxPrice);
+    const result = await this.productService.getAllProducts(page, categoryId, limit, minPrice, maxPrice);
     return res.status(result.success ? 200 : 500).json(result);
   }
 
@@ -98,6 +145,7 @@ export class ProductController {
     }
     return res.status(statusCode).json(result);
   }
+
 }
 
 
