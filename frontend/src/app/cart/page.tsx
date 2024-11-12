@@ -94,10 +94,10 @@ function CartCheckout() {
         </div>
       );
     } else {
-      return cart.items.map((item: any,index:number) => {
+      return cart.items.map((item: any) => {
         const { productId, variantId, quantity } = item;
         const { color, ram, ssd, price, stock } = variantId;
-        const uniqueKey = `${productId._id}-${variantId._id}-${index}`;
+        const uniqueKey = `${productId._id}-${variantId._id}`;
         const isSelected = selectedItems.some(
           (selected) => selected.productId === productId._id && selected.variantId === variantId._id
         );
@@ -188,8 +188,6 @@ function CartCheckout() {
       if (!shipping || auth.shipping.length === 0) {
         setIsShippingModalVisible(true);
       } else {
-        dispatch(CartActions.setCartSelected(selectedItems));
-        dispatch(CartActions.setPriceCheckout(formattedSelectedTotal));
         dispatch(CartActions.setShippingSelectedId(selectedShipping as any));
         router.push('/checkout');
       }
@@ -313,6 +311,7 @@ function CartCheckout() {
           dataSource={shippingList}
           renderItem={(item: any) => (
             <List.Item
+              key={item._id} // Use a unique identifier here, like item._id
               actions={[
                 <Button onClick={() => handleEditShipping(item)}>Sửa</Button>,
                 <Button danger onClick={() => handleDeleteShipping(item._id)}>Xóa</Button>,
