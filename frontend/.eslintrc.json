@@ -22,6 +22,7 @@
     "react-hooks/exhaustive-deps": "off",
     "@next/next/no-img-element": "off",
     "@typescript-eslint/no-unused-expressions": "off",
+    "react/jsx-key": "off",
     "@typescript-eslint/no-unused-vars": "off", // Tắt quy tắc không sử dụng biến
     "@typescript-eslint/no-namespace": "off", // Tắt quy tắc không sử dụng namespace
     "react/no-unescaped-entities": "off", // Tắt quy tắc không cho phép ký tự không được thoát

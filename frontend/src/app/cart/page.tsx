@@ -1,25 +1,39 @@
-"use client";
+'use client'
 import { useAppSelector } from "@/core/services/hook";
-import { AuthSelectors } from "@/modules/auth/slice";
+import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
-import { Button, Card, Checkbox, Col, Empty, Row, Tooltip } from "antd";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { FaTrashAlt } from "react-icons/fa";
+import { CustomerActions, CustomerSelectors } from "@/modules/customer/slice";
+import { Button, Card, Checkbox, Col, Empty, Input, List, message, Modal, Row, Space, Tooltip } from "antd";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { FaTrashAlt } from "react-icons/fa";
+import { useDispatch } from "react-redux";
 
 function CartCheckout() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const auth = useAppSelector(AuthSelectors.user);
   const cart = useAppSelector(CartSelectors.cart);
+  const shipping = useAppSelector(CustomerSelectors.shipping);
+  const shippingList = useAppSelector(CustomerSelectors.shipping);
   const [selectedItems, setSelectedItems] = useState<Array<{ productId: string; variantId: string }>>([]);
   const [selectAll, setSelectAll] = useState(false);
-  const router = useRouter();
-
+  const [selectedShipping, setSelectedShipping] = useState<string | null>(null);
+  const [editShippingData, setEditShippingData] = useState<any | null>(null);
+  const [isShippingModalVisible, setIsShippingModalVisible] = useState(false);
+  const [shippingData, setShippingData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    city: "",
+    address: "",
+    description: ""
+  });
   useEffect(() => {
     if (auth?._id) {
       dispatch(CartActions.fetchCartById(auth._id));
+      dispatch(AuthActions.getInfoUser({}));
     }
   }, [auth?._id, dispatch]);
   useEffect(() => {
@@ -34,6 +48,7 @@ function CartCheckout() {
       setSelectedItems([]);
     }
   }, [selectAll, cart?.items]);
+
   const handleQuantityChange = (productId: string, variantId: string, quantity: number) => {
     if (quantity > 0) {
       dispatch(
@@ -82,12 +97,13 @@ function CartCheckout() {
       return cart.items.map((item: any) => {
         const { productId, variantId, quantity } = item;
         const { color, ram, ssd, price, stock } = variantId;
+        const uniqueKey = `${productId._id}-${variantId._id}`;
         const isSelected = selectedItems.some(
           (selected) => selected.productId === productId._id && selected.variantId === variantId._id
         );
         return (
           <Card
-            key={productId._id || item._id}
+            key={uniqueKey}
             className="my-2 mx-auto w-full bg-[#f7f7f7]"
             hoverable
             bordered={false}
@@ -128,7 +144,7 @@ function CartCheckout() {
                   >
                     +
                   </Button>
-                  <span className="text-gray-500 flex items-center">{`${quantity}`}</span>
+                  <span className="text-gray-500 flex items-center">{quantity}</span>
 
                   <Button
                     size="small"
@@ -156,96 +172,211 @@ function CartCheckout() {
       });
     }
   };
-  console.log(cart);
 
-  const selectedTotal = cart?.items
-    ?.filter((item: any) =>
-      selectedItems.some(
-        (selected) => selected.productId === item.productId._id && selected.variantId === item.variantId._id
-      )
+  const selectedTotal = cart?.items?.filter((item: any) =>
+    selectedItems.some(
+      (selected) => selected.productId === item.productId._id && selected.variantId === item.variantId._id
     )
-    .reduce((acc: number, item: any) => acc + item.variantId.price * item.quantity, 0)
-    .toLocaleString();
+  ).reduce((acc: number, item: any) => acc + item.variantId.price * item.quantity, 0) || 0;
 
+  const taxAmount = (selectedTotal * 0.1) || 0;
+  const formattedSelectedTotal = selectedTotal || 0;
   const handleContinueShopping = () => {
-    if (selectedItems.length > 0) {
-      console.log("🚀 ~ selectedItems:", selectedItems)
+    if (formattedSelectedTotal > 0 && selectedShipping) {
       dispatch(CartActions.setCartSelected(selectedItems))
-      // router.push(`/selected-items?data=${encodeURIComponent(selectedData)}`);
+      dispatch(CartActions.setPriceCheckout(formattedSelectedTotal))
+      if (!shipping || auth.shipping.length === 0) {
+        setIsShippingModalVisible(true);
+      } else {
+        dispatch(CartActions.setShippingSelectedId(selectedShipping as any));
+        router.push('/checkout');
+      }
     } else {
-      // Có thể hiện thông báo nếu không có sản phẩm nào được chọn
-      console.log("Không có sản phẩm nào được chọn");
+      message.success("Chọn đủ sản phẩm và địa chỉ giao hàng")
     }
   };
+
+  const handleSaveShipping = () => {
+    setIsShippingModalVisible(false);
+    if (editShippingData) {
+      // Nếu đang chỉnh sửa, gọi hành động update địa chỉ
+      dispatch(CustomerActions.updateShippingById({ userId: auth._id, shippingId: editShippingData._id, item: shippingData }));
+    } else {
+      // Nếu đang thêm mới, gọi hành động add địa chỉ
+      dispatch(CustomerActions.addShippingById({ id: auth._id, item: shippingData }));
+    }
+  };
+  const handleEditShipping = (shippingData: any) => {
+    setShippingData({
+      firstName: shippingData.firstName,
+      lastName: shippingData.lastName,
+      phoneNumber: shippingData.phoneNumber,
+      city: shippingData.city,
+      address: shippingData.address,
+      description: shippingData.description || '',
+    });
+    setEditShippingData(shippingData);
+    setIsShippingModalVisible(true);
+  };
+
+  const handleDeleteShipping = (shippingId: string) => {
+    Modal.confirm({
+      title: 'Bạn có chắc chắn muốn xóa?',
+      content: 'Hành động này sẽ không thể hoàn tác!',
+      okText: 'Xóa',
+      cancelText: 'Hủy',
+      onOk: () => {
+        dispatch(CustomerActions.deleteShipping({ userId: auth._id, shippingId }));
+      },
+    });
+  };
+
+
+  const handleSelectShipping = (shippingId: string) => {
+    setSelectedShipping(shippingId);
+  };
   return (
-    <div className="font-sans mx-auto bg-bgColor py-4">
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 bg-bgColor p-4 rounded-md">
-          <h2 className="text-2xl font-bold text-fontColor">Cart</h2>
-          <hr className="border-gray-300 mt-4 mb-8" />
-          <div className="flex items-center mb-4">
-            <Checkbox
-              checked={selectAll}
-              onChange={(e) => setSelectAll(e.target.checked)}
-            />
-            <span className="ml-2">Chọn tất cả</span>
+    <>
+      <div className="font-sans mx-auto bg-bgColor py-4">
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="md:col-span-2 bg-bgColor p-4 rounded-md">
+            <h2 className="text-2xl font-bold text-fontColor">Cart</h2>
+            <hr className="border-gray-300 mt-4 mb-8" />
+            <div className="flex items-center mb-4">
+              <Checkbox
+                checked={selectAll}
+                onChange={(e) => setSelectAll(e.target.checked)}
+              />
+              <span className="ml-2">Chọn tất cả</span>
+            </div>
+            {auth?._id && cart && getMenuItems(cart)}
+            <div className="flex text-fontColor">
+              {`Tổng giá đã chọn: ${selectedTotal}₫`}
+            </div>
+            {!auth?._id && <></>}
           </div>
-          {auth?._id && cart && getMenuItems(cart)}
-          <div className="flex text-fontColor">
-            {`Tổng giá đã chọn: ${selectedTotal}₫`}
-          </div>
-          {!auth?._id && <></>}
-        </div>
-        <div className="bg-bgColor rounded-md p-4 md:sticky top-0">
-          <div className="flex border border-blue-600 overflow-hidden rounded-md">
-            <input
-              type="email"
-              placeholder="Promo code"
-              className="w-full outline-none bg-white text-gray-600 text-sm px-4 py-2.5"
-            />
-            <button
-              type="button"
-              className="flex items-center justify-center font-semibold tracking-wide bg-blue-600 hover:bg-blue-700 px-4 text-sm text-white"
-            >
-              Apply
-            </button>
-          </div>
-          <ul className="text-fontColor mt-8 space-y-4">
-            <li className="flex flex-wrap gap-4 text-base">
-              Discount <span className="ml-auto font-bold">$0.00</span>
-            </li>
-            <li className="flex flex-wrap gap-4 text-base">
-              Shipping <span className="ml-auto font-bold">$2.00</span>
-            </li>
-            <li className="flex flex-wrap gap-4 text-base">
-              Tax <span className="ml-auto font-bold">$4.00</span>
-            </li>
-            <li className="flex flex-wrap gap-4 text-base font-bold">
-              Total <span className="ml-auto">
-                <span className="font-bold">
-                  {`${selectedTotal}₫`}
+          <div className="bg-bgColor rounded-md p-4 md:sticky top-0">
+            <div className="flex border border-blue-600 overflow-hidden rounded-md">
+              <input
+                type="email"
+                placeholder="Promo code"
+                className="w-full outline-none bg-white text-gray-600 text-sm px-4 py-2.5"
+              />
+              <button
+                type="button"
+                className="flex items-center justify-center font-semibold tracking-wide bg-blue-600 hover:bg-blue-700 px-4 text-sm text-white"
+              >
+                Apply
+              </button>
+            </div>
+            <ul className="text-fontColor mt-8 space-y-4">
+              <li className="flex flex-wrap gap-4 text-base">
+                Discount <span className="ml-auto font-bold">$0.00</span>
+              </li>
+              <li className="flex flex-wrap gap-4 text-base">
+                Shipping <span className="ml-auto font-bold">$2.00</span>
+              </li>
+              <li className="flex flex-wrap gap-4 text-base">
+                Tax <span className="ml-auto font-bold">{taxAmount.toLocaleString()}</span>
+              </li>
+              <li className="flex flex-wrap gap-4 text-base font-bold">
+                Total <span className="ml-auto">
+                  <span className="font-bold">
+                    {`${formattedSelectedTotal.toLocaleString()}₫`}
+                  </span>
                 </span>
-              </span>
-            </li>
-          </ul>
-          <div className="mt-8 space-y-2">
-            <button
-              type="button"
-              className="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-            >
-              Checkout
-            </button>
-            <button
-              type="button"
-              onClick={handleContinueShopping}
-              className="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-transparent text-fontColor border border-gray-300 rounded-md"
-            >
-              Continue Shopping
-            </button>
+              </li>
+            </ul>
+            <div className="mt-8 space-y-2">
+              <button
+                type="button"
+                className="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+              >
+                Checkout
+              </button>
+              <button
+                type="button"
+                onClick={handleContinueShopping}
+                className="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-transparent text-fontColor border border-gray-300 rounded-md"
+              >
+                Continue Shopping
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <div>
+        <h2>Danh sách địa chỉ giao hàng</h2>
+        <List
+          dataSource={shippingList}
+          renderItem={(item: any) => (
+            <List.Item
+              key={item._id}
+              actions={[
+                <Button onClick={() => handleEditShipping(item)}>Sửa</Button>,
+                <Button danger onClick={() => handleDeleteShipping(item._id)}>Xóa</Button>,
+              ]}
+            >
+              <Checkbox
+                key={item._id}
+                checked={selectedShipping === item._id}
+                onChange={() => handleSelectShipping(item._id)}
+              >
+                {item.firstName} {item.lastName}, {item.address}, {item.city} - {item.phoneNumber}
+              </Checkbox>
+            </List.Item>
+          )}
+        />
+
+        <Button onClick={() => setIsShippingModalVisible(true)}>Thêm địa chỉ mới</Button>
+        <Space direction="vertical" size="middle">
+          <Modal
+            title={editShippingData ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ"}
+            visible={isShippingModalVisible}
+            onCancel={() => setIsShippingModalVisible(false)}
+            onOk={handleSaveShipping}
+          >
+            <form>
+              <label>
+                Họ tên:
+                <Input
+                  value={shippingData.firstName}
+                  onChange={(e) => setShippingData({ ...shippingData, firstName: e.target.value })}
+                />
+              </label>
+              <label>
+                Số điện thoại:
+                <Input
+                  value={shippingData.phoneNumber}
+                  onChange={(e) => setShippingData({ ...shippingData, phoneNumber: e.target.value })}
+                />
+              </label>
+              <label>
+                Thành phố:
+                <Input
+                  value={shippingData.city}
+                  onChange={(e) => setShippingData({ ...shippingData, city: e.target.value })}
+                />
+              </label>
+              <label>
+                Địa chỉ:
+                <Input
+                  value={shippingData.address}
+                  onChange={(e) => setShippingData({ ...shippingData, address: e.target.value })}
+                />
+              </label>
+              <label>
+                Chi Tiết:
+                <Input
+                  value={shippingData.description}
+                  onChange={(e) => setShippingData({ ...shippingData, description: e.target.value })}
+                />
+              </label>
+            </form>
+          </Modal>
+        </Space>
+      </div>
+    </>
   );
 }
 
