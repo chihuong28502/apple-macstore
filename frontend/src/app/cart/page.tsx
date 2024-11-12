@@ -311,13 +311,14 @@ function CartCheckout() {
           dataSource={shippingList}
           renderItem={(item: any) => (
             <List.Item
-              key={item._id || item.firstName} // Use a unique identifier here, like item._id
+              key={item._id}
               actions={[
                 <Button onClick={() => handleEditShipping(item)}>Sửa</Button>,
                 <Button danger onClick={() => handleDeleteShipping(item._id)}>Xóa</Button>,
               ]}
             >
               <Checkbox
+                key={item._id}
                 checked={selectedShipping === item._id}
                 onChange={() => handleSelectShipping(item._id)}
               >
@@ -326,6 +327,7 @@ function CartCheckout() {
             </List.Item>
           )}
         />
+
         <Button onClick={() => setIsShippingModalVisible(true)}>Thêm địa chỉ mới</Button>
         <Space direction="vertical" size="middle">
           <Modal
