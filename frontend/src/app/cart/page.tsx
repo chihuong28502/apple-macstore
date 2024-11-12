@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 function CartCheckout() {
   const dispatch = useDispatch();
@@ -182,19 +183,19 @@ function CartCheckout() {
   const taxAmount = (selectedTotal * 0.1) || 0;
   const formattedSelectedTotal = selectedTotal || 0;
   const handleContinueShopping = () => {
-    if (selectedItems.length > 0) {
+    if (formattedSelectedTotal > 0 && selectedShipping) {
       dispatch(CartActions.setCartSelected(selectedItems))
       dispatch(CartActions.setPriceCheckout(formattedSelectedTotal))
+      if (!shipping || auth.shipping.length === 0) {
+        setIsShippingModalVisible(true);
+      } else {
+        dispatch(CartActions.setCartSelected(selectedItems));
+        dispatch(CartActions.setPriceCheckout(formattedSelectedTotal));
+        dispatch(CartActions.setShippingSelectedId(selectedShipping as any));
+        router.push('/checkout');
+      }
     } else {
-      message.destroy("Không có sản phẩm nào được chọn")
-    }
-    if (!shipping || auth.shipping.length === 0) {
-      setIsShippingModalVisible(true);
-    } else {
-      dispatch(CartActions.setCartSelected(selectedItems));
-      dispatch(CartActions.setPriceCheckout(formattedSelectedTotal));
-      dispatch(CartActions.setShippingSelectedId(selectedShipping as any));
-      router.push('/checkout');
+      message.success("Chọn đủ sản phẩm và địa chỉ giao hàng")
     }
   };
 
