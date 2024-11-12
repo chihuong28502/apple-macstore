@@ -311,7 +311,7 @@ function CartCheckout() {
           dataSource={shippingList}
           renderItem={(item: any) => (
             <List.Item
-              key={item._id} // Use a unique identifier here, like item._id
+              key={item._id || item.firstName} // Use a unique identifier here, like item._id
               actions={[
                 <Button onClick={() => handleEditShipping(item)}>Sửa</Button>,
                 <Button danger onClick={() => handleDeleteShipping(item._id)}>Xóa</Button>,
