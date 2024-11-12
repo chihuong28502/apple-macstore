@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
 
 function CartCheckout() {
   const dispatch = useDispatch();
@@ -95,10 +94,10 @@ function CartCheckout() {
         </div>
       );
     } else {
-      return cart.items.map((item: any) => {
+      return cart.items.map((item: any,index:number) => {
         const { productId, variantId, quantity } = item;
         const { color, ram, ssd, price, stock } = variantId;
-        const uniqueKey = `${productId._id}-${variantId._id}`;
+        const uniqueKey = `${productId._id}-${variantId._id}-${index}`;
         const isSelected = selectedItems.some(
           (selected) => selected.productId === productId._id && selected.variantId === variantId._id
         );

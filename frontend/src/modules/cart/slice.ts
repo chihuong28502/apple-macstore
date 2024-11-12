@@ -9,7 +9,7 @@ type CartState = {
   isLoading: boolean;
   cartById?: any;
   cartSelected: any
-  priceCheckout: Number
+  priceCheckout: number
   shippingSelectedId: any;
 };
 
