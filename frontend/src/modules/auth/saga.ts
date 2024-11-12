@@ -6,6 +6,7 @@ import { AppAction } from "@/core/components/AppSlice";
 import { message } from "antd";
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
+import { CustomerActions } from "../customer/slice";
 
 const getUserIdFromToken = () => {
   // Lấy accessToken từ localStorage
@@ -82,6 +83,7 @@ function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any
     if (userId) {
       const response = yield call(AuthRequest.getUserInfo, userId);
       yield put(AuthActions.setUser(response.data));
+      yield put(CustomerActions.setShipping(response.data.shipping))
       onSuccess();
     } else {
       yield put(AuthActions.getInfoUser({}));

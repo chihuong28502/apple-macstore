@@ -11,7 +11,6 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Admin.name) private adminModel: Model<AdminDocument>) { }
 
-  // Fetch all users excluding sensitive fields
   async findAll(): Promise<ResponseDto<User[]>> {
     try {
       const users = await this.userModel
@@ -33,7 +32,6 @@ export class UserService {
     }
   }
 
-  // Fetch a single user by ID, excluding sensitive fields
   async findOne(id: string): Promise<ResponseDto<User>> {
     try {
       const user = await this.userModel.findById(id).select('-password -__v -createdAt').exec();
@@ -76,7 +74,6 @@ export class UserService {
 
   // Update user information and return the updated user, excluding sensitive fields
   async update(id: string, updateUserDto: UpdateUserDto): Promise<ResponseDto<User>> {
-
     try {
       // Separate profile-related fields
       const { firstName, lastName, phoneNumber, ...otherFields } = updateUserDto as any;
@@ -109,7 +106,6 @@ export class UserService {
     }
   }
 
-
   // Delete user by ID and return a success message
   async remove(id: string): Promise<ResponseDto<User>> {
     try {
@@ -126,6 +122,111 @@ export class UserService {
       return {
         success: false,
         message: error.message || 'Xóa người dùng thất bại',
+        data: null,
+      };
+    }
+  }
+
+  //  Add Shipping info
+  async addShipping(userId: string, shippingInfo: any): Promise<ResponseDto<User>> {
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) {
+        throw new NotFoundException(`User with ID "${userId}" not found`);
+      }
+
+      // Thêm shippingInfo vào mảng shipping
+      user.shipping.push(shippingInfo);
+      await user.save();
+
+      return {
+        success: true,
+        message: 'Thêm thông tin shipping thành công',
+        data: user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Thêm thông tin shipping thất bại',
+        data: null,
+      };
+    }
+  }
+
+  // Cập nhật thông tin shipping cho một địa chỉ shipping cụ thể
+  async updateShipping(userId: string, shippingId: string, shippingInfo: any): Promise<ResponseDto<User>> {
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) {
+        throw new NotFoundException(`User with ID "${userId}" not found`);
+      }
+
+      // Tìm và cập nhật thông tin shipping dựa trên shippingId
+      const shippingIndex = user.shipping.findIndex(s => s._id.toString() === shippingId);
+      if (shippingIndex === -1) {
+        throw new NotFoundException(`Shipping info with ID "${shippingId}" not found`);
+      }
+
+      user.shipping[shippingIndex] = { ...user.shipping[shippingIndex], ...shippingInfo };
+      await user.save();
+
+      return {
+        success: true,
+        message: 'Cập nhật thông tin shipping thành công',
+        data: user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Cập nhật thông tin shipping thất bại',
+        data: null,
+      };
+    }
+  }
+
+  // Xóa một thông tin shipping dựa trên shippingId
+  async deleteShipping(userId: string, shippingId: string): Promise<ResponseDto<User>> {
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) {
+        throw new NotFoundException(`User with ID "${userId}" not found`);
+      }
+
+      // Lọc bỏ shipping với shippingId đã cho
+      user.shipping = user.shipping.filter(s => s._id.toString() !== shippingId);
+      await user.save();
+
+      return {
+        success: true,
+        message: 'Xóa thông tin shipping thành công',
+        data: user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Xóa thông tin shipping thất bại',
+        data: null,
+      };
+    }
+  }
+
+  // Lấy tất cả thông tin shipping của người dùng
+  async getAllShipping(userId: string): Promise<ResponseDto<any[]>> {
+    try {
+      const user = await this.userModel.findById(userId).exec();
+      if (!user) {
+        throw new NotFoundException(`User with ID "${userId}" not found`);
+      }
+
+      return {
+        success: true,
+        message: 'Lấy tất cả thông tin shipping thành công',
+        data: user.shipping,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Lấy tất cả thông tin shipping thất bại',
         data: null,
       };
     }

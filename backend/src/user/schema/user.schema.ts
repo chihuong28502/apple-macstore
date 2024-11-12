@@ -25,11 +25,24 @@ export class User {
       firstName: { type: String },
       lastName: { type: String },
       phoneNumber: { type: String },
-      shoeSize: { type: Number },
-      activityGoal: { type: String }
     }
   })
   profile: Record<string, any>;
+
+  @Prop({
+    type: [
+      {
+        firstName: { type: String },
+        lastName: { type: String },
+        phoneNumber: { type: String },
+        city: { type: String },
+        address: { type: String },
+        desciption: { type: String }
+      }
+    ]
+  })
+  shipping: Array<Record<string, any>>;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

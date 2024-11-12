@@ -1,17 +1,41 @@
 import { configureStore } from "@reduxjs/toolkit";
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST, persistReducer, persistStore, PURGE,
+  REGISTER,
+  REHYDRATE
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
 import createSagaMiddleware from "redux-saga";
-
-import { reducers } from "./reducer";
+import { reducers } from "./reducer"; // Import reducers của bạn
 import rootSaga from "./saga";
-const sagaMidleware = createSagaMiddleware();
+
+const sagaMiddleware = createSagaMiddleware();
+
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["customer", "cart"],
+};
+
+const persistedReducer = persistReducer(persistConfig, reducers);
 
 export const store = configureStore({
-  reducer: reducers,
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }).concat(sagaMidleware),
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+      }
+    }).concat(sagaMiddleware),
 });
 
-sagaMidleware.run(rootSaga);
+// Khởi tạo persistor
+export const persistor = persistStore(store);
+
+// Chạy rootSaga
+sagaMiddleware.run(rootSaga);
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;

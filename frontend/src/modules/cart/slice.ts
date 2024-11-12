@@ -9,13 +9,17 @@ type CartState = {
   isLoading: boolean;
   cartById?: any;
   cartSelected: any
+  priceCheckout: Number
+  shippingSelectedId: any;
 };
 
 const initialState: CartState = {
   cart: null,
   isLoading: false,
   cartById: null,
-  cartSelected: []
+  cartSelected: [],
+  priceCheckout: 0,
+  shippingSelectedId: ""
 };
 
 const CartSlice = createSlice({
@@ -66,17 +70,23 @@ const CartSlice = createSlice({
     setCartSelected: (state: CartState, { payload }: PayloadAction<any[]>) => {
       state.cartSelected = payload;
     },
+    setShippingSelectedId: (state: CartState, { payload }: any) => {
+      state.shippingSelectedId = payload;
+    },
+    setPriceCheckout: (state: any, { payload }: PayloadAction<any[]>) => {
+      state.priceCheckout = payload;
+    },
   },
 });
 
 const CartReducer = CartSlice.reducer;
 export default CartReducer;
-
 export const CartActions = CartSlice.actions;
-
 export const CartSelectors = {
   cart: (state: RootState) => state.cart.cart,
   cartById: (state: RootState) => state.cart.cartById,
+  priceCheckout: (state: RootState) => state.cart.priceCheckout,
   cartSelected: (state: RootState) => state.cart.cartSelected,
   isLoading: (state: RootState) => state.cart.isLoading,
+  shippingSelectedId: (state: RootState) => state.cart.shippingSelectedId,
 };
