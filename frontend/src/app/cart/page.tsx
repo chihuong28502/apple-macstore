@@ -184,7 +184,10 @@ function CartCheckout() {
   const handleContinueShopping = () => {
     if (formattedSelectedTotal > 0 && selectedShipping) {
       dispatch(CartActions.setCartSelected(selectedItems))
-      dispatch(CartActions.setPriceCheckout(formattedSelectedTotal))
+      dispatch(CartActions.setPriceCheckout({
+        selectedTotal: formattedSelectedTotal,
+        taxAmount: taxAmount
+      } as any));
       if (!shipping || auth.shipping.length === 0) {
         setIsShippingModalVisible(true);
       } else {
