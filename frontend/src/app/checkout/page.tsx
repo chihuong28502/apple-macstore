@@ -37,45 +37,42 @@ function Page() {
   return (
     <>
       <div className="font-[sans-serif] bg-mainContent">
-        <div className="max-lg:max-w-xl mx-auto w-full">
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 max-lg:order-1 p-6 !pr-0 max-w-4xl mx-auto w-full">
-              <div className="text-center max-lg:hidden">
-                <h2 className="text-3xl font-extrabold text-fontColor inline-block border-b-2 border-gray-800 pb-1">
-                  Checkout
-                </h2>
-              </div>
-              <form className="lg:mt-16">
-                <div>
-                  <h2 className="text-xl font-bold text-fontColor">Shipping info</h2>
-                  <div className="grid sm:grid-cols-2 gap-4 mt-4">
-                    <ShippingOrder customerShipping={customerShipping} selectedShipping={selectedShipping} />
-                  </div>
+        <div className="max-xl:max-w-xl mx-auto w-full">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-fontColor inline-block border-b-2 border-gray-800 pb-1">
+              Đặt hàng
+            </h2>
+          </div>
+          <div className="grid xl:grid-cols-3 gap-6">
+            <div className="xl:col-span-2 border-2 rounded-lg p-4 max-xl:order-1 !pr-0 max-w-4xl mx-auto w-full mt-8">
+              <form className="">
+                <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                  <ShippingOrder customerShipping={customerShipping} selectedShipping={selectedShipping} />
                 </div>
                 <PaymentMethod />
                 <div className="flex flex-wrap gap-4 mt-8">
                   <button
                     type="button"
-                    className="min-w-[150px] px-6 py-3.5 text-sm bg-gray-200 text-fontColor rounded-lg hover:bg-gray-300"
+                    className="min-w-[150px] px-6 py-3.5 text-sm bg-gray-200 text-fontColor rounded-xl hover:bg-gray-300"
                   >
                     Back
                   </button>
                   <button
                     type="button"
-                    className="min-w-[150px] px-6 py-3.5 text-sm bg-blue-600 text-fontColor rounded-lg hover:bg-blue-700"
+                    className="min-w-[150px] px-6 py-3.5 text-sm bg-blue-600 text-fontColor rounded-xl hover:bg-blue-700"
                   >
                     Confirm payment $240
                   </button>
                 </div>
               </form>
             </div>
-            <div className="bg-mainContent lg:h-screen lg:sticky lg:top-0 mt-5">
+            <div className="bg-mainContent xl:h-screen xl:sticky xl:top-0 mt-8">
               <div className="relative h-full border-2 rounded-md">
-                <div className="p-6 overflow-auto max-lg:max-h-[400px] lg:h-[calc(100vh-60px)] max-lg:mb-8 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out rounded-lg">
-                  <h2 className="text-xl font-bold text-fontColor">Order Summary</h2>
-                  <div className="space-y-2 mt-5 lg:mb-8">
+                <div className="p-6 overflow-auto max-xl:max-h-[400px] xl:h-[calc(100vh-60px)] max-xl:mb-8 shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out rounded-xl">
+                  <h2 className="text-xl font-bold text-fontColor">Tất cả sản phẩm</h2>
+                  <div className="space-y-2 mt-5 md:mb-8">
                     {variantsInSelectedShipping?.map((item: any, index: any) => (
-                      <CardProductCheckout item={item} />
+                      <CardProductCheckout key={item.variantId} item={item} />
                     ))}
                   </div>
                 </div>
