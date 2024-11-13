@@ -12,20 +12,27 @@ export class Order {
     type: [
       {
         productId: { type: Types.ObjectId, ref: 'Product', required: true },
-        customizations: {
-          size: { type: Number, required: true },
-          color: { type: String, required: true },
-          material: { type: String, required: true },
-          addName: { type: String },
-          addLogo: { type: String }
-        },
+        variantId: { type: Types.ObjectId, ref: 'Variant', required: true },
         quantity: { type: Number, required: true },
-        price: { type: Number, required: true }
+        price: { type: Number, required: true },
+        productName: { type: String, required: true },
+        productDescription: { type: String },
+        productImages: { type: [String] },
+        color: { type: String },
+        ram: { type: String },
+        ssd: { type: String },
+        stock: { type: Number }
       }
     ],
     required: true
   })
-  products: Record<string, any>[];
+  items: Record<string, any>[];
+
+  @Prop({ required: true })
+  price: number;
+
+  @Prop({ default: 0 })
+  taxAmount: number;
 
   @Prop({ required: true })
   totalPrice: number;
@@ -33,25 +40,27 @@ export class Order {
   @Prop({ type: String, enum: ['pending', 'shipped', 'delivered', 'cancelled'], required: true })
   status: string;
 
-  @Prop({
-    type: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String },
-      postalCode: { type: String, required: true },
-      country: { type: String, required: true }
-    }
-  })
-  shippingAddress: Record<string, any>;
+  @Prop({ type: Types.ObjectId, ref: 'Shipping', required: true })
+  shippingId: Types.ObjectId;
 
   @Prop({
     type: {
-      method: { type: String, required: true },
+      method: { type: String, },
       transactionId: { type: String },
-      status: { type: String, required: true }
-    }
+      status: { type: String, }
+    },
+
   })
   paymentInfo: Record<string, any>;
+
+  @Prop({ default: 0 })
+  shippingFee: number;
+
+  @Prop({ default: Date.now })
+  createdAt: Date;
+
+  @Prop({ default: null })
+  updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

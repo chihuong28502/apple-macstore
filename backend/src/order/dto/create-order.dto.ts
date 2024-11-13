@@ -2,14 +2,8 @@ export class CreateOrderDto {
   readonly userId: string;
   readonly products: {
     productId: string;
-    customizations: {
-      size: number;
-      color: string;
-      material: string;
-      addName?: string;
-      addLogo?: string;
-    };
     quantity: number;
+    variantId: string;
     price: number;
   }[];
   readonly totalPrice: number;
@@ -20,10 +14,5 @@ export class CreateOrderDto {
     state?: string;
     postalCode: string;
     country: string;
-  };
-  readonly paymentInfo: {
-    method: string;
-    transactionId?: string;
-    status: string;
   };
 }
