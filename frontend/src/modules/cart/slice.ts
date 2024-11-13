@@ -9,7 +9,7 @@ type CartState = {
   isLoading: boolean;
   cartById?: any;
   cartSelected: any
-  priceCheckout: number
+  priceCheckout: any
   shippingSelectedId: any;
 };
 
@@ -18,7 +18,10 @@ const initialState: CartState = {
   isLoading: false,
   cartById: null,
   cartSelected: [],
-  priceCheckout: 0,
+  priceCheckout: {
+    selectedTotal: 0,
+    taxAmount: 0,
+  },
   shippingSelectedId: ""
 };
 
@@ -73,9 +76,16 @@ const CartSlice = createSlice({
     setShippingSelectedId: (state: CartState, { payload }: any) => {
       state.shippingSelectedId = payload;
     },
-    setPriceCheckout: (state: any, { payload }: PayloadAction<any[]>) => {
-      state.priceCheckout = payload;
-    },
+    setPriceCheckout: (state: any, { payload }: any) => {
+      console.log("🚀 ~ payload:", payload);
+      if (typeof state.priceCheckout !== 'object') {
+        // Nếu priceCheckout không phải là đối tượng, khởi tạo lại
+        state.priceCheckout = { selectedTotal: 0, taxAmount: 0 };
+      }
+      // Cập nhật giá trị của priceCheckout
+      state.priceCheckout.selectedTotal = payload.selectedTotal;
+      state.priceCheckout.taxAmount = payload.taxAmount;
+    }
   },
 });
 
