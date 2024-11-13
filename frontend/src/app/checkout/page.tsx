@@ -18,7 +18,8 @@ function Page() {
   const selectedShipping = useSelector(CartSelectors.shippingSelectedId);
   const selectedShippingVariants = cartSelected.map((selected: any) => selected.variantId);
 
-  const variantsInSelectedShipping = cart.items.filter((item: any) => selectedShippingVariants.includes(item.variantId._id))
+  const variantsInSelectedShipping = cart.items
+    .filter((item: any) => selectedShippingVariants.includes(item.variantId._id)) // Kiểm tra xem variantId có trong selectedShipping không
     .map((item: any) => ({
       productId: item.productId._id,
       productName: item.productId.name,
@@ -35,22 +36,23 @@ function Page() {
 
   return (
     <>
-      <div className="bg-mainContent">
+      <div className="font-[sans-serif] bg-mainContent">
         <div className="max-lg:max-w-xl mx-auto w-full">
-          <div className="grid lg:grid-cols-1 gap-6">
-            <div className="lg:col-span-2 max-lg:order-1 !pr-0 max-w-4xl mx-auto w-full">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 max-lg:order-1 p-6 !pr-0 max-w-4xl mx-auto w-full">
               <div className="text-center max-lg:hidden">
-                <h2 className="text-2xl font-bold text-fontColor inline-block border-b-2 border-gray-800 pb-1">
-                  Đặt hàng
+                <h2 className="text-3xl font-extrabold text-fontColor inline-block border-b-2 border-gray-800 pb-1">
+                  Checkout
                 </h2>
               </div>
               <form className="lg:mt-16">
-                <>
-                  <ShippingOrder customerShipping={customerShipping} selectedShipping={selectedShipping} />
-                </>
-                <>
-                  <PaymentMethod />
-                </>
+                <div>
+                  <h2 className="text-xl font-bold text-fontColor">Shipping info</h2>
+                  <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                    <ShippingOrder customerShipping={customerShipping} selectedShipping={selectedShipping} />
+                  </div>
+                </div>
+                <PaymentMethod />
                 <div className="flex flex-wrap gap-4 mt-8">
                   <button
                     type="button"
@@ -69,17 +71,15 @@ function Page() {
             </div>
             <div className="bg-mainContent lg:h-screen lg:sticky lg:top-0 mt-5">
               <div className="relative h-full border-2 rounded-md">
-                <div className="p-6 overflow-auto max-lg:max-h-[400px] lg:h-[calc(100vh-60px)] max-lg:mb-4 shadow-lg transition-shadow duration-300 ease-in-out rounded-lg">
-                  <h2 className="font-bold text-fontColor inline-block border-b-2 border-gray-800 pb-1 text-xl">Tổng sản phẩm đặt hàng</h2>
-                  <div className="space-y-4 mt-5">
-                    {variantsInSelectedShipping?.map((item: any) => (
+                <div className="p-6 overflow-auto max-lg:max-h-[400px] lg:h-[calc(100vh-60px)] max-lg:mb-8 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out rounded-lg">
+                  <h2 className="text-xl font-bold text-fontColor">Order Summary</h2>
+                  <div className="space-y-2 mt-5 lg:mb-8">
+                    {variantsInSelectedShipping?.map((item: any, index: any) => (
                       <CardProductCheckout item={item} />
                     ))}
                   </div>
                 </div>
-                <>
-                  <PriceCard price={price} />
-                </>
+                <PriceCard price={price} />
               </div>
             </div>
           </div>
