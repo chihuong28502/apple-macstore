@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-function page() {
+function Page() {
   return (
     <nav>
       <Link href=" ">Dashboard Home</Link>
@@ -11,4 +11,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
