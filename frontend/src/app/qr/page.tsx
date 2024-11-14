@@ -11,7 +11,7 @@ function QrScan() {
   const dispatch = useDispatch()
   const order = useSelector(OrderSelectors.order)
   const auth = useSelector(AuthSelectors.user)
-  const [payment, setPayment] = useState(false)
+  const [isModalVisible, setIsModalVisible] = useState(false)
   const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -19,11 +19,10 @@ function QrScan() {
 
   useEffect(() => {
     const handleOrderCheck = (orderSocket: any) => {
-      if (orderSocket.code === order.code && auth._id == orderSocket.userId) {
+      if (orderSocket.code === order.code && auth._id === orderSocket.userId && auth._id === order.userId) {
+    
+        
         dispatch(OrderActions.setOrder(orderSocket))
-      } else {
-        setIsLoading(false);
-        setIsCompleted(false);
       }
     }
     listenToSocketEvent(socket, "check-order", handleOrderCheck)
@@ -32,21 +31,27 @@ function QrScan() {
 
   useEffect(() => {
     if (order?.status === "shipping") {
+      setIsModalVisible(true)
       setShowFullScreen(true)
       setIsLoading(true);
       setIsCompleted(true);
-      setPayment(true)
-    } else {
-      setShowFullScreen(false)
-      setIsLoading(false);
-      setIsCompleted(false);
-      setPayment(false)
     }
   }, [order])
 
   return (
-    <div className='flex justify-center  mx-auto items-center'>
+    <div>
       <img src={order?.qr} alt="QR Code" />
+      {/* {isModalVisible && (
+        <Modal
+          title="QR Code for Payment"
+          visible={isModalVisible}
+          footer={null}
+          onCancel={() => setIsModalVisible(false)}
+          centered
+        >
+          <p className="text-center">Không tìm thấy mã QR</p>
+        </Modal>
+      )} */}
       {showFullScreen && (
         <FullScreenLoading
           isLoading={true}
@@ -54,7 +59,7 @@ function QrScan() {
           loadingText="Đang xử lý thanh toán..."
           completedText="Thanh toán thành công!"
           completedFailText="Thanh toán thất bại"
-          paymentStatus={payment}
+          paymentStatus={true}
           onComplete={() => {
             setShowFullScreen(false);
             setIsLoading(false);
