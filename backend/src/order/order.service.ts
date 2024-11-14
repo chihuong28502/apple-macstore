@@ -5,15 +5,25 @@ import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order, OrderDocument } from './schema/order.schema';
+import * as crypto from 'node:crypto';
+import { ConfigService } from '@nestjs/config';
+
 
 @Injectable()
 export class OrderService {
-  constructor(@InjectModel(Order.name) private orderModel: Model<OrderDocument>) { }
+  constructor(@InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    private configService: ConfigService,
+  ) { }
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
     try {
-      const createdOrder = new this.orderModel(createOrderDto);
-      await createdOrder.save();  // Đảm bảo lưu thành công
+      const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+      const qr = `https://qr.sepay.vn/img?acc=${this.configService.getOrThrow('BANK_ACCOUNT_NUMBER')}&bank=${this.configService.getOrThrow('BANK_ACCOUNT_BANK')}&amount=${createOrderDto.totalPrice}&des=HD%20${code}`
+      const createdOrder = new this.orderModel({
+        ...createOrderDto,
+        code, qr
+      });
+      await createdOrder.save();
       return {
         success: true,
         message: 'Order created successfully',

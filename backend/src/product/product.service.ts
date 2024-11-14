@@ -6,11 +6,9 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { extractPublicId } from 'src/utils/func/getPublicId';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
-import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schema/product.schema';
 import { Variant, VariantDocument } from './schema/variants.schema';
-import { populate } from 'dotenv';
 
 @Injectable()
 export class ProductService {

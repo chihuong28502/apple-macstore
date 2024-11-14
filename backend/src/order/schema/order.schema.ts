@@ -8,6 +8,12 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
+  @Prop({ type: String, required: true })
+  code: string;
+
+  @Prop({ type: String, required: true })
+  qr: string;
+
   @Prop({
     type: [
       {
@@ -17,7 +23,7 @@ export class Order {
         price: { type: Number, required: true },
         productName: { type: String, required: true },
         productDescription: { type: String },
-        productImages: { type: [String] },
+        productImages: { type: [] },
         color: { type: String },
         ram: { type: String },
         ssd: { type: String },

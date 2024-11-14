@@ -3,46 +3,25 @@ import { useAppSelector } from '@/core/services/hook';
 import { AuthSelectors } from '@/modules/auth/slice';
 import { CartSelectors } from '@/modules/cart/slice';
 import { CustomerSelectors } from '@/modules/customer/slice';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
-import axios from 'axios';
+import { OrderActions, OrderSelectors } from '@/modules/order/slice';
 import { Button, Modal, Radio } from 'antd'; // Import Radio từ Ant Design
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import CardProductCheckout from './components/CardProductCheckout';
-import PaymentMethod from './components/PaymentMethod';
 import PriceCard from './components/PriceCard';
 import ShippingOrder from './components/ShippingOrder';
-import { useRouter } from 'next/navigation';
-import { OrderActions, OrderSelectors } from '@/modules/order/slice';
 
 function Page() {
   const route = useRouter()
   const dispatch = useDispatch()
   const auth = useAppSelector(AuthSelectors.user);
-  const cart = useSelector(CartSelectors.cart);
   const cartSelected = useSelector(CartSelectors.cartSelected);
   const customerShipping = useSelector(CustomerSelectors.shipping);
   const price = useSelector(CartSelectors.priceCheckout);
   const order = useSelector(OrderSelectors.order);
-  console.log("🚀 ~ order:", order)
   const selectedShipping = useSelector(CartSelectors.shippingSelectedId);
-  const selectedShippingVariants = cartSelected.map((selected: any) => selected.variantId);
 
-  const variantsInSelectedShipping = cart.items
-    .filter((item: any) => selectedShippingVariants.includes(item.variantId._id))
-    .map((item: any) => ({
-      productId: item.productId._id,
-      productName: item.productId.name,
-      productDescription: item.productId.description,
-      productImages: item.productId.images,
-      variantId: item.variantId._id,
-      color: item.variantId.color,
-      ram: item.variantId.ram,
-      ssd: item.variantId.ssd,
-      price: item.variantId.price,
-      stock: item.variantId.stock,
-      quantity: item.quantity
-    }));
-  console.log("price", price)
 
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,26 +29,26 @@ function Page() {
   const [paymentMethod, setPaymentMethod] = useState<string>(''); // State lưu phương thức thanh toán
 
   const handleGetQrCode = async () => {
-    setLoading(true);
-    try {
-      if (paymentMethod === 'qrmBBank') {
-        // API lấy mã QR của MB Bank
-        setQrCode("https://qr.sepay.vn/img?acc=0979756291&bank=MB&amount=29000000&des=NOI_DUNG_MB");
-      } else {
-        // API lấy mã QR mặc định hoặc phương thức thanh toán khác
-        setQrCode("https://qr.sepay.vn/img?acc=0979756291&bank=VCB&amount=29000000&des=NOI_DUNG");
-      }
-      setIsModalVisible(true);
-    } catch (error) {
-      console.error('Lỗi khi lấy QR code:', error);
-    } finally {
-      setLoading(false);
-    }
+    // setLoading(true);
+    // try {
+    //   if (paymentMethod === 'qrmBBank') {
+    //     // API lấy mã QR của MB Bank
+    //     setQrCode("https://qr.sepay.vn/img?acc=0979756291&bank=MB&amount=29000000&des=NOI_DUNG_MB");
+    //   } else {
+    //     // API lấy mã QR mặc định hoặc phương thức thanh toán khác
+    //     setQrCode("https://qr.sepay.vn/img?acc=0979756291&bank=VCB&amount=29000000&des=NOI_DUNG");
+    //   }
+    //   setIsModalVisible(true);
+    // } catch (error) {
+    //   console.error('Lỗi khi lấy QR code:', error);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   const handleClickPayment = async () => {
     if (paymentMethod === 'qrmBBank') {
-      const qr = `https://qr.sepay.vn/img?acc=097976291&bank=MB&amount=${price.selectedTotal + price.taxAmount}&des=${order._id}}`
+      const qr = `https://qr.sepay.vn/img?acc=097976291&bank=MBBank&amount=${price.selectedTotal + price.taxAmount}&des=${order._id}}`
       dispatch(OrderActions.setQr(qr))
       route.push('/qr')
     }
@@ -136,7 +115,7 @@ function Page() {
                 <div className="p-6 overflow-auto max-xl:max-h-[400px] xl:h-[calc(100vh-60px)] max-xl:mb-8 shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out rounded-xl">
                   <h2 className="text-xl font-bold text-fontColor">Tất cả sản phẩm</h2>
                   <div className="space-y-2 mt-5 md:mb-8">
-                    {variantsInSelectedShipping?.map((item: any) => (
+                    {order?.items?.map((item: any) => (
                       <CardProductCheckout key={item.variantId} item={item} />
                     ))}
                   </div>

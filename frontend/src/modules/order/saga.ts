@@ -20,6 +20,7 @@ function* getOrder() {
 }
 
 function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
+  console.log("🚀 ~ payload:", payload)
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } =
@@ -27,7 +28,6 @@ function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Gener
     yield put(AppAction.hideLoading());
     if (res.success) {
       message.success("Thêm order thành công");
-      console.log("🚀 ~ res:", res)
       yield put(OrderActions.setOrder(res.data));
     } else {
       message.error("Thêm order thất bại");
