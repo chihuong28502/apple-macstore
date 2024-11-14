@@ -13,8 +13,8 @@ export class CreateProductDto {
     colors: string[];  // Các màu sắc
   };  // Thông số kỹ thuật
   isPublic:boolean;
-  reviewsCount?: number;  // Số lượng đánh giá
-  averageRating?: number;  // Đánh giá trung bình
+  reviewsCount?: number;
+  averageRating?: number; 
 
   stock: Map<string, Map<string, { quantity: number; price: number ,basePrice: number}>>;  // Tồn kho
 

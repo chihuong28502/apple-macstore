@@ -347,6 +347,7 @@ export class ProductService {
       const variantData = new this.variantModel(
         {
           ...createVariant,
+          availableStock: createVariant.stock,
           productId
         })
       // Lưu sản phẩm vào database

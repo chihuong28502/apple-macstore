@@ -65,6 +65,9 @@ export class Order {
   @Prop({ default: Date.now })
   createdAt: Date;
 
+  @Prop()
+  lockUntil: Date
+
   @Prop({ default: null })
   updatedAt: Date;
 }

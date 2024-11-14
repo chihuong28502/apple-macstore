@@ -96,8 +96,11 @@ function CartCheckout() {
       );
     } else {
       return cart.items.map((item: any) => {
-        const { productId, variantId, quantity } = item;
-        const { color, ram, ssd, price, stock } = variantId;
+        let { productId, variantId, quantity } = item;
+        const { color, ram, ssd, price, availableStock } = variantId;
+        if (quantity > availableStock) {
+          quantity = availableStock
+        }
         const uniqueKey = `${productId._id}-${variantId._id}`;
         const isSelected = selectedItems.some(
           (selected) => selected.productId === productId._id && selected.variantId === variantId._id
@@ -141,11 +144,11 @@ function CartCheckout() {
                   <Button
                     size="small"
                     onClick={() => handleQuantityChange(productId._id, variantId._id, quantity + 1)}
-                    disabled={Number(quantity) >= Number(stock)}
+                    disabled={Number(quantity) >= Number(availableStock)}
                   >
                     +
                   </Button>
-                  <span className="text-gray-500 flex items-center">{quantity}</span>
+                  <span className="text-gray-500 flex items-center">{quantity > availableStock ? availableStock : quantity}</span>
 
                   <Button
                     size="small"
@@ -155,7 +158,7 @@ function CartCheckout() {
                     -
                   </Button>
                 </div>
-                <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div>
+                <div className="text-gray-500 block w-full">{`Tồn kho: ${availableStock}`}</div>
                 <Tooltip title="Xóa" placement="bottom">
                   <Button
                     size="small"
