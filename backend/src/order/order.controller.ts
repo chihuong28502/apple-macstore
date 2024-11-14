@@ -5,11 +5,11 @@ import { Order } from './schema/order.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ResponseDto } from 'src/utils/dto/response.dto';
+import { SepayDto } from './dto/sepay.dto';
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) { }
-
   @Post()
   async create(@Body() createOrderDto: CreateOrderDto, @Res() res: Response): Promise<Response> {
     const result = await this.orderService.create(createOrderDto);
@@ -41,5 +41,12 @@ export class OrderController {
     const result = await this.orderService.remove(id);
     let statusCode = result.success ? 200 : 404;
     return res.status(statusCode).json(result);
+  }
+
+  //payment /seepay
+  @Post("payment/sepay")
+  async checkPayment(@Body() sePayDto: SepayDto, @Res() res: Response): Promise<Response> {
+    const result = await this.orderService.checkPayment(sePayDto);
+    return res.status(result.success ? 201 : 400).json(result);
   }
 }
