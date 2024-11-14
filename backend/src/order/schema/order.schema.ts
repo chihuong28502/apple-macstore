@@ -43,7 +43,7 @@ export class Order {
   @Prop({ required: true })
   totalPrice: number;
 
-  @Prop({ type: String, enum: ['pending', 'shipped', 'delivered', 'cancelled'], required: true })
+  @Prop({ type: String, enum: ['pending', 'shipping', 'delivered', 'cancelled'], required: true })
   status: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Shipping', required: true })
