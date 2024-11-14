@@ -91,7 +91,7 @@ export class CartService {
       const cart = await this.cartModel
         .findOne({ userId })
         .populate('items.productId', 'name description images')  // Lấy thông tin sản phẩm
-        .populate('items.variantId', 'color colorCode ram ssd price stock status'); // Lấy thông tin biến thể
+        .populate('items.variantId', 'color colorCode ram ssd price stock status productId availableStock reservedStock lockUntil'); // Lấy thông tin biến thể
 
       if (!cart) {
         return {

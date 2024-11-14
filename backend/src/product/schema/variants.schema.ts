@@ -6,7 +6,7 @@ export type VariantDocument = Variant & Document;
 @Schema({ timestamps: true })
 export class Variant {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Product', required: true })
-  productId: string;  
+  productId: string;
 
   @Prop({ required: true })
   color: string;
@@ -24,7 +24,13 @@ export class Variant {
   price: number;  // Giá bán sản phẩm
 
   @Prop({ required: true })
-  stock: string;
+  stock: number;
+
+  @Prop({ required: true })
+  availableStock: number;
+
+  @Prop({ required: true, default: 0 })
+  reservedStock: number;
 
   @Prop({ required: true })
   status: string;

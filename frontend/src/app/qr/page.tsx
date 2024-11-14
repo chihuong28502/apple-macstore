@@ -20,8 +20,6 @@ function QrScan() {
   useEffect(() => {
     const handleOrderCheck = (orderSocket: any) => {
       if (orderSocket.code === order.code && auth._id === orderSocket.userId && auth._id === order.userId) {
-    
-        
         dispatch(OrderActions.setOrder(orderSocket))
       }
     }
