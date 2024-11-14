@@ -3,6 +3,7 @@ import { useAppSelector } from "@/core/services/hook";
 import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { CustomerActions, CustomerSelectors } from "@/modules/customer/slice";
+import { OrderActions } from "@/modules/order/slice";
 import { Button, Card, Checkbox, Col, Empty, Input, List, message, Modal, Row, Space, Tooltip } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -181,7 +182,7 @@ function CartCheckout() {
 
   const taxAmount = (selectedTotal * 0.1) || 0;
   const formattedSelectedTotal = selectedTotal || 0;
-  const handleContinueShopping = () => {
+  const handleContinueShopping = async () => {
     if (formattedSelectedTotal > 0 && selectedShipping) {
       dispatch(CartActions.setCartSelected(selectedItems))
       dispatch(CartActions.setPriceCheckout({
@@ -192,6 +193,35 @@ function CartCheckout() {
         setIsShippingModalVisible(true);
       } else {
         dispatch(CartActions.setShippingSelectedId(selectedShipping as any));
+        const selectedShippingVariants = selectedItems.map((selected: any) => selected.variantId);
+
+        const variantsInSelectedShipping = cart.items
+          .filter((item: any) => selectedShippingVariants.includes(item.variantId._id))
+          .map((item: any) => ({
+            productId: item.productId._id,
+            productName: item.productId.name,
+            productDescription: item.productId.description,
+            productImages: item.productId.images,
+            variantId: item.variantId._id,
+            color: item.variantId.color,
+            ram: item.variantId.ram,
+            ssd: item.variantId.ssd,
+            price: item.variantId.price,
+            stock: item.variantId.stock,
+            quantity: item.quantity
+          }));
+
+        dispatch(OrderActions.addOrder({
+          userId: auth._id,
+          items: variantsInSelectedShipping,
+          shippingId: selectedShipping as any,
+          price: formattedSelectedTotal,
+          totalPrice: formattedSelectedTotal + taxAmount,
+          taxAmount: taxAmount,
+          status: "pending",
+          paymentMethod: "",
+          shippingFee: 0,
+        }))
         router.push('/checkout');
       }
     } else {
