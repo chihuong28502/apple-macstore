@@ -96,11 +96,14 @@ function CartCheckout() {
       );
     } else {
       return cart.items.map((item: any) => {
-        let { productId, variantId, quantity } = item;
+        const { productId, variantId, quantity: initialQuantity } = item;
+        let quantity = initialQuantity;  // Dùng let để quantity có thể thay đổi
+
         const { color, ram, ssd, price, availableStock } = variantId;
         if (quantity > availableStock) {
-          quantity = availableStock
+          quantity = availableStock; 
         }
+
         const uniqueKey = `${productId._id}-${variantId._id}`;
         const isSelected = selectedItems.some(
           (selected) => selected.productId === productId._id && selected.variantId === variantId._id
