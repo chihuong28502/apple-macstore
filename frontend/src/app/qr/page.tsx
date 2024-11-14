@@ -3,7 +3,7 @@ import { OrderSelectors } from '@/modules/order/slice'
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-function page() {
+function QrScan() {
   const order = useSelector(OrderSelectors.order)
 
   console.log("🚀 ~ order:", order)
@@ -14,4 +14,4 @@ function page() {
   )
 }
 
-export default page
+export default QrScan
