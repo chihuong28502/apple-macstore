@@ -133,7 +133,7 @@ export class CategoryService {
 
   private async getAllChildCategories(parentId: string): Promise<CategoryDocument[]> {
     const children = await this.categoryModel.find({ parentCategoryId: parentId }).exec();
-    let allChildren = [...children];
+    let allChildren: CategoryDocument[] = [...children]; // Đảm bảo allChildren là mảng CategoryDocument
 
     // Đệ quy tìm category con của các category con
     for (let child of children) {
@@ -143,4 +143,5 @@ export class CategoryService {
 
     return allChildren;
   }
+
 }
