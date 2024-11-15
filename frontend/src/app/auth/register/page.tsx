@@ -72,11 +72,9 @@ function Page() {
         AuthActions.register({
           data: formattedData,
           onSuccess: (rs: any) => {
-            message.success("Đăng ký thành công");
             route.push("login");
           },
           onFail: (message: any, data: any) => {
-            message.error("Đăng ký thất bại");
           },
         })
       );

@@ -15,6 +15,7 @@ interface Variant {
   ram: string;
   ssd: string;
   price: number;
+  availableStock: number;
   stock: number;
   _id: string;
 }
@@ -40,14 +41,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [selectedRam, setSelectedRam] = useState<string | undefined>(undefined);
   const [selectedStorage, setSelectedStorage] = useState<string | undefined>(undefined);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(0);
 
   useEffect(() => {
     const cachedProduct = getCache("productById");
     if (cachedProduct && cachedProduct._id === productId) {
       dispatch(ProductActions.setProduct(cachedProduct));
       return;
-    } 
+    }
     dispatch(ProductActions.fetchProductById(productId));
   }, [dispatch, productId]);
 
@@ -62,17 +63,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const handleColorClick = (color: string) => {
     setSelectedColor(color);
     resetSelections();
-    setQuantity(1);
+    setQuantity(0);
   };
 
   const handleRamClick = (ram: string) => {
     setSelectedRam(ram);
-    setQuantity(1);
+    setQuantity(0);
   };
 
   const handleStorageClick = (storage: string) => {
     setSelectedStorage(storage);
-    setQuantity(1);
+    setQuantity(0);
   };
 
   const resetSelections = () => {
@@ -110,10 +111,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       alert("Please select color, RAM, and storage before adding to the cart.");
       return;
     }
-  
+
     // Tìm variant tương ứng với các lựa chọn
     const selectedStock = getStockForSelectedOptions();
-  
+
     if (selectedStock) {
       // Tạo sản phẩm cần thêm vào giỏ hàng với chỉ productId, variantId và quantity
       const productToAdd = {
@@ -121,7 +122,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         variantId: selectedStock._id, // ID variant (stockId)
         quantity: quantity > selectedStock.stock ? selectedStock.stock : quantity, // Số lượng, giới hạn với số tồn kho
       };
-  
+
       dispatch(
         CartActions.addProductToCart({
           id: auth._id, // ID người dùng
@@ -132,16 +133,19 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       alert("The selected variant is out of stock.");
     }
   };
-  
+
   const handleIncreaseQuantity = () => {
     const selectedStock = getStockForSelectedOptions();
-    if (quantity < (selectedStock?.stock || 0)) {
+    if (selectedStock?.availableStock === 0) {
+      setQuantity(0)
+    }
+    if (quantity < (selectedStock?.availableStock || 0)) {
       setQuantity(quantity + 1);
     }
   };
 
   const handleDecreaseQuantity = () => {
-    if (quantity > 1) {
+    if (quantity >= 1) {
       setQuantity(quantity - 1);
     }
   };
@@ -210,7 +214,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             <div className="mt-5">
               {(() => {
                 const selectedStock = getStockForSelectedOptions();
+
                 return selectedStock && selectedStock.price ? (
+
                   <>
                     <p className="text-lg font-bold !text-black">
                       Giá: {selectedStock.price.toLocaleString("vi-VN", {
@@ -218,7 +224,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                         currency: "VND",
                       })}
                     </p>
-                    <p className="text-[#999]">Tồn kho: {selectedStock.stock} sản phẩm</p>
+                    <p className="text-[#999]">Tồn kho: {selectedStock.availableStock} sản phẩm</p>
                   </>
                 ) : null;
               })()}
@@ -234,6 +240,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           <div className="mt-5 flex flex-wrap gap-4">
             <button
               onClick={handleAddToCart}
+              disabled={(quantity === 0)}
               type="button"
               className="flex items-center justify-center px-8 py-4 bg-gray-800 hover:bg-gray-900 text-white border border-gray-800 text-base rounded-lg shadow-md transition duration-300"
             >

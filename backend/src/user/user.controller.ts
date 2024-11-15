@@ -9,16 +9,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { RulesGuard } from 'src/common/guards/auth.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schema/user.schema';
 import { UserService } from './user.service';
 
-@UseGuards(JwtAuthGuard, RolesGuard) // Áp dụng guard ở cấp controller
-@Roles('admin')
 @Controller('user')
+
+@UseGuards(JwtAuthGuard, RulesGuard)
+@Roles('admin')
 export class UserController {
   constructor(private readonly userService: UserService) { }
   @Get()
@@ -54,6 +55,7 @@ export class UserController {
   }
 
   // SHIPPING
+  @Roles('customer')
   @Post('shipping/:id')
   async addShipping(
     @Param('id') userId: string,
@@ -62,6 +64,7 @@ export class UserController {
     return this.userService.addShipping(userId, shippingInfo);
   }
 
+  @Roles('customer')
   @Put(':userId/shipping/:shippingId')
   async updateShipping(
     @Param('userId') userId: string,
@@ -71,6 +74,7 @@ export class UserController {
     return this.userService.updateShipping(userId, shippingId, shippingInfo);
   }
 
+  @Roles('customer')
   @Delete(':userId/shipping/:shippingId')
   async deleteShipping(
     @Param('userId') userId: string,
@@ -79,6 +83,7 @@ export class UserController {
     return this.userService.deleteShipping(userId, shippingId);
   }
 
+  @Roles('customer')
   @Get(':id/shipping')
   async getAllShipping(@Param('id') userId: string): Promise<ResponseDto<any[]>> {
     return this.userService.getAllShipping(userId);

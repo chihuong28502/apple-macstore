@@ -66,7 +66,9 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
 
     if (res.success) {
       onSuccess(res);
+      message.success("Đăng ký thành công.");
     } else {
+      message.error("Đăng ký thất bại.");
       onFail(res);
     }
   } catch (error: any) {
