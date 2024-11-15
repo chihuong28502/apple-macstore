@@ -2,7 +2,7 @@ import MSTFetch from "@/core/services/fetch";
 
 export const OrderRequest = {
   addOrder(item: any) {
-    console.log("🚀 ~ item:", item)
+    return MSTFetch.post("/order", item);
   },
   getAllOrder() {
     return MSTFetch.get("/order");
