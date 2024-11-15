@@ -2,6 +2,8 @@ import { AppAction } from "@/core/components/AppSlice";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { message } from "antd";
 import { delay, put, takeLeading } from "redux-saga/effects";
+import { CartRequest } from "../cart/request";
+import { CartActions } from "../cart/slice";
 import { OrderRequest } from "./request";
 import { OrderActions } from "./slice";
 
@@ -19,17 +21,28 @@ function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>)
   }
 }
 
-function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
+function* addOrder({ payload }: PayloadAction<{
+  userId: string
+  data: any;
+  onSuccess?: (data: any) => void;
+  onFail?: (error: string, data?: any) => void;
+}>): Generator<any, void, any> {
+  const { onSuccess = () => { }, onFail = () => { } } = payload
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } =
       yield OrderRequest.addOrder(payload);
     yield put(AppAction.hideLoading());
     if (res.success) {
+      const responseCart: { success: boolean; data: any } = yield CartRequest.getCartById(payload.userId);
+      const responseOrder: { success: boolean; data: any } = yield OrderRequest.getOrderById(payload.userId);
+      yield put(CartActions.setCart(responseCart.data));
+      yield put(OrderActions.setOrder(responseOrder.data));
       message.success("Thêm order thành công");
-      yield put(OrderActions.setOrder(res.data));
+      onSuccess(res?.data)
     } else {
       message.error("Thêm order thất bại");
+      onFail(res.data)
     }
   } catch (e) {
     message.error("Thêm order thất bại");

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as crypto from 'node:crypto';
+import { ObjectId } from 'mongodb';
 import { Product, ProductDocument } from 'src/product/schema/product.schema';
 import { Variant, VariantDocument } from 'src/product/schema/variants.schema';
 import { User, UserDocument } from 'src/user/schema/user.schema';
@@ -12,36 +13,32 @@ import { SepayDto } from './dto/sepay.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersGateway } from './order.gateway';
 import { Order, OrderDocument } from './schema/order.schema';
+import { Cart, CartDocument } from 'src/cart/schema/cart.schema';
+import { CartsGateway } from 'src/cart/cart.gateway';
 
 
 @Injectable()
 export class OrderService {
+
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Variant.name) private variantModel: Model<VariantDocument>,
     private configService: ConfigService,
-    private readonly ordersGateway: OrdersGateway
+    private readonly ordersGateway: OrdersGateway,
+    private readonly cartsGateway: CartsGateway
   ) { }
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
     try {
       const user = await this.userModel.findById(createOrderDto.userId);
+      const cart = await this.cartModel.findOne({ userId: createOrderDto.userId });
       const code = `${crypto.randomBytes(4).toString('hex').toUpperCase()}${user.code}`;
       const qr = `https://qr.sepay.vn/img?acc=${this.configService.getOrThrow('BANK_ACCOUNT_NUMBER')}&bank=${this.configService.getOrThrow('BANK_ACCOUNT_BANK')}&amount=${createOrderDto.totalPrice}&des=HD%20${code}`;
-
-      // Tạo đơn hàng
-      const createdOrder = new this.orderModel({
-        ...createOrderDto,
-        code,
-        qr,
-        lockUntil: new Date(Date.now() + 3 * 60 * 60 * 1000),
-      });
-
       const variantUpdates = createOrderDto.items.map(async (item) => {
         const variant = await this.variantModel.findById(item.variantId);
-
         if (variant.availableStock >= item.quantity) {
           // Giảm availableStock và tăng reservedStock
           variant.availableStock -= item.quantity;
@@ -52,10 +49,25 @@ export class OrderService {
           throw new Error(`Kho không còn đủ ${item.variantId}`);
         }
       });
-
+      // Tạo đơn hàng
       await Promise.all(variantUpdates);
-      await createdOrder.save();
+      const createdOrder = new this.orderModel({
+        ...createOrderDto,
+        code,
+        qr,
+        lockUntil: new Date(Date.now() + 3 * 60 * 60 * 1000),
+      });
 
+      cart.items = cart.items.filter(cartItem => {
+        return !createOrderDto.items.some(orderItem => {
+          return cartItem.variantId.toString() === new Types.ObjectId(orderItem.variantId).toString();
+        });
+      });
+
+      await createdOrder.save();
+      await this.ordersGateway.addOrder(createdOrder);
+      const updateCart = await cart.save();
+      this.cartsGateway.sendEventAddCart(updateCart);
       return {
         success: true,
         message: 'Order created successfully',
@@ -69,7 +81,6 @@ export class OrderService {
       };
     }
   }
-
 
   async findAll(): Promise<ResponseDto<Order[]>> {
     try {
@@ -164,7 +175,6 @@ export class OrderService {
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-
       return {
         success: true,
         message: 'Order updated successfully',
@@ -221,7 +231,7 @@ export class OrderService {
       for (const item of order.items) {
         await this.variantModel.findByIdAndUpdate(
           item.variantId,
-          { $inc: { stock: -parseInt(item.quantity as any, 10) } }, // Đảm bảo ép kiểu `quantity` thành số nguyên
+          { $inc: { stock: -parseInt(item.quantity as any, 10) } },
           { new: true }
 
         );

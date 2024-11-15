@@ -39,7 +39,6 @@ const CartSlice = createSlice({
       state.isLoading = payload;
     },
     addProductToCart(state, action: PayloadAction<{ id: string; item: any }>) {
-      const { id, item } = action.payload;
     },
     updateCartItemQuantity(
       state,

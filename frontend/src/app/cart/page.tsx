@@ -151,7 +151,7 @@ function CartCheckout() {
                   >
                     +
                   </Button>
-                  <span className="text-gray-500 flex items-center">{quantity > availableStock ? availableStock : quantity}</span>
+                  <span className="text-gray-500 flex items-center">{quantity}</span>
 
                   <Button
                     size="small"
@@ -190,11 +190,12 @@ function CartCheckout() {
   const formattedSelectedTotal = selectedTotal || 0;
   const handleContinueShopping = async () => {
     if (formattedSelectedTotal > 0 && selectedShipping) {
-      dispatch(CartActions.setCartSelected(selectedItems))
+      dispatch(CartActions.setCartSelected(selectedItems));
       dispatch(CartActions.setPriceCheckout({
         selectedTotal: formattedSelectedTotal,
-        taxAmount: taxAmount
+        taxAmount: taxAmount,
       } as any));
+
       if (!shipping || auth.shipping.length === 0) {
         setIsShippingModalVisible(true);
       } else {
@@ -202,20 +203,28 @@ function CartCheckout() {
         const selectedShippingVariants = selectedItems.map((selected: any) => selected.variantId);
 
         const variantsInSelectedShipping = cart.items
-          .filter((item: any) => selectedShippingVariants.includes(item.variantId._id))
-          .map((item: any) => ({
-            productId: item.productId._id,
-            productName: item.productId.name,
-            productDescription: item.productId.description,
-            productImages: item.productId.images,
-            variantId: item.variantId._id,
-            color: item.variantId.color,
-            ram: item.variantId.ram,
-            ssd: item.variantId.ssd,
-            price: item.variantId.price,
-            stock: item.variantId.stock,
-            quantity: item.availableStock
-          }));
+          .filter((item: any) =>
+            selectedShippingVariants.includes(item.variantId._id) &&
+            selectedItems.some((selected) =>
+              selected.productId === item.productId._id && selected.variantId === item.variantId._id
+            )
+          )
+          .map((item: any) => {
+            const availableQuantity = Math.min(item.quantity, item.variantId.availableStock); // Giới hạn quantity
+            return {
+              productId: item.productId._id,
+              productName: item.productId.name,
+              productDescription: item.productId.description,
+              productImages: item.productId.images,
+              variantId: item.variantId._id,
+              color: item.variantId.color,
+              ram: item.variantId.ram,
+              ssd: item.variantId.ssd,
+              price: item.variantId.price,
+              stock: item.variantId.availableStock,
+              quantity: availableQuantity, // Cập nhật quantity
+            };
+          });
 
         dispatch(OrderActions.addOrder({
           userId: auth._id,
@@ -227,13 +236,19 @@ function CartCheckout() {
           status: "pending",
           paymentMethod: "",
           shippingFee: 0,
-        }))
-        router.push('/checkout');
+          onSuccess: (rs: any) => {
+            router.push('/checkout');
+          },
+          onFail: (message: any, data: any) => {
+            console.error("Error adding order:", message, data);
+          },
+        }));
       }
     } else {
-      message.success("Chọn đủ sản phẩm và địa chỉ giao hàng")
+      message.error("Chọn đủ sản phẩm và địa chỉ giao hàng");
     }
   };
+
 
   const handleSaveShipping = () => {
     setIsShippingModalVisible(false);
