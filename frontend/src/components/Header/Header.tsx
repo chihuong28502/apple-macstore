@@ -1,17 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import React from "react";
-import { FaRegUserCircle } from "react-icons/fa";
 import { SVGLogo } from "@/asset/svg";
 import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-
+import Link from "next/link";
+import React from "react";
+import { FaRegUserCircle } from "react-icons/fa";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
 import SearchComponent from "../Search/Search";
-import User from "./User";
 import Cart from "./Cart";
+import Order from "./Order";
+import User from "./User";
 
 type Props = {
   isMobile: boolean;
@@ -36,6 +36,9 @@ const Header = () => {
           <div className="flex flex-grow items-center justify-end lg:justify-between">
             <div className="w-full max-w-lg  xl:max-w-3xl mx-auto px-4 block">
               <SearchComponent />
+            </div>
+            <div className=" mx-5">
+              {auth && <Order />}
             </div>
             <div className=" mx-5">
               {auth && <Cart />}

@@ -1,12 +1,12 @@
 import AuthReducer from "@/modules/auth/slice";
+import CartReducer from "@/modules/cart/slice";
 import CustomerReducer from "@/modules/customer/slice";
 import LoadingGlobalReducer from "@/modules/loading-global/slice";
+import NotifyReducer from "@/modules/notify/slice";
+import OrderReducer from "@/modules/order/slice";
 import ProductReducer from "@/modules/product/slice";
 import { combineReducers } from "@reduxjs/toolkit";
-import CartReducer from "@/modules/cart/slice";
-import NotifyReducer from "@/modules/notify/slice";
 import AppReducer from "../components/AppSlice";
-import OrderReducer from "@/modules/order/slice";
 
 export const reducers = combineReducers({
   app: AppReducer,

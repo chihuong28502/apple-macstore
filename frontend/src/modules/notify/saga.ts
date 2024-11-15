@@ -1,6 +1,5 @@
 import { PayloadAction } from "@reduxjs/toolkit";
-import { toast } from "react-toastify";
-import { delay, put, takeLatest, takeLeading } from "redux-saga/effects";
+import { put, takeLeading } from "redux-saga/effects";
 
 import { NotifyRequest } from "./request";
 import { NotifyActions } from "./slice";

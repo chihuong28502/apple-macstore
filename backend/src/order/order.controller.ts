@@ -29,9 +29,23 @@ export class OrderController {
     return res.status(statusCode).json(result);
   }
 
+  @Get('user/:id')
+  async findAllOrderByCustomer(@Param('id') id: string, @Res() res: Response): Promise<Response> {
+    const result = await this.orderService.findAllOrderByCustomer(id);
+    let statusCode = result.success ? 200 : 404;
+    return res.status(statusCode).json(result);
+  }
+
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto, @Res() res: Response): Promise<Response> {
     const result = await this.orderService.update(id, updateOrderDto);
+    let statusCode = result.success ? 200 : 400;
+    return res.status(statusCode).json(result);
+  }
+
+  @Put('update/status/:id')
+  async updateStatus(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto, @Res() res: Response): Promise<Response> {
+    const result = await this.orderService.updateStatus(id, updateOrderDto);
     let statusCode = result.success ? 200 : 400;
     return res.status(statusCode).json(result);
   }

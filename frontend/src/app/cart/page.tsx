@@ -97,11 +97,11 @@ function CartCheckout() {
     } else {
       return cart.items.map((item: any) => {
         const { productId, variantId, quantity: initialQuantity } = item;
-        let quantity = initialQuantity;  // Dùng let để quantity có thể thay đổi
+        let quantity = initialQuantity;
 
         const { color, ram, ssd, price, availableStock } = variantId;
         if (quantity > availableStock) {
-          quantity = availableStock; 
+          quantity = availableStock;
         }
 
         const uniqueKey = `${productId._id}-${variantId._id}`;
@@ -111,7 +111,7 @@ function CartCheckout() {
         return (
           <Card
             key={uniqueKey}
-            className="my-2 mx-auto w-full bg-[#f7f7f7]"
+            className={`my-2 mx-auto w-full bg-[#f7f7f7] ${availableStock === 0 ? "disabled opacity-70 cursor-not-allowed" : ""}`}
             hoverable
             bordered={false}
             style={{
@@ -122,8 +122,9 @@ function CartCheckout() {
             <Row gutter={[16, 16]} align="middle">
               <Col span={1}>
                 <Checkbox
-                  checked={isSelected}
+                  checked={availableStock === 0 ? false : isSelected}
                   onChange={() => handleSelectItem(productId._id, variantId._id)}
+                  disabled={availableStock === 0}
                 />
               </Col>
               <Col span={4} style={{ textAlign: "center" }}>
@@ -184,7 +185,7 @@ function CartCheckout() {
     selectedItems.some(
       (selected) => selected.productId === item.productId._id && selected.variantId === item.variantId._id
     )
-  ).reduce((acc: number, item: any) => acc + item.variantId.price * item.quantity, 0) || 0;
+  ).reduce((acc: number, item: any) => acc + item.variantId.price * item.availableStock, 0) || 0;
 
   const taxAmount = (selectedTotal * 0.1) || 0;
   const formattedSelectedTotal = selectedTotal || 0;
@@ -214,7 +215,7 @@ function CartCheckout() {
             ssd: item.variantId.ssd,
             price: item.variantId.price,
             stock: item.variantId.stock,
-            quantity: item.quantity
+            quantity: item.availableStock
           }));
 
         dispatch(OrderActions.addOrder({

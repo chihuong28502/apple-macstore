@@ -77,7 +77,6 @@ const CartSlice = createSlice({
       state.shippingSelectedId = payload;
     },
     setPriceCheckout: (state: any, { payload }: any) => {
-      console.log("🚀 ~ payload:", payload);
       if (typeof state.priceCheckout !== 'object') {
         // Nếu priceCheckout không phải là đối tượng, khởi tạo lại
         state.priceCheckout = { selectedTotal: 0, taxAmount: 0 };

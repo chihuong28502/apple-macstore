@@ -1,12 +1,11 @@
 "use client";
 import { ConfigProvider, Dropdown, MenuProps } from "antd";
 import _ from "lodash";
-import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FiUser } from "react-icons/fi";
 import { TbLogout } from "react-icons/tb";
-
 import { useAppDispatch, useAppSelector } from "@/core/services/hook";
 import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
 

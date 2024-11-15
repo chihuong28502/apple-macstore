@@ -1,4 +1,5 @@
 import ProgressCustom from "./ProgressCustom";
+
 function Loading() {
   return (
     <div className="py-9 text-center w-[200px] ">

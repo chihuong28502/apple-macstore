@@ -5,22 +5,21 @@ import { delay, put, takeLeading } from "redux-saga/effects";
 import { OrderRequest } from "./request";
 import { OrderActions } from "./slice";
 
-function* getOrder() {
+function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } =
-      yield OrderRequest.getAllOrder();
+      yield OrderRequest.getOrderById(payload);
     yield put(AppAction.hideLoading());
-
     if (res.success) {
-      yield put(OrderActions.setOrder(res.data));
+      yield put(OrderActions.setAllOrder(res.data));
     } else {
     }
-  } catch (e) { }
+  } catch (e) {
+  }
 }
 
 function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
-  console.log("🚀 ~ payload:", payload)
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } =
@@ -34,6 +33,23 @@ function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Gener
     }
   } catch (e) {
     message.error("Thêm order thất bại");
+  }
+}
+
+function* updateStatus({ payload }: PayloadAction<{ id: string; data: any, userId: string }>): Generator<any, void, any> {
+  try {
+    yield delay(100);
+    const { id, data, userId } = payload;
+    const rs = yield OrderRequest.updateStatusOrderById(id, data);
+    if (rs.success) {
+      message.success("Hủy đơn hàng thành công");
+      const res = yield OrderRequest.getOrderById(userId);
+      yield put(OrderActions.setAllOrder(res.data));
+    } else {
+      message.error("Hủy đơn hàng thất bại");
+    }
+  } catch (error: any) {
+    message.error("Hủy đơn hàng thất bại");
   }
 }
 
@@ -70,10 +86,11 @@ function* deleteOrder({ payload }: any): Generator<any, void, any> {
     message.error("Xóa danh mục thất bại Catch");
   }
 }
-addOrder
+
 export function* OrderSaga() {
   yield takeLeading(OrderActions.addOrder, addOrder);
   yield takeLeading(OrderActions.deleteOrder, deleteOrder);
-  yield takeLeading(OrderActions.getOrder, getOrder);
+  yield takeLeading(OrderActions.getAllOrderById, getAllOrderById);
   yield takeLeading(OrderActions.updateOrder, updateOrder);
+  yield takeLeading(OrderActions.updateStatus, updateStatus);
 }

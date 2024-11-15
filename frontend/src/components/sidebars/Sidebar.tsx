@@ -2,10 +2,6 @@
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
-
-import { AuthSelectors } from "@/modules/auth/slice";
-
 import MenuSidebar from "./Menu";
 
 type Props = {

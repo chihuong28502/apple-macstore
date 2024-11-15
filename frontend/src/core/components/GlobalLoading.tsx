@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
-
+import { useEffect, useState } from "react";
 import { useAppSelector } from "../services/hook";
 import { AppSelector } from "./AppSlice";
 import Loading from "./Loading";

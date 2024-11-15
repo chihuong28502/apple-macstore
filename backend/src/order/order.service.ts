@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as crypto from 'node:crypto';
+import { Product, ProductDocument } from 'src/product/schema/product.schema';
+import { Variant, VariantDocument } from 'src/product/schema/variants.schema';
 import { User, UserDocument } from 'src/user/schema/user.schema';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -10,8 +12,6 @@ import { SepayDto } from './dto/sepay.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersGateway } from './order.gateway';
 import { Order, OrderDocument } from './schema/order.schema';
-import { Product, ProductDocument } from 'src/product/schema/product.schema';
-import { Variant, VariantDocument } from 'src/product/schema/variants.schema';
 
 
 @Injectable()
@@ -26,7 +26,6 @@ export class OrderService {
   ) { }
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
-    console.log("🚀 ~ OrderService ~ createOrderDto:", createOrderDto)
     try {
       const user = await this.userModel.findById(createOrderDto.userId);
       const code = `${crypto.randomBytes(4).toString('hex').toUpperCase()}${user.code}`;
@@ -115,7 +114,51 @@ export class OrderService {
     }
   }
 
+  async findAllOrderByCustomer(id: string): Promise<ResponseDto<Order>> {
+    try {
+      const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 });
+
+      if (order.length === 0) {
+        throw new NotFoundException(`Order with ID "${id}" not found`);
+      }
+
+      return {
+        success: true,
+        message: 'Order retrieved successfully',
+        data: order,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to retrieve order: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
+    try {
+      const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
+      if (!updatedOrder) {
+        throw new NotFoundException(`Order with ID "${id}" not found`);
+      }
+
+      return {
+        success: true,
+        message: 'Order updated successfully',
+        data: updatedOrder,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to update order: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
@@ -158,18 +201,15 @@ export class OrderService {
   }
 
   async checkPayment(@Body() sepayDto: SepayDto): Promise<ResponseDto<Order>> {
-    console.log("🚀 ~ OrderService ~ sepayDto:", sepayDto);
     try {
       const match = sepayDto.content.match(/HD (\w+)/);
       const matchedCode = match ? match[1] : null;
-      console.log("🚀 ~ matchedCode:", matchedCode);
 
       if (!matchedCode) {
         throw new Error("Không tìm thấy mã trong nội dung sepayDto");
       }
 
       const order = await this.orderModel.findOne({ code: matchedCode });
-      console.log("🚀 ~ Order:", order);
 
       if (!order) {
         throw new Error("Không tìm thấy đơn hàng với mã code trùng khớp");
@@ -179,11 +219,11 @@ export class OrderService {
       const variantIds = order.items.map(item => item.variantId);
 
       for (const item of order.items) {
-        console.log("Updating stock for variantId:", item.variantId, "with quantity:", -item.quantity);
         await this.variantModel.findByIdAndUpdate(
           item.variantId,
           { $inc: { stock: -parseInt(item.quantity as any, 10) } }, // Đảm bảo ép kiểu `quantity` thành số nguyên
           { new: true }
+
         );
       }
 
