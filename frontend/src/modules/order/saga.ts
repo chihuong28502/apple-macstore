@@ -19,7 +19,13 @@ function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>)
   }
 }
 
-function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
+function* addOrder({ payload }: PayloadAction<{
+  id: string;
+  data: any;
+  onSuccess?: (data: any) => void;
+  onFail?: (error: string, data?: any) => void;
+}>): Generator<any, void, any> {
+  const { onSuccess = () => { }, onFail = () => { } } = payload
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } =
@@ -28,8 +34,10 @@ function* addOrder({ payload }: PayloadAction<{ id: string; data: any }>): Gener
     if (res.success) {
       message.success("Thêm order thành công");
       yield put(OrderActions.setOrder(res.data));
+      onSuccess(res?.data)
     } else {
       message.error("Thêm order thất bại");
+      onFail()
     }
   } catch (e) {
     message.error("Thêm order thất bại");

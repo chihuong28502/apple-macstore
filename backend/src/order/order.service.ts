@@ -40,8 +40,10 @@ export class OrderService {
       });
 
       const variantUpdates = createOrderDto.items.map(async (item) => {
+        console.log("🚀 ~ OrderService ~ createOrderDto:", createOrderDto)
         const variant = await this.variantModel.findById(item.variantId);
-
+        console.log("🚀 ~ OrderService ~ variant.availableStock:", variant.availableStock)
+        console.log("🚀 ~ OrderService ~ item:", item.quantity)
         if (variant.availableStock >= item.quantity) {
           // Giảm availableStock và tăng reservedStock
           variant.availableStock -= item.quantity;
