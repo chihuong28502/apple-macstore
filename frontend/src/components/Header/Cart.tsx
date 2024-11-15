@@ -1,5 +1,7 @@
 "use client";
 import { useAppSelector } from "@/core/services/hook";
+import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
+import socket from "@/lib/socket/socket";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { Badge, Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
@@ -23,6 +25,13 @@ const Cart = () => {
     }
   }, [auth?._id, dispatch]);
 
+  // useEffect(() => {
+  //   // Lắng nghe sự kiện thông báo
+  //   listenToSocketEvent(socket, "add-cart", (cart) => {
+  //     // dispatch(CartActions.setCart(cart))
+  //   });
+  //   return () => cleanupSocketEvent(socket, "add-cart");
+  // }, [socket]);
   const { resolvedTheme } = useTheme();
 
   const handleClickPayment = () => {
@@ -76,7 +85,7 @@ const Cart = () => {
                 <Col span={6} className="text-right">
                   <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
                   <div className="text-gray-500 block w-full">{`SSD: ${ssd}`}</div>
-                  <div className="text-gray-500 block w-full">{`Số lượng: ${availableStock}`}</div>
+                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
                   {/* <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div> */}
                 </Col>
               </Row>

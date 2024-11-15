@@ -1,5 +1,7 @@
 "use client";
 import { useAppSelector } from "@/core/services/hook";
+import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
+import socket from "@/lib/socket/socket";
 import { formatTimeDifference } from "@/lib/timeCurrentDesInput";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { OrderActions, OrderSelectors } from "@/modules/order/slice";
@@ -15,6 +17,7 @@ const Order = () => {
   const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
   const allOrder = useAppSelector(OrderSelectors.allOrder);
+  const [orderBase, setOrderBase] = useState<any>(allOrder);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +25,14 @@ const Order = () => {
       dispatch(OrderActions.getAllOrderById(auth._id));
     }
   }, [auth?._id, dispatch]);
+
+  useEffect(() => {
+    // Lắng nghe sự kiện thông báo
+    listenToSocketEvent(socket, "add-order", (order) => {
+      setOrderBase((prev: any) => [...prev, order]);
+    });
+    return () => cleanupSocketEvent(socket, "add-order");
+  }, [socket]);
   const handleCancelOrder = (id: any) => {
     Modal.confirm({
       title: "Xác nhận xóa",
@@ -48,7 +59,7 @@ const Order = () => {
   const { resolvedTheme } = useTheme();
 
   const getMenuItems = (): MenuProps["items"] => {
-    if (!allOrder || allOrder.length === 0) {
+    if (!orderBase || orderBase.length === 0) {
       return [
         {
           label: (
@@ -60,7 +71,7 @@ const Order = () => {
         },
       ];
     } else {
-      return allOrder.map((order: any) => {
+      return orderBase.map((order: any) => {
         const { _id, items, totalPrice, status, createdAt } = order;
         const statusStyles: any = {
           success: "bg-green-100",
@@ -158,7 +169,7 @@ const Order = () => {
               lineHeight: '16px',
               padding: '0',
             }}
-            count={allOrder?.length}
+            count={orderBase?.length}
             overflowCount={99}
             color="red"
           >

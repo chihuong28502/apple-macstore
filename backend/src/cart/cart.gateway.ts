@@ -27,6 +27,7 @@ export class CartsGateway {
 
   // Gửi thông báo đến tất cả client
   sendEventAddCart(cart: any) {
+    console.log("🚀 ~ CartsGateway ~ cart:", cart)
     this.server.emit('add-cart', cart);
   }
 

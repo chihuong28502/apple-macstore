@@ -30,6 +30,10 @@ export class OrdersGateway {
     this.server.emit('check-order', order);
   }
 
+  addOrder(order: any) {
+    this.server.emit('add-order', order);
+  }
+
   // Nếu bạn muốn lắng nghe các sự kiện từ client
   @SubscribeMessage('clientEvent')
   handleClientEvent(client: any, payload: any) {
