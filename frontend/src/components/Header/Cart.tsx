@@ -43,14 +43,14 @@ const Cart = () => {
       ];
     } else {
       return cart.items.map((item: any) => {
-        const { productId, variantId, quantity } = item;
+        const { productId, variantId, quantity, } = item;
         const { images, name, description } = productId;
-        const { color, ram, ssd, price, stock } = variantId;
+        const { color, ram, ssd, price, availableStock } = variantId;
 
         return {
           label: (
             <Card
-              className="my-2 mx-auto w-full"
+              className={`my-2 mx-auto w-full ${availableStock === 0 ? "disabled opacity-70" : ""}`}
               hoverable
               bordered={false}
               style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
@@ -76,7 +76,7 @@ const Cart = () => {
                 <Col span={6} className="text-right">
                   <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
                   <div className="text-gray-500 block w-full">{`SSD: ${ssd}`}</div>
-                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
+                  <div className="text-gray-500 block w-full">{`Số lượng: ${availableStock}`}</div>
                   {/* <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div> */}
                 </Col>
               </Row>
@@ -120,6 +120,17 @@ const Cart = () => {
         open={isOpen}
         onOpenChange={setIsOpen}
         menu={{ items: getMenuItems() }}
+        dropdownRender={(menu) => (
+          <div
+            style={{
+              borderRadius: "8px",
+              maxHeight: "400px",
+              overflowY: "auto",
+            }}
+          >
+            {menu}
+          </div>
+        )}
         trigger={["click"]}
       >
         <div className="cursor-pointer p-1.5 pl-0 text-fontColor flex items-center">

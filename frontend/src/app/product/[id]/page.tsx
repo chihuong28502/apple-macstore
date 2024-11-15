@@ -36,7 +36,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const productId = params.id;
   const productById: Product | undefined = useSelector(ProductSelectors.product);
   const auth = useSelector(AuthSelectors.user);
-
   const [mainImage, setMainImage] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [selectedRam, setSelectedRam] = useState<string | undefined>(undefined);
@@ -240,9 +239,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           <div className="mt-5 flex flex-wrap gap-4">
             <button
               onClick={handleAddToCart}
-              disabled={(quantity === 0)}
+              disabled={(quantity == 0)}
               type="button"
-              className="flex items-center justify-center px-8 py-4 bg-gray-800 hover:bg-gray-900 text-white border border-gray-800 text-base rounded-lg shadow-md transition duration-300"
+              className={`${quantity === 0 ? "disabled opacity-70 cursor-not-allowed" : "hover:bg-gray-900"} flex items-center justify-center px-8 py-4 bg-gray-800  text-white border border-gray-800 text-base rounded-lg shadow-md transition duration-300`}
             >
               Add to Cart
             </button>

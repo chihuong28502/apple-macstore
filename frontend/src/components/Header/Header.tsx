@@ -12,6 +12,7 @@ import BtnAuth from "../headerBtnAuth/BtnAuth";
 import SearchComponent from "../Search/Search";
 import User from "./User";
 import Cart from "./Cart";
+import Order from "./Order";
 
 type Props = {
   isMobile: boolean;
@@ -36,6 +37,9 @@ const Header = () => {
           <div className="flex flex-grow items-center justify-end lg:justify-between">
             <div className="w-full max-w-lg  xl:max-w-3xl mx-auto px-4 block">
               <SearchComponent />
+            </div>
+            <div className=" mx-5">
+              {auth && <Order />}
             </div>
             <div className=" mx-5">
               {auth && <Cart />}
