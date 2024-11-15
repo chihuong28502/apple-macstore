@@ -40,10 +40,12 @@ function CartCheckout() {
   useEffect(() => {
     if (selectAll) {
       setSelectedItems(
-        cart.items.map((item: any) => ({
-          productId: item.productId._id,
-          variantId: item.variantId._id,
-        }))
+        cart.items
+          .filter((item: any) => item.variantId.availableStock > 0) // Chỉ chọn sản phẩm có sẵn
+          .map((item: any) => ({
+            productId: item.productId._id,
+            variantId: item.variantId._id,
+          }))
       );
     } else {
       setSelectedItems([]);
@@ -76,7 +78,6 @@ function CartCheckout() {
       const isSelected = prevSelectedItems.some(
         (item) => item.productId === productId && item.variantId === variantId
       );
-
       if (isSelected) {
         return prevSelectedItems.filter(
           (item) => !(item.productId === productId && item.variantId === variantId)
@@ -98,12 +99,10 @@ function CartCheckout() {
       return cart.items.map((item: any) => {
         const { productId, variantId, quantity: initialQuantity } = item;
         let quantity = initialQuantity;
-
         const { color, ram, ssd, price, availableStock } = variantId;
         if (quantity > availableStock) {
           quantity = availableStock;
         }
-
         const uniqueKey = `${productId._id}-${variantId._id}`;
         const isSelected = selectedItems.some(
           (selected) => selected.productId === productId._id && selected.variantId === variantId._id
@@ -111,7 +110,7 @@ function CartCheckout() {
         return (
           <Card
             key={uniqueKey}
-            className={`my-2 mx-auto w-full bg-[#f7f7f7] ${availableStock === 0 ? "disabled opacity-70 cursor-not-allowed" : ""}`}
+            className={`my-2 mx-auto w-full bg-[#f7f7f7] ${availableStock === 0 ? "disabled bg-slate-400 cursor-not-allowed" : ""}`}
             hoverable
             bordered={false}
             style={{
@@ -185,7 +184,7 @@ function CartCheckout() {
     selectedItems.some(
       (selected) => selected.productId === item.productId._id && selected.variantId === item.variantId._id
     )
-  ).reduce((acc: number, item: any) => acc + item.variantId.price * item.availableStock, 0) || 0;
+  ).reduce((acc: number, item: any) => acc + item.variantId.price * item.quantity, 0) || 0;
 
   const taxAmount = (selectedTotal * 0.1) || 0;
   const formattedSelectedTotal = selectedTotal || 0;
@@ -287,7 +286,7 @@ function CartCheckout() {
                 checked={selectAll}
                 onChange={(e) => setSelectAll(e.target.checked)}
               />
-              <span className="ml-2">Chọn tất cả</span>
+              <span className="ml-2 text-fontColor">Chọn tất cả</span>
             </div>
             {auth?._id && cart && getMenuItems(cart)}
             <div className="flex text-fontColor">
