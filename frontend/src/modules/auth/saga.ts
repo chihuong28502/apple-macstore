@@ -1,17 +1,16 @@
+import { AppAction } from "@/core/components/AppSlice";
 import { PayloadAction } from "@reduxjs/toolkit";
+import { message } from "antd";
 import { AxiosError } from "axios";
 import jwt from 'jsonwebtoken';
 import { call, delay, put, takeLeading } from "redux-saga/effects";
-import { AppAction } from "@/core/components/AppSlice";
-import { message } from "antd";
+import { CustomerActions } from "../customer/slice";
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
-import { CustomerActions } from "../customer/slice";
 
 const getUserIdFromToken = () => {
   // Lấy accessToken từ localStorage
   const accessToken = localStorage.getItem('accessToken');
-
   if (accessToken) {
     const decoded: any = jwt.decode(accessToken); // Giải mã token
     return decoded?._id || null; // Trả về userId hoặc null

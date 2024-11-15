@@ -2,7 +2,6 @@
 import { AnimatePresence,motion } from "framer-motion";
 import React, { useEffect,useRef, useState } from "react";
 import { FaCheck,FaChevronDown, FaTimes } from "react-icons/fa";
-
 import { cn } from "@/lib/utils";
 
 interface Option {

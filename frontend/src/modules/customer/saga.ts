@@ -1,11 +1,9 @@
-import { PayloadAction } from "@reduxjs/toolkit";
-import { put, takeLeading } from "redux-saga/effects";
-
 import { AppAction } from "@/core/components/AppSlice";
-
+import { PayloadAction } from "@reduxjs/toolkit";
+import { message } from "antd";
+import { put, takeLeading } from "redux-saga/effects";
 import { CustomerRequest } from "./request";
 import { CustomerActions } from "./slice";
-import { message } from "antd";
 
 function* getCustomer({ payload }: PayloadAction<any>) {
   const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;

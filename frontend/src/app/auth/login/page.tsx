@@ -1,13 +1,13 @@
 "use client";
+import CustomButton from "@/app/components/Button";
+import { VALIDATE } from "@/core/validate/validate";
+import { AuthActions } from "@/modules/auth/slice";
+import { message } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
-import CustomButton from "@/app/components/Button";
-import { VALIDATE } from "@/core/validate/validate";
-import { AuthActions } from "@/modules/auth/slice";
-import { message } from "antd";
 import { InputField } from "./components/InputField";
 
 function Page() {

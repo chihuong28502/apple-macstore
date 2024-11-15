@@ -1,11 +1,10 @@
-import { all, call } from "redux-saga/effects";
-
 import { AuthSaga } from "@/modules/auth/saga";
 import { CartSaga } from "@/modules/cart/saga";
 import { CustomerSaga } from "@/modules/customer/saga";
 import { NotifySaga } from "@/modules/notify/saga";
-import { ProductSaga } from "@/modules/product/saga";
 import { OrderSaga } from "@/modules/order/saga";
+import { ProductSaga } from "@/modules/product/saga";
+import { all, call } from "redux-saga/effects";
 
 function* rootSaga() {
   yield all([

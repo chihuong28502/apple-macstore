@@ -1,12 +1,9 @@
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import React from "react";
-import { useEffect, useRef } from "react";
-import { useCallback,useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaCheck } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-
-import { cn } from "@/lib/utils";
 
 interface Props {
   data: { name: string; _id: number }[];

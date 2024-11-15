@@ -1,6 +1,5 @@
 "use client";
 import { getCache } from "@/cache/cacheLocal";
-import { extractColorCode, extractColorName } from "@/lib/utils";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions } from "@/modules/cart/slice";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
