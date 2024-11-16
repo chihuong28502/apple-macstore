@@ -18,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './taskSchedule/tasks.module';
 import { NotifyModule } from './notify/notify.module';
 import { CartModule } from './cart/cart.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { CartModule } from './cart/cart.module';
     ProductModule,
     OrderModule,
     NotifyModule,
-    CartModule
+    CartModule,
+    RedisModule
   ],
   providers: [
     AppService,
