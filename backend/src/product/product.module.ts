@@ -6,6 +6,7 @@ import { Product, ProductSchema } from './schema/product.schema';
 import { CategoryModule } from 'src/category/category.module';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Variant, VariantSchema } from './schema/variants.schema';
+import { RedisModule } from 'nestjs-redis';
 
 @Module({
   imports: [
@@ -14,9 +15,10 @@ import { Variant, VariantSchema } from './schema/variants.schema';
       { name: Variant.name, schema: VariantSchema }
 
     ]),
-    CategoryModule
+    CategoryModule,
+    RedisModule
   ],
-  providers: [ProductService, CloudinaryService],
+  providers: [ProductService, CloudinaryService,],
   controllers: [ProductController],
   exports: [ProductService],
 })
