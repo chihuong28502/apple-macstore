@@ -19,7 +19,6 @@ import { CartsGateway } from 'src/cart/cart.gateway';
 
 @Injectable()
 export class OrderService {
-
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -101,20 +100,16 @@ export class OrderService {
 
   async findOne(id: string): Promise<ResponseDto<Order>> {
     try {
-      const order = await this.orderModel.aggregate([
-        {
-          $match: { _id: new Types.ObjectId(id) }  // Tìm order theo ID
-        }
-      ]);
+      const order = await this.orderModel.findById(id);
 
-      if (order.length === 0) {
+      if (!order) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
 
       return {
         success: true,
         message: 'Order retrieved successfully',
-        data: order[0],
+        data: order, 
       };
     } catch (error) {
       return {
@@ -127,7 +122,7 @@ export class OrderService {
 
   async findAllOrderByCustomer(id: string): Promise<ResponseDto<Order>> {
     try {
-      const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 });
+      const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 }).limit(10);
 
       if (order.length === 0) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
@@ -146,7 +141,6 @@ export class OrderService {
       };
     }
   }
-
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     try {
@@ -254,6 +248,4 @@ export class OrderService {
       };
     }
   }
-
-
 }
