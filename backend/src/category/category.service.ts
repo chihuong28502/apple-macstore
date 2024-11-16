@@ -1,3 +1,4 @@
+import { RedisService } from './../redis/redis.service';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -8,8 +9,10 @@ import { Category, CategoryDocument } from './schema/category.schema';
 
 @Injectable()
 export class CategoryService {
+  private readonly CACHE_TTL = 3600;
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+    private readonly redisService: RedisService,
   ) { }
 
   // Create a new category
@@ -17,6 +20,7 @@ export class CategoryService {
     try {
       const createdCategory = new this.categoryModel(createCategoryDto);
       await createdCategory.save();
+      await this.redisService.clearCache('categories_all');
       return {
         success: true,
         message: 'Category created successfully',
@@ -34,7 +38,19 @@ export class CategoryService {
   // Find all categories
   async findAll(): Promise<ResponseDto<Category[]>> {
     try {
+      const cacheKey = 'categories_all';
+
+      // Check cache first
+      const cachedCategories = await this.redisService.getCache<Category[]>(cacheKey);
+      if (cachedCategories) {
+        return {
+          success: true,
+          message: 'Categories retrieved from cache',
+          data: cachedCategories,
+        };
+      }
       const categories = await this.categoryModel.find().select('-__v -createdAt -updatedAt').exec();
+      await this.redisService.setCache(cacheKey, categories, this.CACHE_TTL);
       return {
         success: true,
         message: 'Categories retrieved successfully',
@@ -52,6 +68,15 @@ export class CategoryService {
   // Find one category by ID
   async findOne(id: string): Promise<ResponseDto<Category>> {
     try {
+      const cacheKey = `category_${id}`;
+      const cachedCategory = await this.redisService.getCache<Category>(cacheKey);
+      if (cachedCategory) {
+        return {
+          success: true,
+          message: 'Category retrieved from cache',
+          data: cachedCategory,
+        };
+      }
       const category = await this.categoryModel.findById(id).select('-__v -createdAt -updatedAt').exec();
       if (!category) {
         return {
@@ -60,6 +85,7 @@ export class CategoryService {
           data: null,
         };
       }
+      await this.redisService.setCache(cacheKey, category, this.CACHE_TTL);
       return {
         success: true,
         message: 'Category retrieved successfully',
@@ -79,6 +105,8 @@ export class CategoryService {
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<ResponseDto<Category>> {
     try {
+      const cacheKeyById = `category_${id}`;
+      const cacheKeyAllCate = `categories_all}`;
       const updatedCategory = await this.categoryModel
         .findByIdAndUpdate(id, updateCategoryDto, { new: true })
         .select('-__v -createdAt -updatedAt')
@@ -90,6 +118,8 @@ export class CategoryService {
           data: null,
         };
       }
+      await this.redisService.clearCache(cacheKeyById);
+      await this.redisService.clearCache(cacheKeyAllCate);
       return {
         success: true,
         message: 'Category updated successfully',
@@ -106,6 +136,8 @@ export class CategoryService {
 
   async remove(id: string): Promise<ResponseDto<Category>> {
     try {
+      const cacheKeyById = `category_${id}`;
+      const cacheKeyAllCate = `categories_all}`;
       // Lấy tất cả các category con của category này
       const allCategories = await this.getAllChildCategories(id);
       // Thêm cả category chính vào danh sách cần xóa
@@ -116,6 +148,8 @@ export class CategoryService {
       }).exec();
 
       // Trả về phản hồi thành công
+      await this.redisService.clearCache(cacheKeyById);
+      await this.redisService.clearCache(cacheKeyAllCate);
       return {
         success: true,
         message: 'Category deleted successfully',
