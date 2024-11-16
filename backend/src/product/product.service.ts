@@ -231,7 +231,7 @@ export class ProductService {
       }
 
       // Lưu vào cache Redis với TTL = 3600 giây (1 giờ)
-      await this.redisService.setCache(id, product, 3600,);
+      await this.redisService.setCache(id, product[0], 3600,);
 
       return {
         success: true,
