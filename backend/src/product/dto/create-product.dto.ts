@@ -3,7 +3,7 @@ export class CreateProductDto {
   description?: string;  // Mô tả sản phẩm
   price?: number;  // Giá bán
   categoryId?: string;  // ID danh mục sản phẩm
-  images?: { image?: string; publicId?: string; _id?: string }[];  // URL hình ảnh sản phẩm
+  images?: { image: string; publicId: string; _id?: string }[];  // URL hình ảnh sản phẩm
   tags?: string[];  // Thẻ tìm kiếm
   specifications?: {
     models?: string[];  // Dòng sản phẩm

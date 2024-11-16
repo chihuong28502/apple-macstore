@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Redis from 'ioredis'; // Import ioredis
+import { RedisService } from './redis.service';
 
 @Global() // This makes the Redis module globally available in your app
 @Module({
@@ -37,8 +38,9 @@ import Redis from 'ioredis'; // Import ioredis
         return redis;
       },
       inject: [ConfigService], // Inject ConfigService to access the environment variables
-    },
+    }, RedisService
   ],
-  exports: ['REDIS_CLIENT'], // Export Redis client for use in other modules
+  controllers: [],
+  exports: ['REDIS_CLIENT', RedisService], // Export Redis client for use in other modules
 })
-export class RedisModule {}
+export class RedisModule { }

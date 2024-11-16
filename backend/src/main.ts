@@ -25,7 +25,7 @@ async function bootstrap() {
   console.log(
     `    - Listen BACKEND:
     - PORT: ${configService.get<string>('PORT', '3000')} 
-    - CONNECTDB: ${configService.get<string>('MONGODB_URI', 'localhost:27017')} 
+    - CONNECTDB: ${configService.get<string>('MONGODB_URI', 'localhost:27017').slice(0,90)} 
     - ENV: ${configService.get<string>('NODE_ENV', 'dev')}`,
   );
 }

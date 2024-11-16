@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import Redis from 'ioredis';
 import { Model, Types } from 'mongoose';
-import { RedisService } from 'nestjs-redis';
 import { Category, CategoryDocument } from 'src/category/schema/category.schema';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
@@ -11,6 +10,7 @@ import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schema/product.schema';
 import { Variant, VariantDocument } from './schema/variants.schema';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class ProductService {
@@ -18,9 +18,8 @@ export class ProductService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     @InjectModel(Variant.name) private variantModel: Model<VariantDocument>,
-    @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
     private readonly cloudinaryService: CloudinaryService,
-    // private readonly redisService: RedisService
+    private readonly redisService: RedisService
   ) { }
 
   async create(createProductDto: any): Promise<ResponseDto<Product>> {
@@ -35,7 +34,7 @@ export class ProductService {
       );
 
       // Lọc những kết quả hợp lệ (không phải null)
-      const validUploads = uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
+      const validUploads = await this.handleImageUpload(createProductDto.images);
 
       const createdProduct = new this.productModel({
         ...createProductDto,
@@ -88,15 +87,10 @@ export class ProductService {
       const cacheKey = `products_page_${page}_${categoryId || 'all'}_${minPrice || 'min'}_${maxPrice || 'max'}`;
       const skip = (page - 1) * limit;
       const filter: any = {};
-      const cachedData = await this.redisClient.get(cacheKey);
-      if (cachedData) {
-        console.log('Returning products from cache');
-        return JSON.parse(cachedData); // Trả về dữ liệu cache
-      }
+      const cachedData: any = await this.redisService.getCache(cacheKey);
+      if (cachedData)
+        return cachedData;
 
-      // Nếu không có dữ liệu trong cache, truy vấn database
-      console.log('Fetching products from database');
-      // Nếu categoryId không được truyền vào, trả về tất cả sản phẩm
       if (!categoryId) {
         // Thêm bộ lọc giá nếu có
         if (minPrice !== undefined && maxPrice !== undefined) {
@@ -122,7 +116,7 @@ export class ProductService {
           data: { products, total },
         };
 
-        await this.redisClient.setex(cacheKey, 300, JSON.stringify(response)); // Cache kết quả
+        await this.redisService.setCache(cacheKey, response, 300); // Cache kết quả
         return response;
       }
 
@@ -140,13 +134,11 @@ export class ProductService {
       const findAllChildCategories = async (parentId: string): Promise<string[]> => {
         const categoryIds: string[] = [];
         const childCategories = await this.categoryModel.find({ parentCategoryId: parentId }).exec();
-
         for (const child of childCategories) {
           categoryIds.push(child._id.toString()); // Lưu ID của danh mục con
           const grandChildIds = await findAllChildCategories(child._id.toString());
           categoryIds.push(...grandChildIds); // Thêm các danh mục con vào mảng
         }
-
         return categoryIds; // Trả về danh sách tất cả các danh mục con
       };
 
@@ -213,10 +205,9 @@ export class ProductService {
       // Kiểm tra xem sản phẩm có trong cache không
       const cachedProduct = await this.redisClient.get(id);
       if (cachedProduct) {
-        console.log('Returning product from cache');
         return {
           success: true,
-          message: 'Product fetched from cache',
+          message: 'Product retrieved successfully',
           data: JSON.parse(cachedProduct),
         };
       }
@@ -241,7 +232,7 @@ export class ProductService {
       }
 
       // Lưu vào cache Redis với TTL = 3600 giây (1 giờ)
-      await this.redisClient.setex(id, 3600, JSON.stringify(product[0]));
+      await this.redisClient.setex(id, 3600, JSON.stringify(product));
 
       return {
         success: true,
@@ -292,7 +283,7 @@ export class ProductService {
 
       // Xóa cache cũ sau khi cập nhật
       await this.redisClient.del(id);
-
+      await this.clearProductsPageCache()
       // Lưu lại sản phẩm mới vào cache
       await this.redisClient.setex(id, 3600, JSON.stringify(updatedProduct));
 
@@ -310,26 +301,21 @@ export class ProductService {
     }
   }
 
-  // async clearCacheForAllProducts() {
-  //   const redisClient = this.redisService.getClient();
-
-  //   let cursor = '0';  // Bắt đầu từ cursor '0' để quét tất cả keys
-  //   const pattern = 'products_page_*';  // Pattern cần tìm kiếm
-
-  //   // Sử dụng SCAN để tìm tất cả các key matching với pattern
-  //   do {
-  //     const result = await redisClient.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
-  //     cursor = result[0];  // Lấy cursor mới để tiếp tục quét nếu có thêm keys
-
-  //     // result[1] chứa danh sách keys matching pattern
-  //     const keysToDelete = result[1];
-
-  //     // Nếu có keys cần xóa, thực hiện xóa chúng
-  //     if (keysToDelete.length > 0) {
-  //       await redisClient.del(...keysToDelete);  // Xóa tất cả các keys trong danh sách
-  //     }
-  //   } while (cursor !== '0');  // Tiếp tục quét cho đến khi cursor = '0'
-  // }
+  async clearProductsPageCache(): Promise<void> {
+    try {
+      let cursor = '0';
+      do {
+        const [newCursor, keys] = await this.redisClient.scan(cursor, 'MATCH', 'products_page_*', 'COUNT', 100);
+        // Xóa tất cả các key đã tìm được
+        if (keys.length > 0) {
+          await this.redisClient.del(...keys);
+        }
+        cursor = newCursor; // Cập nhật cursor để tiếp tục quét nếu cần
+      } while (cursor !== '0'); // Quá trình quét hoàn tất khi cursor trở về 0
+    } catch (error) {
+      console.error('Error clearing product page cache:', error);
+    }
+  }
 
   async remove(id: string): Promise<ResponseDto<Product>> {
     try {
@@ -337,32 +323,32 @@ export class ProductService {
       if (!productToDelete) {
         throw new NotFoundException(`Không tìm thấy sản phẩm với ID "${id}"`);
       }
-  
+
       // Lọc ra các publicId hợp lệ hoặc lấy từ URL nếu cần
       const validImagePublicIds = productToDelete.images.map(image => {
         return image.publicId || extractPublicId(image.image);
       });
-  
+
       // Gọi deleteMedia cho từng publicId hợp lệ
       const deleteMediaPromises = validImagePublicIds.map(async publicId => {
         return this.cloudinaryService.deleteMedia(publicId, 'image');
       });
-  
+
       // Chờ cho tất cả các promise được hoàn thành
       const deleteMediaResults = await Promise.all(deleteMediaPromises);
-  
+
       // Kiểm tra xem tất cả các ảnh đã được xóa thành công
       const allDeleted = deleteMediaResults.every(result => result.success);
       if (!allDeleted) {
         throw new Error('Some media files failed to delete');
       }
-  
+
       // Xóa sản phẩm
       await this.productModel.findByIdAndDelete(id).exec();
-  
+      await this.clearProductsPageCache()
       // Xóa cache của sản phẩm khỏi Redis
       await this.redisClient.del(id);
-  
+
       return {
         success: true,
         message: 'Product deleted successfully',
@@ -374,19 +360,32 @@ export class ProductService {
       };
     }
   }
-  
-
   // VARIANT
 
-  async getAllVariants(
-    productId?: string,
-  ): Promise<ResponseDto<any>> {
+  async getAllVariants(productId?: string): Promise<ResponseDto<any>> {
     try {
-      const variants = await this.variantModel.find({ productId: productId })
+      const cacheKey = `variants_${productId || 'all'}`;
+
+      // Kiểm tra cache trước
+      const cachedVariants = await this.redisClient.get(cacheKey);
+      if (cachedVariants) {
+        return {
+          success: true,
+          message: 'Variants retrieved from cache',
+          data: { variants: JSON.parse(cachedVariants) },
+        };
+      }
+
+      // Nếu không có cache, truy vấn từ DB
+      const variants = await this.variantModel.find({ productId: productId });
+
+      // Lưu vào cache với thời gian hết hạn (ví dụ: 1 giờ)
+      await this.redisClient.setex(cacheKey, 3600, JSON.stringify(variants));
+
       return {
         success: true,
-        message: 'variants retrieved successfully',
-        data: { variants: variants },
+        message: 'Variants retrieved successfully from database',
+        data: { variants },
       };
     } catch (error) {
       return {
@@ -396,6 +395,7 @@ export class ProductService {
       };
     }
   }
+
 
   async createVariant(createVariant: any): Promise<ResponseDto<any>> {
     try {
@@ -408,6 +408,8 @@ export class ProductService {
         })
       // Lưu sản phẩm vào database
       await variantData.save();
+      const cacheKey = `variants_${productId || 'all'}`;
+      await this.redisClient.del(cacheKey);
 
       return {
         success: true,
@@ -431,7 +433,9 @@ export class ProductService {
       const updatedVariant = await this.variantModel
         .findByIdAndUpdate(id, { ...updateVariant }, { new: true })
         .exec();
-
+      // Xóa cache liên quan
+      const cacheKey = `variants_${updatedVariant.productId || 'all'}`;
+      await this.redisClient.del(cacheKey); // Xóa cache cũ
       return {
         success: true,
         message: 'Cập nhật variant thành công',
@@ -448,7 +452,17 @@ export class ProductService {
 
   async removeVariant(id: string): Promise<ResponseDto<any>> {
     try {
+      const variantToDelete = await this.variantModel.findById(id).exec();
+      if (!variantToDelete) {
+        return {
+          success: false,
+          message: 'Variant not found',
+          data: null,
+        };
+      }
       await this.variantModel.findByIdAndDelete(id).exec();
+      const cacheKey = `variants_${variantToDelete.productId || 'all'}`;
+      await this.redisClient.del(cacheKey);
       return {
         success: true,
         message: 'Xóa variant thành công',
@@ -460,4 +474,18 @@ export class ProductService {
       };
     }
   }
+
+  // handle
+  private async handleImageUpload(images: string[]): Promise<{ image: string; publicId: string }[]> {
+    const uploadedImages = await Promise.all(
+      images.map(async (base64: string) => {
+        const base64Str = base64.split(',')[1];
+        const buffer = Buffer.from(base64Str, 'base64');
+        const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
+        return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
+      })
+    );
+    return uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
+  }
+
 }
