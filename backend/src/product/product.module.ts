@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ProductService } from './product.service';
-import { ProductController } from './product.controller';
-import { Product, ProductSchema } from './schema/product.schema';
+import { RedisModule } from 'nestjs-redis';
 import { CategoryModule } from 'src/category/category.module';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { RedisService } from 'src/redis/redis.service';
+import { ProductController } from './product.controller';
+import { ProductService } from './product.service';
+import { Product, ProductSchema } from './schema/product.schema';
 import { Variant, VariantSchema } from './schema/variants.schema';
-import { RedisModule } from 'nestjs-redis';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { RedisModule } from 'nestjs-redis';
     CategoryModule,
     RedisModule
   ],
-  providers: [ProductService, CloudinaryService,],
+  providers: [ProductService, CloudinaryService, RedisService],
   controllers: [ProductController],
   exports: [ProductService],
 })

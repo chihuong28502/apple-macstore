@@ -1,16 +1,15 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import Redis from 'ioredis';
 import { Model, Types } from 'mongoose';
 import { Category, CategoryDocument } from 'src/category/schema/category.schema';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { RedisService } from 'src/redis/redis.service';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { extractPublicId } from 'src/utils/func/getPublicId';
 import { CreateMultipleProductsDto } from './dto/create-multi.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schema/product.schema';
 import { Variant, VariantDocument } from './schema/variants.schema';
-import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class ProductService {
@@ -116,7 +115,7 @@ export class ProductService {
           data: { products, total },
         };
 
-        await this.redisService.setCache(cacheKey, response, 300); // Cache kết quả
+        await this.redisService.setCache(cacheKey, response, 3600); // Cache kết quả
         return response;
       }
 
@@ -189,7 +188,7 @@ export class ProductService {
       };
 
       // Lưu vào Redis cache (TTL = 300 giây)
-      await this.redisClient.setex(cacheKey, 300, JSON.stringify(response)); // Cache kết quả
+      await this.redisService.setCache(cacheKey, response, 3600); // Cache kết quả
       return response;
     } catch (error) {
       return {
@@ -203,12 +202,12 @@ export class ProductService {
   async findOne(id: string): Promise<ResponseDto<Product>> {
     try {
       // Kiểm tra xem sản phẩm có trong cache không
-      const cachedProduct = await this.redisClient.get(id);
+      const cachedProduct = await this.redisService.getCache(id);
       if (cachedProduct) {
         return {
           success: true,
           message: 'Product retrieved successfully',
-          data: JSON.parse(cachedProduct),
+          data: cachedProduct
         };
       }
 
@@ -232,7 +231,7 @@ export class ProductService {
       }
 
       // Lưu vào cache Redis với TTL = 3600 giây (1 giờ)
-      await this.redisClient.setex(id, 3600, JSON.stringify(product));
+      await this.redisService.setCache(id, product, 3600,);
 
       return {
         success: true,
@@ -282,10 +281,10 @@ export class ProductService {
         .exec();
 
       // Xóa cache cũ sau khi cập nhật
-      await this.redisClient.del(id);
-      await this.clearProductsPageCache()
+      await this.redisService.clearCache(id);
+      await this.redisService.clearProductsPageCache()
       // Lưu lại sản phẩm mới vào cache
-      await this.redisClient.setex(id, 3600, JSON.stringify(updatedProduct));
+      await this.redisService.setCache(id, updatedProduct, 3600);
 
       return {
         success: true,
@@ -298,22 +297,6 @@ export class ProductService {
         message: `Product update failed: ${error.message}`,
         data: null,
       };
-    }
-  }
-
-  async clearProductsPageCache(): Promise<void> {
-    try {
-      let cursor = '0';
-      do {
-        const [newCursor, keys] = await this.redisClient.scan(cursor, 'MATCH', 'products_page_*', 'COUNT', 100);
-        // Xóa tất cả các key đã tìm được
-        if (keys.length > 0) {
-          await this.redisClient.del(...keys);
-        }
-        cursor = newCursor; // Cập nhật cursor để tiếp tục quét nếu cần
-      } while (cursor !== '0'); // Quá trình quét hoàn tất khi cursor trở về 0
-    } catch (error) {
-      console.error('Error clearing product page cache:', error);
     }
   }
 
@@ -345,9 +328,9 @@ export class ProductService {
 
       // Xóa sản phẩm
       await this.productModel.findByIdAndDelete(id).exec();
-      await this.clearProductsPageCache()
+      await this.redisService.clearProductsPageCache()
       // Xóa cache của sản phẩm khỏi Redis
-      await this.redisClient.del(id);
+      await this.redisService.clearCache(id);
 
       return {
         success: true,
@@ -367,12 +350,12 @@ export class ProductService {
       const cacheKey = `variants_${productId || 'all'}`;
 
       // Kiểm tra cache trước
-      const cachedVariants = await this.redisClient.get(cacheKey);
+      const cachedVariants = await this.redisService.getCache(cacheKey);
       if (cachedVariants) {
         return {
           success: true,
           message: 'Variants retrieved from cache',
-          data: { variants: JSON.parse(cachedVariants) },
+          data: { variants: cachedVariants },
         };
       }
 
@@ -380,7 +363,7 @@ export class ProductService {
       const variants = await this.variantModel.find({ productId: productId });
 
       // Lưu vào cache với thời gian hết hạn (ví dụ: 1 giờ)
-      await this.redisClient.setex(cacheKey, 3600, JSON.stringify(variants));
+      await this.redisService.setCache(cacheKey, variants, 3600);
 
       return {
         success: true,
@@ -409,7 +392,7 @@ export class ProductService {
       // Lưu sản phẩm vào database
       await variantData.save();
       const cacheKey = `variants_${productId || 'all'}`;
-      await this.redisClient.del(cacheKey);
+      await this.redisService.clearCache(cacheKey);
 
       return {
         success: true,
@@ -435,7 +418,7 @@ export class ProductService {
         .exec();
       // Xóa cache liên quan
       const cacheKey = `variants_${updatedVariant.productId || 'all'}`;
-      await this.redisClient.del(cacheKey); // Xóa cache cũ
+      await this.redisService.clearCache(cacheKey); // Xóa cache cũ
       return {
         success: true,
         message: 'Cập nhật variant thành công',
@@ -462,7 +445,7 @@ export class ProductService {
       }
       await this.variantModel.findByIdAndDelete(id).exec();
       const cacheKey = `variants_${variantToDelete.productId || 'all'}`;
-      await this.redisClient.del(cacheKey);
+      await this.redisService.clearCache(cacheKey);
       return {
         success: true,
         message: 'Xóa variant thành công',
