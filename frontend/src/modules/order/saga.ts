@@ -18,6 +18,7 @@ function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>)
     } else {
     }
   } catch (e) {
+    message.error("Thao tác thất bại!");
   }
 }
 
@@ -46,7 +47,7 @@ function* addOrder({ payload }: PayloadAction<{
       onFail(res.data)
     }
   } catch (e) {
-    message.error("Thêm order thất bại");
+    message.error("Thao tác thất bại!");
   }
 }
 
@@ -56,14 +57,18 @@ function* updateStatus({ payload }: PayloadAction<{ id: string; data: any, userI
     const { id, data, userId } = payload;
     const rs = yield OrderRequest.updateStatusOrderById(id, data);
     if (rs.success) {
-      message.success("Hủy đơn hàng thành công");
+      if (data.status === 'cancelled') {
+        message.success("Hủy đơn hàng thành công");
+      } else {
+        message.success("Xác nhận nhận đơn hàng thành công");
+      }
       const res = yield OrderRequest.getOrderById(userId);
       yield put(OrderActions.setAllOrder(res.data));
     } else {
-      message.error("Hủy đơn hàng thất bại");
+      message.error("Thao tác thất bại!");
     }
   } catch (error: any) {
-    message.error("Hủy đơn hàng thất bại");
+    message.error("Thao tác thất bại!");
   }
 }
 
@@ -80,7 +85,7 @@ function* updateOrder({ payload }: PayloadAction<{ id: string; data: any }>): Ge
       message.error("Sửa thông tin người dùng thất bại");
     }
   } catch (error: any) {
-    message.error("An error occurred while updating the category.");
+    message.error("Thao tác thất bại!");
   }
 }
 

@@ -6,6 +6,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "i.pinimg.com",
         pathname: "/**",
+      },{
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        pathname: "/**",
       },
       {
         protocol: "https",
@@ -15,6 +19,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "img.youtube.com",
+        pathname: "/**",
+      },{
+        protocol: "https",
+        hostname: "images.unsplash.com",
         pathname: "/**",
       },
     ],

@@ -24,7 +24,7 @@ type Props = {
 const Header = () => {
   const auth = useAppSelector(AuthSelectors.user);
   return (
-    <div className="p-6 bg-layout z-20">
+    <div className="px-6 py-1 bg-layout z-20">
       <div className="h-12 flex md:justify-between justify-end">
         <div className="h-full flex flex-grow ">
           <Link
