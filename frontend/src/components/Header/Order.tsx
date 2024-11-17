@@ -109,7 +109,9 @@ const Order = () => {
         {
           label: (
             <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
-              <Button type="primary" style={{ marginLeft: '10px' }}>
+              <Button
+                onClick={() => router.push('/orders')}
+                type="primary" style={{ marginLeft: '10px' }}>
                 Show All
               </Button>
             </div>

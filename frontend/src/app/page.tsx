@@ -1,100 +1,72 @@
 "use client";
 
-import CategoryCard from "@/components/CategoryCard/CategoryCard";
 import TripleSlider from "@/components/Slider/Slider";
-import TopCard from "@/components/TopicCard/TopCard";
+import { Button, Tag } from 'antd';
+import Image from "next/image";
 import { useState } from "react";
-import { HiInboxStack } from "react-icons/hi2";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-const listTopic = [
-  { _id: 1, title: "Nội dung nổi bật" },
-  { _id: 2, title: "Ca nhạc" },
-  { _id: 3, title: "Điện thoại" },
-  { _id: 4, title: "Trò chơi" },
-  { _id: 5, title: "Truyện tranh" },
-];
-
-const listCategoryCard = [
+const promoData = [
   {
-    _id: 1,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
+    id: 'ipad-air',
+    title: 'Mac Mini',
+    subtitle: 'Two sizes. Faster chip. Does it all.',
+    description: 'Learn more about the iPad Air features.',
+    imageUrl: 'https://images.unsplash.com/photo-1604404439625-976a22785855?q=80&w=1931&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    link: '/ipad-air',
+    buyLink: '/buy-ipad-air',
+    status: 'available',
   },
   {
-    _id: 2,
-    title: "Danh mục",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
+    id: 'airpods-pro-2',
+    title: 'AirPods Pro',
+    subtitle: 'Advanced features for better sound quality.',
+    description: 'Buy the latest AirPods Pro 2.',
+    imageUrl: 'https://images.unsplash.com/photo-1603351154351-5e2d0600bb77?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    link: '/airpods-pro-2',
+    buyLink: '/buy-airpods-pro-2',
+    status: 'available',
+  }, {
+    id: 'MacBook Pro',
+    title: 'Macbook',
+    subtitle: 'Advanced features for better sound quality.',
+    description: 'Buy the latest AirPods Pro 2.',
+    imageUrl: 'https://images.unsplash.com/photo-1710905219584-8521769e3678?q=80&w=1910&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    link: '/airpods-pro-2',
+    buyLink: '/buy-airpods-pro-2',
+    status: 'available',
+  }, {
+    id: 'MacBook Pro123',
+    title: 'Macbook Pro',
+    subtitle: 'Advanced features for better sound quality.',
+    description: 'Buy the latest AirPods Pro 2.',
+    imageUrl: 'https://via.placeholder.com/300',
+    link: '/airpods-pro-2',
+    buyLink: '/buy-airpods-pro-2',
+    status: 'available',
   },
-  {
-    _id: 3,
-    title: "Danh mục",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 4,
-    title: "Danh mục",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 5,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 6,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 7,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 8,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 9,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
-  {
-    _id: 10,
-    title: "Abc",
-    description: "Lorem Ipsum is simply dummy te...",
-    icon: <HiInboxStack />,
-  },
+  // Thêm các sản phẩm khác vào đây
 ];
 
 const slides = [
   {
     _id: 1,
     image:
-      "https://i.pinimg.com/564x/0f/71/f4/0f71f451c8e21f20da8e0a0a352f1251.jpg",
-    title: "abc",
+      "https://images.unsplash.com/photo-1710905219584-8521769e3678?q=80&w=1910&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    title: "Macbook",
   },
   {
     _id: 2,
     image:
-      "https://i.pinimg.com/564x/0f/71/f4/0f71f451c8e21f20da8e0a0a352f1251.jpg",
-    title: "abc",
+      "https://images.unsplash.com/photo-1604404439625-976a22785855?q=80&w=1931&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    title: "airpods",
   },
   {
     _id: 3,
     image:
-      "https://i.pinimg.com/564x/0f/71/f4/0f71f451c8e21f20da8e0a0a352f1251.jpg",
-    title: "abc",
+      "https://images.unsplash.com/photo-1710905219584-8521769e3678?q=80&w=1910&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    title: "Mac Mini",
   },
 ];
 
@@ -104,34 +76,56 @@ export default function Home() {
   const [selectCategoryCard, setSelectCategoryCard] = useState(null);
 
   return (
-    <div className="bg-mainLayout rounded-xl p-8">
-      {/* Slider */}
-      <div className="w-full">
+    <div className="bg-mainLayout rounded-xl p-4">
+      <div className="w-full h-full">
         <TripleSlider slides={slides} />
       </div>
-      {/* List Topic Card */}
-      <div className="mb-8 flex flex-wrap gap-x-2 gap-y-2">
-        {listTopic.map((item: any, index: number) => (
-          <TopCard
-            key={index}
-            item={item}
-            onSelect={setSelectTopcard}
-            isSelect={selectTopCard}
-          />
-        ))}
-      </div>
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+        {promoData.map((promo) => (
+          <div
+            key={promo.id}
+            className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden"
+          >
+            <a href={promo.link} className="relative block">
+              <Image
+                width={300}
+                height={300}
+                src={promo.imageUrl}
+                alt={promo.title}
+                className="w-full h-56 object-cover"
+              />
+            </a>
+            <div className="p-6 flex flex-col flex-1">
+              <h3 className="text-xl font-bold text-gray-800">{promo.title}</h3>
+              <p className="mt-2 text-gray-600">{promo.subtitle}</p>
 
-      {/* List Category Card */}
-      <div className="grid grid-cols-5 gap-6">
-        {listCategoryCard.map((item: any, index: number) => (
-          <CategoryCard
-            key={index}
-            item={item}
-            onSelect={setSelectCategoryCard}
-            isSelect={selectCategoryCard}
-          />
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Tag color="blue">New</Tag>
+                {promo.status === 'available' && (
+                  <Tag color="green">In Stock</Tag>
+                )}
+              </div>
+
+              <div className="mt-4 flex gap-4">
+                <Button
+                  type="primary"
+                  href={promo.link}
+                  className="flex-1"
+                >
+                  Learn More
+                </Button>
+                <Button
+                  type="default"
+                  href={promo.buyLink}
+                  className="flex-1"
+                >
+                  Buy
+                </Button>
+              </div>
+            </div>
+          </div>
         ))}
-      </div>
+      </section>
     </div>
   );
 }
