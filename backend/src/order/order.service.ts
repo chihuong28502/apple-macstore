@@ -15,22 +15,28 @@ import { OrdersGateway } from './order.gateway';
 import { Order, OrderDocument } from './schema/order.schema';
 import { Cart, CartDocument } from 'src/cart/schema/cart.schema';
 import { CartsGateway } from 'src/cart/cart.gateway';
+import { RedisService } from 'src/redis/redis.service';
 
 
 @Injectable()
 export class OrderService {
+  private readonly CACHE_TTL = 3600;
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Variant.name) private variantModel: Model<VariantDocument>,
+    private readonly redisService: RedisService,
     private configService: ConfigService,
     private readonly ordersGateway: OrdersGateway,
     private readonly cartsGateway: CartsGateway
   ) { }
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
+    const cacheKeyById = `cart_by_${createOrderDto.userId}`;
+    createOrderDto.items.map(item =>
+      this.redisService.clearCache(item.productId))
     try {
       const user = await this.userModel.findById(createOrderDto.userId);
       const cart = await this.cartModel.findOne({ userId: createOrderDto.userId });
@@ -67,6 +73,8 @@ export class OrderService {
       await this.ordersGateway.addOrder(createdOrder);
       const updateCart = await cart.save();
       this.cartsGateway.sendEventAddCart(updateCart);
+      this.redisService.setCache(cacheKeyById, updateCart, 3600);
+
       return {
         success: true,
         message: 'Order created successfully',
@@ -105,11 +113,10 @@ export class OrderService {
       if (!order) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-
       return {
         success: true,
         message: 'Order retrieved successfully',
-        data: order, 
+        data: order,
       };
     } catch (error) {
       return {
@@ -121,13 +128,14 @@ export class OrderService {
   }
 
   async findAllOrderByCustomer(id: string): Promise<ResponseDto<Order>> {
+    const keyCache = `order_by_user_${id}`;
     try {
       const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 }).limit(10);
 
       if (order.length === 0) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-
+      this.redisService.setCache(keyCache, order, this.CACHE_TTL)
       return {
         success: true,
         message: 'Order retrieved successfully',
@@ -143,12 +151,14 @@ export class OrderService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
+    // const keyCache = `order_by_user_${id}`;
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
 
+      // this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
       return {
         success: true,
         message: 'Order updated successfully',
@@ -164,11 +174,13 @@ export class OrderService {
   }
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
+    const keyCache = `order_by_user_${id}`;
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
+      this.redisService.clearCache(keyCache)
       return {
         success: true,
         message: 'Order updated successfully',

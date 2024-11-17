@@ -1,10 +1,12 @@
+import { ConfigService } from '@nestjs/config';
 import {
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  SubscribeMessage,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
-import { ConfigService } from '@nestjs/config';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
@@ -22,21 +24,35 @@ import { ConfigService } from '@nestjs/config';
     credentials: true,
   },
 })
-export class OrdersGateway {
+export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
+  
+  // Đối tượng để lưu trữ các client kết nối
+  private connectedClients: Map<string, Socket> = new Map();
+
+  // Khi một client kết nối
+  handleConnection(client: Socket) {
+    this.connectedClients.set(client.id, client); // Thêm client vào Map
+  }
+
+  // Khi một client ngắt kết nối
+  handleDisconnect(client: Socket) {
+    this.connectedClients.delete(client.id); // Xóa client khỏi Map
+  }
 
   // Gửi thông báo đến tất cả client
   sendOrder(order: any) {
-    this.server.emit('check-order', order);
+    this.server.emit('check-order', order); // Gửi thông báo tới tất cả các client
   }
 
+  // Thêm đơn hàng và gửi đến tất cả client
   addOrder(order: any) {
-    this.server.emit('add-order', order);
+    this.server.emit('add-order', order); // Gửi đơn hàng mới tới tất cả các client
   }
 
   // Nếu bạn muốn lắng nghe các sự kiện từ client
   @SubscribeMessage('clientEvent')
-  handleClientEvent(client: any, payload: any) {
-    // Xử lý sự kiện từ client
+  handleClientEvent(client: Socket, payload: any) {
+    // Xử lý sự kiện từ client tại đây
   }
 }

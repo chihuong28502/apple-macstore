@@ -1,6 +1,6 @@
 'use client'
 import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
-import socket from "@/lib/socket/socket";
+import { getSocket } from "@/lib/socket/socket";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { NotifyActions, NotifySelectors } from "@/modules/notify/slice";
 import { Badge, ConfigProvider, Popover } from "antd";
@@ -37,6 +37,7 @@ const NotificationList = ({ notifications }: any) => (
 
 const NotificationPopover = () => {
   const dispatch = useDispatch();
+  const socket = getSocket(); 
   const notificationss = useSelector(NotifySelectors.notify);
   const user = useSelector(AuthSelectors.user);
   const [notifications, setNotifications] = useState(notificationss);

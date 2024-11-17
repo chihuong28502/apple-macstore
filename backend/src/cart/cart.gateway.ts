@@ -3,8 +3,10 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
@@ -22,18 +24,30 @@ import { Server } from 'socket.io';
     credentials: true,
   },
 })
-export class CartsGateway {
+export class CartsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
+
+  // Đối tượng để lưu trữ các client kết nối
+  private connectedClients: Map<string, Socket> = new Map();
+
+  // Khi một client kết nối
+  handleConnection(client: Socket) {
+    this.connectedClients.set(client.id, client); // Thêm client vào Map
+  }
+
+  // Khi một client ngắt kết nối
+  handleDisconnect(client: Socket) {
+    this.connectedClients.delete(client.id); // Xóa client khỏi Map
+  }
 
   // Gửi thông báo đến tất cả client
   sendEventAddCart(cart: any) {
-    console.log("🚀 ~ CartsGateway ~ cart:", cart)
-    this.server.emit('add-cart', cart);
+    this.server.emit('add-cart', cart); // Gửi thông báo đến tất cả client
   }
 
   // Nếu bạn muốn lắng nghe các sự kiện từ client
   @SubscribeMessage('clientEvent')
-  handleClientEvent(client: any, payload: any) {
-    // Xử lý sự kiện từ client
+  handleClientEvent(client: Socket, payload: any) {
+    // Xử lý sự kiện từ client tại đây
   }
 }

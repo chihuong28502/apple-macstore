@@ -5,10 +5,13 @@ import { Model, Types } from 'mongoose';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CartsGateway } from './cart.gateway';
 import { Cart, CartDocument } from './schema/cart.schema';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class CartService {
+  private readonly CACHE_TTL = 3600;
   constructor(@InjectModel(Cart.name) private cartModel: Model<CartDocument>,
+    private readonly redisService: RedisService,
     private readonly cartsGateway: CartsGateway) { }
 
   async createCartForUser(userId: string): Promise<Cart> {
@@ -38,6 +41,7 @@ export class CartService {
   }
 
   async addItem(userId: string, item: any): Promise<ResponseDto<Cart>> {
+    const cacheKeyById = `cart_by_${userId}`;
     try {
       let cart = await this.cartModel.findOne({ userId });
 
@@ -70,6 +74,7 @@ export class CartService {
 
       // Gửi sự kiện giỏ hàng đã được cập nhật
       this.cartsGateway.sendEventAddCart(updatedCart);
+      await this.redisService.clearCache(cacheKeyById);
 
       return {
         success: true,
@@ -87,6 +92,17 @@ export class CartService {
 
 
   async findByUserId(userId: string): Promise<ResponseDto<Cart>> {
+    const cacheKey = `cart_by_${userId}`;
+
+    // Check cache first
+    const cachedCart = await this.redisService.getCache<Cart>(cacheKey);
+    if (cachedCart) {
+      return {
+        success: true,
+        message: 'Cart retrieved from cache',
+        data: cachedCart,
+      };
+    }
     try {
       const cart = await this.cartModel
         .findOne({ userId })
@@ -101,6 +117,7 @@ export class CartService {
         };
       }
 
+      await this.redisService.setCache(cacheKey, cart, this.CACHE_TTL);
       return {
         success: true,
         message: 'Cart retrieved successfully',
@@ -116,6 +133,7 @@ export class CartService {
   }
 
   async update(userId: string, items: Array<{ productId: string; variantId: string; quantity: number }>): Promise<ResponseDto<Cart>> {
+    const cacheKey = `cart_by_${userId}`;
     try {
       const cart = await this.cartModel.findOne({ userId });
       const { productId, variantId, quantity } = items as any
@@ -144,10 +162,8 @@ export class CartService {
 
       // Update the quantity
       item.quantity = quantity;
-
-      // Save the cart with updated quantity
       await cart.save();
-
+      this.redisService.clearCache(cacheKey)
       return {
         success: true,
         message: 'Quantity updated successfully',
@@ -163,6 +179,7 @@ export class CartService {
   }
 
   async delete(userId: string, items: Array<{ productId: string; variantId: string }>): Promise<ResponseDto<Cart>> {
+    const cacheKey = `cart_by_${userId}`;
     try {
       // Kiểm tra nếu items là mảng
       if (!Array.isArray(items)) {
@@ -195,6 +212,7 @@ export class CartService {
 
       // Cập nhật giỏ hàng sau khi xóa
       await cart.save();
+      this.redisService.clearCache(cacheKey)
 
       return {
         success: true,
