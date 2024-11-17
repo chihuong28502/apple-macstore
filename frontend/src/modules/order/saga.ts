@@ -37,7 +37,8 @@ function* addOrder({ payload }: PayloadAction<{
       const responseCart: { success: boolean; data: any } = yield CartRequest.getCartById(payload.userId);
       const responseOrder: { success: boolean; data: any } = yield OrderRequest.getOrderById(payload.userId);
       yield put(CartActions.setCart(responseCart.data));
-      yield put(OrderActions.setOrder(responseOrder.data));
+      yield put(OrderActions.setAllOrder(responseOrder.data));
+      yield put(OrderActions.setOrder(res.data));
       message.success("Thêm order thành công");
       onSuccess(res?.data)
     } else {

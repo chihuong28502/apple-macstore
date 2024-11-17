@@ -26,7 +26,7 @@ export class CartController {
   @Get(':userId')
   async findByUserId(@Param('userId') userId: string, @Res() res: Response) {
     const result: ResponseDto<Cart> = await this.cartService.findByUserId(userId);
-    const statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
+    const statusCode = result.success ? 200 : result.message.includes('not found') ? 200 : 500;
     return res.status(statusCode).json(result);
   }
 

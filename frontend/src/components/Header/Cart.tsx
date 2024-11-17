@@ -22,14 +22,6 @@ const Cart = () => {
       dispatch(CartActions.fetchCartById(auth._id));
     }
   }, [auth?._id, dispatch]);
-
-  // useEffect(() => {
-  //   // Lắng nghe sự kiện thông báo
-  //   listenToSocketEvent(socket, "add-cart", (cart) => {
-  //     // dispatch(CartActions.setCart(cart))
-  //   });
-  //   return () => cleanupSocketEvent(socket, "add-cart");
-  // }, [socket]);
   const { resolvedTheme } = useTheme();
 
   const handleClickPayment = () => {
