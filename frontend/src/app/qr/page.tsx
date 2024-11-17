@@ -1,7 +1,7 @@
 'use client'
 import FullScreenLoading from '@/components/loadingCheck/LoadingCheck'
 import { cleanupSocketEvent, listenToSocketEvent } from '@/lib/socket/emit.socket'
-import socket from '@/lib/socket/socket'
+import  { getSocket } from '@/lib/socket/socket'
 import { AuthSelectors } from '@/modules/auth/slice'
 import { OrderActions, OrderSelectors } from '@/modules/order/slice'
 import { useEffect, useState } from 'react'
@@ -13,19 +13,27 @@ function QrScan() {
   const auth = useSelector(AuthSelectors.user)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
-
+  const socket = getSocket(); 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
   useEffect(() => {
-    const handleOrderCheck = (orderSocket: any) => {
-      if (orderSocket.code === order.code && auth._id === orderSocket.userId && auth._id === order.userId) {
-        dispatch(OrderActions.setOrder(orderSocket))
+    const handleOrderCheck = (orderSocket :any) => {
+      if (
+        orderSocket.code === order.code &&
+        auth._id === orderSocket.userId &&
+        auth._id === order.userId
+      ) {
+        dispatch(OrderActions.setOrder(orderSocket));
       }
-    }
-    listenToSocketEvent(socket, "check-order", handleOrderCheck)
-    return () => cleanupSocketEvent(socket, "check-order")
-  }, [socket, dispatch])
+    };
+
+    listenToSocketEvent(socket, "check-order", handleOrderCheck);
+
+    return () => {
+      cleanupSocketEvent(socket, "check-order");
+    };
+  }, [socket, dispatch, order, auth]);
 
   useEffect(() => {
     if (order?.status === "shipping") {

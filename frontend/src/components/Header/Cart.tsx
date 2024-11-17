@@ -1,7 +1,5 @@
 "use client";
 import { useAppSelector } from "@/core/services/hook";
-import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
-import socket from "@/lib/socket/socket";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { Badge, Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";

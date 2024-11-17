@@ -42,11 +42,11 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const [quantity, setQuantity] = useState(0);
 
   useEffect(() => {
-    const cachedProduct = getCache("productById");
-    if (cachedProduct && cachedProduct._id === productId) {
-      dispatch(ProductActions.setProduct(cachedProduct));
-      return;
-    }
+    // const cachedProduct = getCache("productById");
+    // if (cachedProduct && cachedProduct._id === productId) {
+    //   dispatch(ProductActions.setProduct(cachedProduct));
+    //   return;
+    // }
     dispatch(ProductActions.fetchProductById(productId));
   }, [dispatch, productId]);
 

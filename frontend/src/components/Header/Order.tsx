@@ -1,7 +1,7 @@
 "use client";
 import { useAppSelector } from "@/core/services/hook";
 import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
-import socket from "@/lib/socket/socket";
+import { getSocket } from "@/lib/socket/socket";
 import { formatTimeDifference } from "@/lib/timeCurrentDesInput";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { OrderActions, OrderSelectors } from "@/modules/order/slice";
@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 const Order = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
+  const socket = getSocket(); 
   const auth = useAppSelector(AuthSelectors.user);
   const allOrder = useAppSelector(OrderSelectors.allOrder);
   const [orderBase, setOrderBase] = useState<any>(allOrder);

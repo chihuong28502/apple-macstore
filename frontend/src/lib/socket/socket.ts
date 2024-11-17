@@ -1,5 +1,15 @@
-import { io } from 'socket.io-client';
+import { io, Socket } from "socket.io-client";
 
-const socket = io(process.env.NEXT_PUBLIC_API_URL_LOCAL || process.env.NEXT_PUBLIC_API_URL);
+let socket: Socket | null = null;
 
-export default socket;
+export const getSocket = (): Socket => {
+  if (!socket) {
+    const url = process.env.NEXT_PUBLIC_API_URL_LOCAL || process.env.NEXT_PUBLIC_API_URL;
+    socket = io(url, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+  }
+  return socket;
+};

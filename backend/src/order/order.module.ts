@@ -9,6 +9,8 @@ import { Product, ProductSchema } from 'src/product/schema/product.schema';
 import { Variant, VariantSchema } from 'src/product/schema/variants.schema';
 import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
 import { CartsGateway } from 'src/cart/cart.gateway';
+import { RedisModule } from 'src/redis/redis.module';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -19,9 +21,13 @@ import { CartsGateway } from 'src/cart/cart.gateway';
     { name: Variant.name, schema: VariantSchema },
 
   ]),
-    CartsGateway],
+    CartsGateway,
+    RedisModule
+  ],
   controllers: [OrderController],
-  providers: [OrderService, OrdersGateway, CartsGateway],
+  providers: [
+    OrderService, OrdersGateway,
+    CartsGateway, RedisService],
   exports: [OrderService],
 })
 export class OrderModule { }
