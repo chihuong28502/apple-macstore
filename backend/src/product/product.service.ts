@@ -201,7 +201,6 @@ export class ProductService {
 
   async findOne(id: string): Promise<ResponseDto<Product>> {
     try {
-      // Kiểm tra xem sản phẩm có trong cache không
       const cachedProduct = await this.redisService.getCache(id);
       if (cachedProduct) {
         return {
@@ -211,32 +210,28 @@ export class ProductService {
         };
       }
 
-      // Nếu không có trong cache, truy vấn từ database
       const product = await this.productModel.aggregate([
         {
-          $match: { _id: new Types.ObjectId(id) },
+          $match: { _id: new Types.ObjectId(id) }  // Tìm sản phẩm theo ID
         },
         {
           $lookup: {
-            from: 'variants',
-            localField: '_id',
-            foreignField: 'productId',
-            as: 'variants',
-          },
-        },
+            from: "variants",  // Tên của collection Variant
+            localField: "_id",  // Trường của Product mà bạn muốn nối
+            foreignField: "productId",  // Trường trong Variant mà bạn muốn nối
+            as: "variants"  // Kết quả sẽ được lưu trong trường variants
+          }
+        }
       ]);
 
       if (product.length === 0) {
         throw new NotFoundException(`Product with ID "${id}" not found`);
       }
-
-      // Lưu vào cache Redis với TTL = 3600 giây (1 giờ)
       await this.redisService.setCache(id, product[0], 3600,);
-
       return {
         success: true,
-        message: 'Product retrieved successfully',
-        data: product[0],
+        message: 'Product Get One successfully',
+        data: product[0]
       };
     } catch (error) {
       return {

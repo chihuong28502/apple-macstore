@@ -33,7 +33,7 @@ function* fetchProductById({ payload }: PayloadAction<any>) {
     yield put(ProductActions.setLoading(false));
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
-      setCache('productById', response.data);
+      // setCache('productById', response.data);
       onSuccess(response.data);
     } else {
       onFail(response);
