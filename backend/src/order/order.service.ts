@@ -178,7 +178,7 @@ export class OrderService {
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${updateOrderDto.userId}`;
     const keyCacheAllOrder = `order_all`;
-  
+
     try {
       // Cập nhật trạng thái đơn hàng
       const updatedOrder = await this.orderModel
@@ -188,11 +188,11 @@ export class OrderService {
           { new: true }
         )
         .exec();
-  
+
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-  
+
       if (updateOrderDto.status === 'cancelled') {
         // Hoàn lại stock khi hủy đơn hàng
         const updateStockTasks = updatedOrder.items.map(async (item) => {
@@ -200,12 +200,12 @@ export class OrderService {
           if (variant) {
             variant.availableStock += item.quantity;
             variant.reservedStock -= item.quantity;
-  
+
             // Đảm bảo không âm giá trị reservedStock
             if (variant.reservedStock < 0) {
               variant.reservedStock = 0;
             }
-  
+
             await variant.save();
           }
         });
@@ -217,30 +217,33 @@ export class OrderService {
           if (variant) {
             // Trừ số lượng từ reservedStock
             variant.reservedStock -= item.quantity;
-  
+
             // Đảm bảo không âm giá trị reservedStock
             if (variant.reservedStock < 0) {
               variant.reservedStock = 0;
             }
-  
+
             // Cập nhật stock
             variant.stock -= item.quantity;
-  
+            console.log("🚀 ~ OrderService ~  variant.stock:", variant.stock)
+            console.log("🚀 ~ OrderService ~ item.quantity:", item.quantity)
+            console.log("🚀 ~ OrderService ~ variant.reservedStock:", variant.reservedStock)
+
             // Đảm bảo không âm giá trị stock
             if (variant.stock < 0) {
               variant.stock = 0;
             }
-  
+
             await variant.save();
           }
         });
         await Promise.all(updateStockTasks);
       }
-  
+
       // Xóa cache
       this.redisService.clearCache(keyCache);
       this.redisService.clearCache(keyCacheAllOrder);
-  
+
       return {
         success: true,
         message: 'Order updated successfully',
@@ -254,7 +257,7 @@ export class OrderService {
       };
     }
   }
-  
+
 
   async remove(id: string): Promise<ResponseDto<Order>> {
     try {
@@ -296,16 +299,6 @@ export class OrderService {
       }
 
       order.status = "shipping";
-      const variantIds = order.items.map(item => item.variantId);
-
-      for (const item of order.items) {
-        await this.variantModel.findByIdAndUpdate(
-          item.variantId,
-          { $inc: { stock: -parseInt(item.quantity as any, 10) } },
-          { new: true }
-
-        );
-      }
 
       await order.save();
       await this.ordersGateway.sendOrder(order);
