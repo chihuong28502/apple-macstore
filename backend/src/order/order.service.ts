@@ -73,7 +73,7 @@ export class OrderService {
       await this.ordersGateway.addOrder(createdOrder);
       const updateCart = await cart.save();
       this.cartsGateway.sendEventAddCart(updateCart);
-      this.redisService.setCache(cacheKeyById, updateCart, 3600);
+      this.redisService.clearCache(cacheKeyById);
 
       return {
         success: true,
