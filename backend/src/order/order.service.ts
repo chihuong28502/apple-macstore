@@ -34,6 +34,7 @@ export class OrderService {
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
     const cacheKeyById = `cart_by_${createOrderDto.userId}`;
+    const cacheKeyByOrder = `cart_by_user_${createOrderDto.userId}`;
     createOrderDto.items.map(item =>
       this.redisService.clearCache(item.productId))
     try {
@@ -73,7 +74,8 @@ export class OrderService {
       await this.ordersGateway.addOrder(createdOrder);
       const updateCart = await cart.save();
       this.cartsGateway.sendEventAddCart(updateCart);
-      this.redisService.clearCache(cacheKeyById);
+      this.redisService.setCache(cacheKeyById, updateCart, 3600);
+      this.redisService.setCache(cacheKeyByOrder, updateCart, 3600);
 
       return {
         success: true,
