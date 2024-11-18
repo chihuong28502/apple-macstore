@@ -121,7 +121,6 @@ export class OrderService {
   async findAllOrderByCustomer(id: string): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${id}`;
     try {
-      console.log("🚀 ~ OrderService ~ findAllOrderByCustomer:", keyCache)
       const orderCache = await this.redisService.getCache(keyCache);
       if (orderCache) {
         return {
@@ -153,7 +152,6 @@ export class OrderService {
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${updateOrderDto.userId}`;
     const keyCacheAllOrder = `order_all`;
-    console.log("🚀 ~ OrderService ~ keyCache:", keyCache)
 
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
@@ -291,7 +289,7 @@ export class OrderService {
       }
 
       const order = await this.orderModel.findOne({ code: matchedCode });
-      const keyCache = `order_by_user_${order._id}`;
+      const keyCache = `order_by_user_${order.userId}`;
 
       if (!order) {
         throw new Error("Không tìm thấy đơn hàng với mã code trùng khớp");
@@ -318,7 +316,6 @@ export class OrderService {
         data: order,
       };
     } catch (error) {
-      console.error("🚀 ~ Error:", error.message);
       return {
         success: false,
         message: `Failed to process thanh toán: ${error.message}`,

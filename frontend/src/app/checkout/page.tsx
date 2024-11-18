@@ -20,7 +20,6 @@ function Page() {
   const customerShipping = useSelector(CustomerSelectors.shipping);
   const price = useSelector(CartSelectors.priceCheckout);
   const order = useSelector(OrderSelectors.order);
-  console.log("🚀 ~ order:", order)
   const selectedShipping = useSelector(CartSelectors.shippingSelectedId);
 
 
