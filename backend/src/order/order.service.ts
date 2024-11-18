@@ -3,9 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as crypto from 'node:crypto';
-import { ObjectId } from 'mongodb';
+import { CartsGateway } from 'src/cart/cart.gateway';
+import { Cart, CartDocument } from 'src/cart/schema/cart.schema';
 import { Product, ProductDocument } from 'src/product/schema/product.schema';
 import { Variant, VariantDocument } from 'src/product/schema/variants.schema';
+import { RedisService } from 'src/redis/redis.service';
 import { User, UserDocument } from 'src/user/schema/user.schema';
 import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -13,9 +15,6 @@ import { SepayDto } from './dto/sepay.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersGateway } from './order.gateway';
 import { Order, OrderDocument } from './schema/order.schema';
-import { Cart, CartDocument } from 'src/cart/schema/cart.schema';
-import { CartsGateway } from 'src/cart/cart.gateway';
-import { RedisService } from 'src/redis/redis.service';
 
 
 @Injectable()
@@ -58,6 +57,7 @@ export class OrderService {
       await Promise.all(variantUpdates);
       const createdOrder = new this.orderModel({
         ...createOrderDto,
+        totalPrice: parseFloat(createOrderDto.totalPrice.toFixed(1)),
         code,
         qr,
         lockUntil: new Date(Date.now() + 3 * 60 * 60 * 1000),
@@ -90,8 +90,18 @@ export class OrderService {
   }
 
   async findAll(): Promise<ResponseDto<Order[]>> {
+    const keyCache = `order_all`;
     try {
+      const orderCache = await this.redisService.getCache(keyCache);
+      if (orderCache) {
+        return {
+          success: true,
+          message: 'Orders retrieved successfully',
+          data: orderCache
+        };
+      }
       const orders = await this.orderModel.find().exec();
+      this.redisService.setCache(keyCache, orders, this.CACHE_TTL)
       return {
         success: true,
         message: 'Orders retrieved successfully',
@@ -106,30 +116,17 @@ export class OrderService {
     }
   }
 
-  async findOne(id: string): Promise<ResponseDto<Order>> {
-    try {
-      const order = await this.orderModel.findById(id);
-
-      if (!order) {
-        throw new NotFoundException(`Order with ID "${id}" not found`);
-      }
-      return {
-        success: true,
-        message: 'Order retrieved successfully',
-        data: order,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: `Failed to retrieve order: ${error.message}`,
-        data: null,
-      };
-    }
-  }
-
   async findAllOrderByCustomer(id: string): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${id}`;
     try {
+      const orderCache = await this.redisService.getCache(keyCache);
+      if (orderCache) {
+        return {
+          success: true,
+          message: 'Orders retrieved successfully',
+          data: orderCache
+        };
+      }
       const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 }).limit(10);
 
       if (order.length === 0) {
@@ -151,14 +148,17 @@ export class OrderService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
-    // const keyCache = `order_by_user_${id}`;
+    const keyCache = `order_by_user_${id}`;
+    const keyCacheAllOrder = `order_all`;
+
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
 
-      // this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
         message: 'Order updated successfully',
@@ -175,12 +175,16 @@ export class OrderService {
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${id}`;
+    const keyCacheAllOrder = `order_all`;
+
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
       this.redisService.clearCache(keyCache)
+      this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
         message: 'Order updated successfully',
@@ -197,11 +201,13 @@ export class OrderService {
 
   async remove(id: string): Promise<ResponseDto<Order>> {
     try {
+      const keyCacheAllOrder = `order_all`;
+
       const deletedOrder = await this.orderModel.findByIdAndDelete(id).exec();
       if (!deletedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-
+      this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
         message: 'Order deleted successfully',
@@ -226,6 +232,7 @@ export class OrderService {
       }
 
       const order = await this.orderModel.findOne({ code: matchedCode });
+      const keyCache = `order_by_user_${order._id}`;
 
       if (!order) {
         throw new Error("Không tìm thấy đơn hàng với mã code trùng khớp");
@@ -245,7 +252,7 @@ export class OrderService {
 
       await order.save();
       await this.ordersGateway.sendOrder(order);
-
+      this.redisService.clearCache(keyCache)
       return {
         success: true,
         message: 'Order thanh toán thành công',

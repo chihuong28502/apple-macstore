@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CartsGateway } from 'src/cart/cart.gateway';
+import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
+import { Product, ProductSchema } from 'src/product/schema/product.schema';
+import { Variant, VariantSchema } from 'src/product/schema/variants.schema';
+import { RedisModule } from 'src/redis/redis.module';
+import { RedisService } from 'src/redis/redis.service';
+import { User, UserSchema } from 'src/user/schema/user.schema';
 import { OrderController } from './order.controller';
 import { OrdersGateway } from './order.gateway';
 import { OrderService } from './order.service';
 import { Order, OrderSchema } from './schema/order.schema';
-import { User, UserSchema } from 'src/user/schema/user.schema';
-import { Product, ProductSchema } from 'src/product/schema/product.schema';
-import { Variant, VariantSchema } from 'src/product/schema/variants.schema';
-import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
-import { CartsGateway } from 'src/cart/cart.gateway';
-import { RedisModule } from 'src/redis/redis.module';
-import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [MongooseModule.forFeature([

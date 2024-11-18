@@ -1,6 +1,5 @@
 "use client";
 import { useAppSelector } from "@/core/services/hook";
-import { cleanupSocketEvent, listenToSocketEvent } from "@/lib/socket/emit.socket";
 import { formatTimeDifference } from "@/lib/timeCurrentDesInput";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { OrderActions, OrderSelectors } from "@/modules/order/slice";
