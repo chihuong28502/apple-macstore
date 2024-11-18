@@ -32,7 +32,7 @@ export class OrderController {
   @Get('user/:id')
   async findAllOrderByCustomer(@Param('id') id: string, @Res() res: Response): Promise<Response> {
     const result = await this.orderService.findAllOrderByCustomer(id);
-    let statusCode =result.success ? 200 : result.message.includes('not found') ? 200 : 500;
+    let statusCode = result.success ? 200 : result.message.includes('not found') ? 200 : 500;
     return res.status(statusCode).json(result);
   }
 
@@ -50,10 +50,10 @@ export class OrderController {
     return res.status(statusCode).json(result);
   }
 
-  @Delete(':id')
+  @Delete("delete/:id")
   async remove(@Param('id') id: string, @Res() res: Response): Promise<Response> {
     const result = await this.orderService.remove(id);
-    let statusCode =result.success ? 200 : result.message.includes('not found') ? 404 : 500;
+    let statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
     return res.status(statusCode).json(result);
   }
 

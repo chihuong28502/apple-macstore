@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { FaCalculator, FaUser, } from "react-icons/fa";
 import { FaCartShopping, FaShirt } from "react-icons/fa6";
 import { MdDashboardCustomize } from "react-icons/md";
+import { IoReceipt } from "react-icons/io5";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -76,10 +77,19 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
           </div>
         </Tooltip>
       ),
+      onClick: () => handleOnclickPush("/orders"),
+    },{
+      key: "/orders",
+      icon: (
+        <Tooltip title="Orders" placement="bottom">
+          <div className="w-full px-2">
+            <IoReceipt />
+          </div>
+        </Tooltip>
+      ),
       onClick: () => handleOnclickPush("/promotion"),
     },
   ];
-
   return (
     <>
       <ConfigProvider

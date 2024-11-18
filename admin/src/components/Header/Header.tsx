@@ -22,7 +22,7 @@ const Header = () => {
     <div className="p-3 bg-layout z-20 overflow-hidden">
       <div className="h-12 flex md:justify-between justify-end">
         <div className="h-full flex flex-grow justify-center">
-        <SideBar collapsed={false} />
+          <SideBar collapsed={false} />
           <div className="flex items-center gap-5">
             {auth && <User />}
             {!auth && <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />}

@@ -5,6 +5,7 @@ import LoadingGlobalReducer from "@/modules/loading-global/slice";
 import ProductReducer from "@/modules/product/slice";
 
 import AppReducer from "../components/AppSlice";
+import OrderReducer from "@/modules/order/slice";
 
 export const reducers = {
   app: AppReducer,
@@ -13,4 +14,5 @@ export const reducers = {
   loadingGlobal: LoadingGlobalReducer,
   customer: CustomerReducer,
   category: CategoryReducer,
+  order: OrderReducer,
 };

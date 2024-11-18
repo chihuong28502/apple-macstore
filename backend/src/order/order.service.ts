@@ -90,8 +90,10 @@ export class OrderService {
   }
 
   async findAll(): Promise<ResponseDto<Order[]>> {
+    const keyCache = `order_all`;
     try {
       const orders = await this.orderModel.find().exec();
+      this.redisService.setCache(keyCache, orders, this.CACHE_TTL)
       return {
         success: true,
         message: 'Orders retrieved successfully',
@@ -151,14 +153,17 @@ export class OrderService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
-    // const keyCache = `order_by_user_${id}`;
+    const keyCache = `order_by_user_${id}`;
+    const keyCacheAllOrder = `order_all`;
+
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
 
-      // this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
         message: 'Order updated successfully',
@@ -175,12 +180,16 @@ export class OrderService {
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${id}`;
+    const keyCacheAllOrder = `order_all`;
+
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
       this.redisService.clearCache(keyCache)
+      this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
         message: 'Order updated successfully',
@@ -197,11 +206,13 @@ export class OrderService {
 
   async remove(id: string): Promise<ResponseDto<Order>> {
     try {
+      const keyCacheAllOrder = `order_all`;
+
       const deletedOrder = await this.orderModel.findByIdAndDelete(id).exec();
       if (!deletedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-
+      this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
         message: 'Order deleted successfully',
@@ -224,8 +235,9 @@ export class OrderService {
       if (!matchedCode) {
         throw new Error("Không tìm thấy mã trong nội dung sepayDto");
       }
-
+      
       const order = await this.orderModel.findOne({ code: matchedCode });
+      const keyCache = `order_by_user_${order._id}`;
 
       if (!order) {
         throw new Error("Không tìm thấy đơn hàng với mã code trùng khớp");
@@ -245,7 +257,7 @@ export class OrderService {
 
       await order.save();
       await this.ordersGateway.sendOrder(order);
-
+      this.redisService.clearCache(keyCache)
       return {
         success: true,
         message: 'Order thanh toán thành công',
