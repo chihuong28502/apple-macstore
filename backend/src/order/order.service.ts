@@ -180,8 +180,9 @@ export class OrderService {
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${updateOrderDto.userId}`;
     const keyCacheAllOrder = `order_all`;
-
+  
     try {
+      // Cập nhật trạng thái đơn hàng
       const updatedOrder = await this.orderModel
         .findByIdAndUpdate(
           id,
@@ -189,11 +190,59 @@ export class OrderService {
           { new: true }
         )
         .exec();
+  
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-      this.redisService.clearCache(keyCache)
-      this.redisService.clearCache(keyCacheAllOrder)
+  
+      if (updateOrderDto.status === 'cancelled') {
+        // Hoàn lại stock khi hủy đơn hàng
+        const updateStockTasks = updatedOrder.items.map(async (item) => {
+          const variant = await this.variantModel.findById(item.variantId);
+          if (variant) {
+            variant.availableStock += item.quantity;
+            variant.reservedStock -= item.quantity;
+  
+            // Đảm bảo không âm giá trị reservedStock
+            if (variant.reservedStock < 0) {
+              variant.reservedStock = 0;
+            }
+  
+            await variant.save();
+          }
+        });
+        await Promise.all(updateStockTasks);
+      } else if (updateOrderDto.status === 'success') {
+        // Trừ stock khi đơn hàng thành công
+        const updateStockTasks = updatedOrder.items.map(async (item) => {
+          const variant = await this.variantModel.findById(item.variantId);
+          if (variant) {
+            // Trừ số lượng từ reservedStock
+            variant.reservedStock -= item.quantity;
+  
+            // Đảm bảo không âm giá trị reservedStock
+            if (variant.reservedStock < 0) {
+              variant.reservedStock = 0;
+            }
+  
+            // Cập nhật stock
+            variant.stock -= item.quantity;
+  
+            // Đảm bảo không âm giá trị stock
+            if (variant.stock < 0) {
+              variant.stock = 0;
+            }
+  
+            await variant.save();
+          }
+        });
+        await Promise.all(updateStockTasks);
+      }
+  
+      // Xóa cache
+      this.redisService.clearCache(keyCache);
+      this.redisService.clearCache(keyCacheAllOrder);
+  
       return {
         success: true,
         message: 'Order updated successfully',
@@ -207,6 +256,7 @@ export class OrderService {
       };
     }
   }
+  
 
   async remove(id: string): Promise<ResponseDto<Order>> {
     try {
