@@ -1,11 +1,9 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { OrderService } from './order.service';
-import { Order } from './schema/order.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { ResponseDto } from 'src/utils/dto/response.dto';
 import { SepayDto } from './dto/sepay.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrderService } from './order.service';
 
 @Controller('order')
 export class OrderController {
@@ -20,13 +18,6 @@ export class OrderController {
   async findAll(@Res() res: Response): Promise<Response> {
     const result = await this.orderService.findAll();
     return res.status(result.success ? 200 : 500).json(result);
-  }
-
-  @Get(':id')
-  async findOne(@Param('id') id: string, @Res() res: Response): Promise<Response> {
-    const result = await this.orderService.findOne(id);
-    let statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
-    return res.status(statusCode).json(result);
   }
 
   @Get('user/:id')
