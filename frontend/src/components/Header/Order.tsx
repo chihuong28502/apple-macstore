@@ -36,6 +36,7 @@ const Order = () => {
             userId: auth._id,
             id: id,
             data: {
+              userId: auth._id,
               status: "cancelled"
             }
           }));
@@ -49,7 +50,7 @@ const Order = () => {
   const { resolvedTheme } = useTheme();
 
   const getMenuItems = (): MenuProps["items"] => {
-    if (!allOrder || allOrder.length === 0) {
+    if (!allOrder || allOrder?.length === 0) {
       return [
         {
           label: (
@@ -61,7 +62,7 @@ const Order = () => {
         },
       ];
     } else {
-      return allOrder.map((order: any) => {
+      return allOrder?.map((order: any) => {
         const { _id, items, totalPrice, status, createdAt } = order;
         const statusStyles: any = {
           success: "bg-green-100",

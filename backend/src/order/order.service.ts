@@ -34,7 +34,7 @@ export class OrderService {
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
     const cacheKeyById = `cart_by_${createOrderDto.userId}`;
-    const cacheKeyByOrder = `cart_by_user_${createOrderDto.userId}`;
+    const cacheKeyByOrder = `order_by_user_${createOrderDto.userId}`;
     createOrderDto.items.map(item =>
       this.redisService.clearCache(item.productId))
     try {
@@ -59,6 +59,7 @@ export class OrderService {
       const createdOrder = new this.orderModel({
         ...createOrderDto,
         totalPrice: parseFloat(createOrderDto.totalPrice.toFixed(1)),
+        taxAmount: parseFloat(createOrderDto.taxAmount.toFixed(1)),
         code,
         qr,
         lockUntil: new Date(Date.now() + 3 * 60 * 60 * 1000),
@@ -74,9 +75,8 @@ export class OrderService {
       await this.ordersGateway.addOrder(createdOrder);
       const updateCart = await cart.save();
       this.cartsGateway.sendEventAddCart(updateCart);
-      this.redisService.setCache(cacheKeyById, updateCart, 3600);
-      this.redisService.setCache(cacheKeyByOrder, updateCart, 3600);
-
+      this.redisService.clearCache(cacheKeyById);
+      this.redisService.clearCache(cacheKeyByOrder);
       return {
         success: true,
         message: 'Order created successfully',
@@ -121,6 +121,7 @@ export class OrderService {
   async findAllOrderByCustomer(id: string): Promise<ResponseDto<Order>> {
     const keyCache = `order_by_user_${id}`;
     try {
+      console.log("🚀 ~ OrderService ~ findAllOrderByCustomer:", keyCache)
       const orderCache = await this.redisService.getCache(keyCache);
       if (orderCache) {
         return {
@@ -129,7 +130,7 @@ export class OrderService {
           data: orderCache
         };
       }
-      const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 }).limit(10);
+      const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 })
 
       if (order.length === 0) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
@@ -150,8 +151,9 @@ export class OrderService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
-    const keyCache = `order_by_user_${id}`;
+    const keyCache = `order_by_user_${updateOrderDto.userId}`;
     const keyCacheAllOrder = `order_all`;
+    console.log("🚀 ~ OrderService ~ keyCache:", keyCache)
 
     try {
       const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
@@ -159,7 +161,7 @@ export class OrderService {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
 
-      this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
+      this.redisService.clearCache(keyCache)
       this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,
@@ -176,16 +178,21 @@ export class OrderService {
   }
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
-    const keyCache = `order_by_user_${id}`;
+    const keyCache = `order_by_user_${updateOrderDto.userId}`;
     const keyCacheAllOrder = `order_all`;
 
     try {
-      const updatedOrder = await this.orderModel.findByIdAndUpdate(id, updateOrderDto, { new: true }).exec();
+      const updatedOrder = await this.orderModel
+        .findByIdAndUpdate(
+          id,
+          { status: updateOrderDto.status },
+          { new: true }
+        )
+        .exec();
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
       this.redisService.clearCache(keyCache)
-      this.redisService.setCache(keyCache, updatedOrder, this.CACHE_TTL)
       this.redisService.clearCache(keyCacheAllOrder)
       return {
         success: true,

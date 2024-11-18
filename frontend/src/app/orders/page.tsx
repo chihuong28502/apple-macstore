@@ -88,6 +88,7 @@ function Orders() {
             userId: auth._id,
             id: orderId,
             data: {
+              userId: auth._id,
               status: "cancelled"
             }
           }));
@@ -113,7 +114,8 @@ function Orders() {
             userId: auth._id,
             id: orderId,
             data: {
-              status: "success"
+              status: "success",
+              userId: auth._id,
             }
           }));
         } catch (error) {

@@ -10,6 +10,7 @@ export class CreateOrderDto {
     lockUntil?: Date;        // Thời gian khóa variant, nếu có
   }[];                       // Danh sách các sản phẩm trong đơn hàng
   readonly totalPrice: number;  // Tổng giá trị đơn hàng
+  readonly taxAmount: number;  // Tổng giá trị đơn hàng
   readonly status: string;      // Trạng thái đơn hàng (pending, completed, etc.)
   readonly shippingAddress: {
     street: string;    // Địa chỉ đường

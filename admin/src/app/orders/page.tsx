@@ -102,6 +102,7 @@ function Orders() {
               userId: auth._id,
               id: orderId,
               data: {
+                userId: auth._id,
                 status: "cancelled",
               },
             })
@@ -149,6 +150,7 @@ function Orders() {
               userId: auth._id,
               id: orderId,
               data: {
+                userId: auth._id,
                 status: "success",
               },
             })
