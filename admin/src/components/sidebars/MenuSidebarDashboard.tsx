@@ -69,15 +69,15 @@ const   MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       onClick: () => handleOnclickPush("/category"),
     },
     {
-      key: "/promotion",
+      key: "/introduction",
       icon: (
-        <Tooltip title="Promotions" placement="bottom">
+        <Tooltip title="Introductions-Ads" placement="bottom">
           <div className="w-full px-2">
             <FaCartShopping />
           </div>
         </Tooltip>
       ),
-      onClick: () => handleOnclickPush("/promotion"),
+      onClick: () => handleOnclickPush("/introduction"),
     },{
       key: "/orders",
       icon: (

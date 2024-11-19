@@ -5,6 +5,7 @@ import { CategorySaga } from "@/modules/category/saga";
 import { CustomerSaga } from "@/modules/customer/saga";
 import { ProductSaga } from "@/modules/product/saga";
 import { OrderSaga } from "@/modules/order/saga";
+import { IntroductionSaga } from "@/modules/introduction/saga";
 
 function* rootSaga() {
   yield all([
@@ -13,6 +14,7 @@ function* rootSaga() {
     call(CategorySaga),
     call(CustomerSaga),
     call(OrderSaga),
+    call(IntroductionSaga),
   ]);
 }
 export default rootSaga;

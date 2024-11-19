@@ -1,5 +1,17 @@
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
+class ImageDto {
+  @IsString()
+  image: string;
+
+  @IsString()
+  publicId: string;
+
+  @IsString()
+  @IsOptional()
+  _id?: string;
+}
 
 export class UpdateIntroductionDto {
   @IsString()
@@ -14,9 +26,10 @@ export class UpdateIntroductionDto {
   @IsOptional()
   type?: string;
 
-  @IsArray()
+  @ValidateNested()
+  @Type(() => ImageDto)
   @IsOptional()
-  images?: { image: string; publicId: string; _id?: string }[];
+  images?: ImageDto;
 
   @IsString()
   @IsOptional()

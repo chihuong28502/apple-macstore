@@ -6,6 +6,7 @@ import ProductReducer from "@/modules/product/slice";
 
 import AppReducer from "../components/AppSlice";
 import OrderReducer from "@/modules/order/slice";
+import IntroductionReducer from "@/modules/introduction/slice";
 
 export const reducers = {
   app: AppReducer,
@@ -15,4 +16,5 @@ export const reducers = {
   customer: CustomerReducer,
   category: CategoryReducer,
   order: OrderReducer,
+  introduction: IntroductionReducer,
 };

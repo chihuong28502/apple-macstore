@@ -18,18 +18,40 @@ export class IntroductionService {
     private readonly cloudinaryService: CloudinaryService,
   ) { }
 
-  // Create a new introduction
   async create(createIntroductionDto: CreateIntroductionDto): Promise<ResponseDto<Introduction>> {
     try {
-      const createdIntroduction = new this.introductionModel(createIntroductionDto);
+      const cacheKey = 'introductions_by_user_all';
+
+      let uploadedImage = null;
+
+      // Kiểm tra và xử lý upload hình ảnh nếu có
+      if (createIntroductionDto.images && !createIntroductionDto.images.image.startsWith('https://res.cloudinary.com/')) {
+        uploadedImage = await this.handleImageUpload(createIntroductionDto.images.image);
+        if (!uploadedImage) {
+          throw new Error('Failed to upload image');
+        }
+      }
+
+      // Tạo đối tượng Introduction mới
+      const createdIntroduction = new this.introductionModel({
+        ...createIntroductionDto,
+        images: uploadedImage , // Sử dụng hình ảnh đã upload hoặc giữ nguyên
+      });
+
+      // Lưu vào cơ sở dữ liệu
       await createdIntroduction.save();
+
+      // Xóa cache cũ
       await this.redisService.clearCache('introductions_all');
+      await this.redisService.clearCache(cacheKey);
+
       return {
         success: true,
         message: 'Introduction created successfully',
         data: createdIntroduction,
       };
     } catch (error) {
+      console.log("🚀 ~ IntroductionService ~ error:", error)
       return {
         success: false,
         message: 'Failed to create introduction',
@@ -38,6 +60,34 @@ export class IntroductionService {
     }
   }
 
+  async findAllByCustomer(): Promise<ResponseDto<Introduction[]>> {
+    try {
+      const cacheKey = 'introductions_by_user_all';
+      const cachedIntroductions = await this.redisService.getCache<Introduction[]>(cacheKey);
+      if (cachedIntroductions) {
+        return {
+          success: true,
+          message: 'Introductions retrieved from cache',
+          data: cachedIntroductions,
+        };
+      }
+      const introductions = await this.introductionModel.find({
+        isPublic: true,
+      }).exec();
+      await this.redisService.setCache<Introduction[]>(cacheKey, introductions, this.CACHE_TTL);
+      return {
+        success: true,
+        message: 'Fetched introductions successfully',
+        data: introductions,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to fetch introductions',
+        data: null,
+      };
+    }
+  }
   // Get all introductions
   async findAll(): Promise<ResponseDto<Introduction[]>> {
     try {
@@ -103,44 +153,52 @@ export class IntroductionService {
   // Update an introduction
   async update(id: string, updateIntroductionDto: UpdateIntroductionDto): Promise<ResponseDto<Introduction>> {
     const cacheKey = `introduction_${id}`;
+    const cacheKeyByUser = 'introductions_by_user_all';
     try {
-      const updatedIntroduction = await this.introductionModel
-        .findById(id)
-        .exec();
-      const uploadedImages = await Promise.all(
-        updatedIntroduction.images.map(async (image: any) => {
-          if (!image.image.startsWith('https://res.cloudinary.com/')) {
-            // Tách base64 phần cần thiết
-            const base64Str = image.image.split(',')[1];
-            const buffer = Buffer.from(base64Str, 'base64');
-            const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
-            return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
-          }
-          return image; // Nếu ảnh đã có trên Cloudinary, giữ nguyên
-        })
-      );
+      // Tìm tài liệu cần cập nhật
+      const existingIntroduction = await this.introductionModel.findById(id).exec();
 
-      // Lọc những ảnh hợp lệ (không phải null)
-      const validUploads = uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
-
-      // Cập nhật sản phẩm với thông tin mới
-      const updatedProduct = await this.introductionModel
-        .findByIdAndUpdate(id, { ...updateIntroductionDto, images: validUploads }, { new: true })
-        .exec();
-
-      // Xóa cache cũ sau khi cập nhật
-      await this.redisService.clearCache(cacheKey);
-      await this.redisService.clearProductsPageCache()
-      // Lưu lại sản phẩm mới vào cache
-      await this.redisService.setCache(cacheKey, updatedProduct, this.CACHE_TTL);
-      if (!updatedIntroduction) {
+      if (!existingIntroduction) {
         return {
           success: false,
           message: 'Introduction not found',
           data: null,
         };
       }
+
+      let updatedImage = existingIntroduction.images;
+
+      // Kiểm tra và xử lý hình ảnh mới nếu có trong DTO
+      if (updateIntroductionDto.images && !updateIntroductionDto.images.image.startsWith('https://res.cloudinary.com/')) {
+        // Tách base64 phần cần thiết
+        const base64Str = updateIntroductionDto.images.image.split(',')[1];
+        const buffer = Buffer.from(base64Str, 'base64');
+        const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
+
+        if (uploadResult.success) {
+          updatedImage = { image: uploadResult.data.url, publicId: uploadResult.data.publicId };
+        } else {
+          throw new Error('Failed to upload new image');
+        }
+      }
+
+      // Cập nhật tài liệu với dữ liệu mới
+      const updatedIntroduction = await this.introductionModel
+        .findByIdAndUpdate(
+          id,
+          { ...updateIntroductionDto, images: updatedImage },
+          { new: true },
+        )
+        .exec();
+
+      // Xóa cache cũ
+      await this.redisService.clearCache(cacheKey);
+      await this.redisService.clearCache(cacheKeyByUser);
       await this.redisService.clearCache('introductions_all');
+
+      // Lưu cache mới
+      await this.redisService.setCache(cacheKey, updatedIntroduction, this.CACHE_TTL);
+
       return {
         success: true,
         message: 'Introduction updated successfully',
@@ -155,29 +213,14 @@ export class IntroductionService {
     }
   }
 
+
   // Delete an introduction
   async remove(id: string): Promise<ResponseDto<null>> {
     const cacheKey = `introduction_${id}`;
+    const cacheKeyByUser = 'introductions_by_user_all';
     try {
       const deletedIntroduction = await this.introductionModel.findById(id);
-      // Lọc ra các publicId hợp lệ hoặc lấy từ URL nếu cần
-      const validImagePublicIds = deletedIntroduction.images.map(image => {
-        return image.publicId || extractPublicId(image.image);
-      });
 
-      // Gọi deleteMedia cho từng publicId hợp lệ
-      const deleteMediaPromises = validImagePublicIds.map(async publicId => {
-        return this.cloudinaryService.deleteMedia(publicId, 'image');
-      });
-
-      // Chờ cho tất cả các promise được hoàn thành
-      const deleteMediaResults = await Promise.all(deleteMediaPromises);
-
-      // Kiểm tra xem tất cả các ảnh đã được xóa thành công
-      const allDeleted = deleteMediaResults.every(result => result.success);
-      if (!allDeleted) {
-        throw new Error('Some media files failed to delete');
-      }
       if (!deletedIntroduction) {
         return {
           success: false,
@@ -185,9 +228,25 @@ export class IntroductionService {
           data: null,
         };
       }
+
+      // Lấy publicId hợp lệ hoặc trích xuất từ URL nếu cần
+      // const validImagePublicId = deletedIntroduction.images.publicId || extractPublicId(deletedIntroduction.images.image);
+
+      // Xóa media nếu có validImagePublicId
+      // if (validImagePublicId) {
+      //   const deleteMediaResult = await this.cloudinaryService.deleteMedia(validImagePublicId, 'image');
+      //   if (!deleteMediaResult.success) {
+      //     throw new Error('Failed to delete media file');
+      //   }
+      // }
+
       await this.introductionModel.findByIdAndDelete(id).exec();
+
+      // Xóa cache liên quan
       await this.redisService.clearCache('introductions_all');
       await this.redisService.clearCache(cacheKey);
+      await this.redisService.clearCache(cacheKeyByUser);
+
       return {
         success: true,
         message: 'Introduction deleted successfully',
@@ -201,15 +260,11 @@ export class IntroductionService {
       };
     }
   }
-  private async handleImageUpload(images: string[]): Promise<{ image: string; publicId: string }[]> {
-    const uploadedImages = await Promise.all(
-      images.map(async (base64: string) => {
-        const base64Str = base64.split(',')[1];
-        const buffer = Buffer.from(base64Str, 'base64');
-        const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
-        return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
-      })
-    );
-    return uploadedImages.filter(upload => upload !== null) as { image: string; publicId: string }[];
+
+  private async handleImageUpload(base64: string): Promise<{ image: string; publicId: string } | null> {
+    const base64Str = base64.split(',')[1];
+    const buffer = Buffer.from(base64Str, 'base64');
+    const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
+    return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
   }
 }

@@ -10,12 +10,13 @@ export class Introduction {
 
   @Prop({ required: true })
   isPublic: boolean;
-  
+
   @Prop({ required: true })
   type: string;
 
-  @Prop({ type: [{ image: String, publicId: String }], required: true })
-  images: { image: string; publicId: string; }[];
+  @Prop({ type: { image: String, publicId: String }, required: true })
+  images: { image: string; publicId: string };
+
 
   @Prop({ required: true })
   description: string;

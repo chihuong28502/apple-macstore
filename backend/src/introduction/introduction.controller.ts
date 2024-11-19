@@ -15,15 +15,21 @@ import { ResponseDto } from 'src/utils/dto/response.dto';
 export class IntroductionController {
   constructor(private readonly introductionService: IntroductionService) { }
 
+  @Public()
   @Post()
   async create(@Body() createIntroductionDto: CreateIntroductionDto): Promise<ResponseDto<Introduction>> {
     return this.introductionService.create(createIntroductionDto);
   }
 
-  @Public()
   @Get()
   async findAll(): Promise<ResponseDto<Introduction[]>> {
     return this.introductionService.findAll();
+  }
+
+  @Public()
+  @Get('customer')
+  async findAllByCustomer(): Promise<ResponseDto<Introduction[]>> {
+    return this.introductionService.findAllByCustomer();
   }
 
   @Public()

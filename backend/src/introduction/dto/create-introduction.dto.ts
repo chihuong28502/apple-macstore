@@ -1,6 +1,17 @@
-import { ArrayNotEmpty, IsArray, IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 
+class ImageDto {
+  @IsString()
+  image: string;
 
+  @IsString()
+  publicId: string;
+
+  @IsString()
+  @IsOptional()
+  _id?: string;
+}
 
 export class CreateIntroductionDto {
   @IsString()
@@ -15,9 +26,10 @@ export class CreateIntroductionDto {
   @IsNotEmpty()
   type: string;
 
-  @IsArray()
-  @ArrayNotEmpty()
-  images?: { image: string; publicId: string; _id?: string }[];
+  @ValidateNested()
+  @Type(() => ImageDto)
+  @IsOptional()
+  images?: ImageDto;
 
   @IsString()
   @IsNotEmpty()
