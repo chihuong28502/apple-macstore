@@ -23,14 +23,14 @@ export class ProductService {
 
   async create(createProductDto: any): Promise<ResponseDto<Product>> {
     try {
-      const uploadedImages = await Promise.all(
-        createProductDto.images.map(async (base64: any) => {
-          const base64Str = base64.split(',')[1];
-          const buffer = Buffer.from(base64Str, 'base64');
-          const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
-          return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
-        })
-      );
+      // const uploadedImages = await Promise.all(
+      //   createProductDto.images.map(async (base64: any) => {
+      //     const base64Str = base64.split(',')[1];
+      //     const buffer = Buffer.from(base64Str, 'base64');
+      //     const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
+      //     return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
+      //   })
+      // );
 
       // Lọc những kết quả hợp lệ (không phải null)
       const validUploads = await this.handleImageUpload(createProductDto.images);
@@ -42,7 +42,7 @@ export class ProductService {
 
       // Lưu sản phẩm vào database
       await createdProduct.save();
-
+      this.redisService.clearProductsPageCache()
       return {
         success: true,
         message: 'Product created successfully',

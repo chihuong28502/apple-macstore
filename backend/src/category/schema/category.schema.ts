@@ -14,11 +14,6 @@ export class Category {
   @Prop([String])
   breadcrumbs: string[]; 
 
-  @Prop({ default: Date.now })
-  createdAt: Date;
-
-  @Prop({ default: Date.now })
-  updatedAt: Date;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

@@ -131,10 +131,14 @@ export class OrderService {
       }
       const order = await this.orderModel.find({ userId: id }).sort({ createdAt: -1 })
 
-      if (order.length === 0) {
-        throw new NotFoundException(`Order with ID "${id}" not found`);
-      }
       this.redisService.setCache(keyCache, order, this.CACHE_TTL)
+      if (order.length === 0) {
+        return {
+          success: true,
+          message: 'Order retrieved successfully',
+          data: null,
+        };
+      }
       return {
         success: true,
         message: 'Order retrieved successfully',
