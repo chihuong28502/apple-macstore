@@ -1,13 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
-import { IntroductionService } from './introduction.service';
-import { CreateIntroductionDto } from './dto/create-introduction.dto';
-import { Introduction } from './schema/introduction.schema';
-import { UpdateIntroductionDto } from './dto/update-introduction.dto';
-import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Public } from 'src/common/decorators/public.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RulesGuard } from 'src/common/guards/auth.guard';
-import { Public } from 'src/common/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt/jwt-auth.guard';
 import { ResponseDto } from 'src/utils/dto/response.dto';
+import { CreateIntroductionDto } from './dto/create-introduction.dto';
+import { UpdateIntroductionDto } from './dto/update-introduction.dto';
+import { IntroductionService } from './introduction.service';
+import { Introduction } from './schema/introduction.schema';
 
 @UseGuards(JwtAuthGuard, RulesGuard)
 @Roles('admin')
@@ -30,6 +30,18 @@ export class IntroductionController {
   @Get('customer')
   async findAllByCustomer(): Promise<ResponseDto<Introduction[]>> {
     return this.introductionService.findAllByCustomer();
+  }
+
+  @Public()
+  @Get('ads')
+  async findAllByAds(): Promise<ResponseDto<Introduction[]>> {
+    return  await this.introductionService.findAllByAds();
+  }
+
+  @Public()
+  @Get('banner')
+  async findAllByBanner(): Promise<ResponseDto<Introduction[]>> {
+    return  await this.introductionService.findAllByBanner();
   }
 
   @Public()

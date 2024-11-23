@@ -7,6 +7,8 @@ import OrderReducer from "@/modules/order/slice";
 import ProductReducer from "@/modules/product/slice";
 import { combineReducers } from "@reduxjs/toolkit";
 import AppReducer from "../components/AppSlice";
+import { IntroductionSaga } from "@/modules/introduction/saga";
+import IntroductionReducer from "@/modules/introduction/slice";
 
 export const reducers = combineReducers({
   app: AppReducer,
@@ -17,4 +19,5 @@ export const reducers = combineReducers({
   notify: NotifyReducer,
   cart: CartReducer,
   order: OrderReducer,
+  introduction: IntroductionReducer,
 });

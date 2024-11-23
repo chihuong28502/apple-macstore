@@ -12,16 +12,22 @@ import { extractPublicId } from 'src/utils/func/getPublicId';
 @Injectable()
 export class IntroductionService {
   private readonly CACHE_TTL = 86400;
+  private readonly cacheKeysToClear = [
+    'introductions_all',
+    'introductions_by_user_all',
+    'introductions_by_user_ads',
+    'introductions_by_user_banner',
+  ];
   constructor(
     @InjectModel(Introduction.name) private readonly introductionModel: Model<IntroductionDocument>,
     private readonly redisService: RedisService,
     private readonly cloudinaryService: CloudinaryService,
   ) { }
-
+  private async clearAllRelatedCache() {
+    await Promise.all(this.cacheKeysToClear.map((key) => this.redisService.clearCache(key)));
+  }
   async create(createIntroductionDto: CreateIntroductionDto): Promise<ResponseDto<Introduction>> {
     try {
-      const cacheKey = 'introductions_by_user_all';
-
       let uploadedImage = null;
 
       // Kiểm tra và xử lý upload hình ảnh nếu có
@@ -35,16 +41,13 @@ export class IntroductionService {
       // Tạo đối tượng Introduction mới
       const createdIntroduction = new this.introductionModel({
         ...createIntroductionDto,
-        images: uploadedImage , // Sử dụng hình ảnh đã upload hoặc giữ nguyên
+        images: uploadedImage, // Sử dụng hình ảnh đã upload hoặc giữ nguyên
       });
 
       // Lưu vào cơ sở dữ liệu
       await createdIntroduction.save();
 
-      // Xóa cache cũ
-      await this.redisService.clearCache('introductions_all');
-      await this.redisService.clearCache(cacheKey);
-
+      await this.clearAllRelatedCache();
       return {
         success: true,
         message: 'Introduction created successfully',
@@ -60,34 +63,17 @@ export class IntroductionService {
     }
   }
 
-  async findAllByCustomer(): Promise<ResponseDto<Introduction[]>> {
-    try {
-      const cacheKey = 'introductions_by_user_all';
-      const cachedIntroductions = await this.redisService.getCache<Introduction[]>(cacheKey);
-      if (cachedIntroductions) {
-        return {
-          success: true,
-          message: 'Introductions retrieved from cache',
-          data: cachedIntroductions,
-        };
-      }
-      const introductions = await this.introductionModel.find({
-        isPublic: true,
-      }).exec();
-      await this.redisService.setCache<Introduction[]>(cacheKey, introductions, this.CACHE_TTL);
-      return {
-        success: true,
-        message: 'Fetched introductions successfully',
-        data: introductions,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to fetch introductions',
-        data: null,
-      };
-    }
+  async findAllByCustomer() {
+    return this.findAllByType('all', 'introductions_by_user_all');
   }
+  async findAllByAds() {
+    return this.findAllByType('Ads', 'introductions_by_user_ads');
+  }
+
+  async findAllByBanner() {
+    return this.findAllByType('Banner', 'introductions_by_user_banner');
+  }
+
   // Get all introductions
   async findAll(): Promise<ResponseDto<Introduction[]>> {
     try {
@@ -117,18 +103,8 @@ export class IntroductionService {
   }
 
   async findOne(id: string): Promise<ResponseDto<Introduction>> {
-    const cacheKey = `introduction_${id}`;
-    const cachedIntroductions = await this.redisService.getCache<Introduction[]>(cacheKey);
-    if (cachedIntroductions) {
-      return {
-        success: true,
-        message: 'Introductions retrieved from cache',
-        data: cachedIntroductions,
-      };
-    }
     try {
       const introduction = await this.introductionModel.findById(id).exec();
-      await this.redisService.setCache<Introduction>(cacheKey, introduction, this.CACHE_TTL);
       if (!introduction) {
         return {
           success: false,
@@ -152,8 +128,7 @@ export class IntroductionService {
 
   // Update an introduction
   async update(id: string, updateIntroductionDto: UpdateIntroductionDto): Promise<ResponseDto<Introduction>> {
-    const cacheKey = `introduction_${id}`;
-    const cacheKeyByUser = 'introductions_by_user_all';
+
     try {
       // Tìm tài liệu cần cập nhật
       const existingIntroduction = await this.introductionModel.findById(id).exec();
@@ -183,22 +158,13 @@ export class IntroductionService {
       }
 
       // Cập nhật tài liệu với dữ liệu mới
-      const updatedIntroduction = await this.introductionModel
-        .findByIdAndUpdate(
-          id,
-          { ...updateIntroductionDto, images: updatedImage },
-          { new: true },
-        )
-        .exec();
+      const updatedIntroduction = await this.introductionModel.findOneAndUpdate(
+        { _id: id },
+        { ...updateIntroductionDto, images: updatedImage },
+        { new: true, upsert: false },
+      ).exec();
 
-      // Xóa cache cũ
-      await this.redisService.clearCache(cacheKey);
-      await this.redisService.clearCache(cacheKeyByUser);
-      await this.redisService.clearCache('introductions_all');
-
-      // Lưu cache mới
-      await this.redisService.setCache(cacheKey, updatedIntroduction, this.CACHE_TTL);
-
+      await this.clearAllRelatedCache();
       return {
         success: true,
         message: 'Introduction updated successfully',
@@ -214,10 +180,7 @@ export class IntroductionService {
   }
 
 
-  // Delete an introduction
   async remove(id: string): Promise<ResponseDto<null>> {
-    const cacheKey = `introduction_${id}`;
-    const cacheKeyByUser = 'introductions_by_user_all';
     try {
       const deletedIntroduction = await this.introductionModel.findById(id);
 
@@ -242,10 +205,7 @@ export class IntroductionService {
 
       await this.introductionModel.findByIdAndDelete(id).exec();
 
-      // Xóa cache liên quan
-      await this.redisService.clearCache('introductions_all');
-      await this.redisService.clearCache(cacheKey);
-      await this.redisService.clearCache(cacheKeyByUser);
+      await this.clearAllRelatedCache();
 
       return {
         success: true,
@@ -266,5 +226,33 @@ export class IntroductionService {
     const buffer = Buffer.from(base64Str, 'base64');
     const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
     return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
+  }
+
+  private async findAllByType(type: string, cacheKey: string): Promise<ResponseDto<Introduction[]>> {
+    try {
+      const cachedData = await this.redisService.getCache<Introduction[]>(cacheKey);
+      if (cachedData) {
+        return {
+          success: true,
+          message: `Introductions (${type}) retrieved from cache`,
+          data: cachedData,
+        };
+      }
+      const filter = type === 'all' ? { isPublic: true } : { isPublic: true, type };
+      const data = await this.introductionModel.find(filter).exec();
+      await this.redisService.setCache(cacheKey, data, this.CACHE_TTL);
+      return {
+        success: true,
+        message: `Fetched introductions (${type}) successfully`,
+        data,
+      };
+    } catch (error) {
+      console.error(`Error fetching introductions (${type}):`, error.message);
+      return {
+        success: false,
+        message: `Failed to fetch introductions (${type})`,
+        data: null,
+      };
+    }
   }
 }

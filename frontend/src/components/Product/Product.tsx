@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 function Product({ product }: any) {
@@ -14,8 +15,10 @@ function Product({ product }: any) {
         ? 'cursor-not-allowed opacity-50 bg-gray-300'
         : ''
         } bg-gray-100 shadow-md p-2 rounded-lg group overflow-hidden cursor-pointer relative z-10 hover:bg-gray-200`}>
-      <div className="w-full overflow-hidden  mx-auto aspect-w-16 aspect-h-8 transition-transform duration-300 ease-in-out transform group-hover:-translate-y-2">
-        <img
+      <div className="w-full overflow-hidden mx-auto aspect-w-16 aspect-h-8 transition-transform duration-300 ease-in-out transform group-hover:-translate-y-1.5">
+        <Image
+          width={300}
+          height={300}
           src={product?.images[0].image}
           alt={product?.name}
           className="object-contain rounded-lg"
