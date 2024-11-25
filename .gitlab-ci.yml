@@ -4,46 +4,28 @@ stages:
 
 # Biến môi trường chung
 variables:
-  REGISTRY_URL: "registry.nch.pics"
-  REGISTRY_PROJECT: "${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}"
-  DOCKER_IMAGE_FE: "${REGISTRY_URL}/${REGISTRY_PROJECT}/frontend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
-  DOCKER_IMAGE_BE: "${REGISTRY_URL}/${REGISTRY_PROJECT}/backend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
-  DOCKER_IMAGE_ADMIN: "${REGISTRY_URL}/${REGISTRY_PROJECT}/admin:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}"
+  DOCKER_IMAGE_FE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/frontend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
+  DOCKER_IMAGE_BE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/backend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
+  DOCKER_IMAGE_ADMIN: ${REGISTRY_URL}/${REGISTRY_PROJECT}/admin:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
 
 # Job build Docker images
 build_images:
   stage: build
   image: docker:latest
   services:
-    - name: docker:dind
-      command: ["--insecure-registry=registry.nch.pics"]
+    - docker:dind
   variables:
-    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_CERTDIR: "/certs"  
+  before_script:
+    - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
   script:
-    - echo "Logging in to Docker registry..."
-    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $REGISTRY_URL
     - echo "Building Docker images..."
-    - docker build -t $DOCKER_IMAGE_FE ./frontend
+    - docker build -t $DOCKER_IMAGE_FE ./frontend  # Build Docker image cho frontend
+    - docker push $DOCKER_IMAGE_FE  # Push Docker image cho frontend
     - docker build -t $DOCKER_IMAGE_BE ./backend
+    - docker push $DOCKER_IMAGE_BE   # Build Docker image cho backend
     - docker build -t $DOCKER_IMAGE_ADMIN ./admin
+    - docker push $DOCKER_IMAGE_ADMIN  # Build Docker image cho admin
   tags:
     - dev-server-apple-store
 
-# Job push Docker images
-push_images:
-  stage: push
-  image: docker:latest
-  services:
-    - name: docker:dind
-      command: ["--insecure-registry=registry.nch.pics"]
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-  script:
-    - echo "Logging in to Docker registry..."
-    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $REGISTRY_URL
-    - echo "Pushing Docker images..."
-    - docker push $DOCKER_IMAGE_FE
-    - docker push $DOCKER_IMAGE_BE
-    - docker push $DOCKER_IMAGE_ADMIN
-  tags:
-    - dev-server-apple-store
