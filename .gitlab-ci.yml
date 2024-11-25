@@ -1,26 +1,80 @@
-image: docker:20.10.16
-
-services:
-  - docker:20.10.16-dind
-
-variables:
-  DOCKER_DRIVER: overlay2
-
 stages:
+  - prepare
   - build
   - deploy
 
-build_image:
-  stage: build
+# Giai đoạn chuẩn bị: Tạo file .env cho từng module
+prepare_env:
+  stage: prepare
   script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    # Tạo file .env cho frontend từ ENV_FILE_FE
+    - echo "$ENV_FILE_FE" > ./frontend/.env
+    # Tạo file .env cho backend từ ENV_FILE_BE
+    - echo "$ENV_FILE_BE" > ./backend/.env
+    # Tạo file .env cho admin từ ENV_FILE_ADMIN
+    - echo "$ENV_FILE_ADMIN" > ./admin/.env
+    # Kiểm tra nội dung các file .env
+    - echo "Frontend .env:"
+    - cat ./frontend/.env
+    - echo "Backend .env:"
+    - cat ./backend/.env
+    - echo "Admin .env:"
+    - cat ./admin/.env
 
-deploy_to_server:
-  stage: deploy
-  only:
-    - main
+# Giai đoạn build: Xây dựng image Docker cho từng module và đẩy lên registry
+build_frontend:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:19.03.12-dind
   script:
-    - echo "Deploying to server..."
-    - ssh user@your-server-ip "docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA && docker-compose up -d"
+    # Đăng nhập vào Docker Registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    # Build image Docker cho frontend
+    - docker build -t "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA" ./frontend
+    # Push image lên registry
+    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+
+build_backend:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:19.03.12-dind
+  script:
+    # Đăng nhập vào Docker Registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    # Build image Docker cho backend
+    - docker build -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA" ./backend
+    # Push image lên registry
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+
+build_admin:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:19.03.12-dind
+  script:
+    # Đăng nhập vào Docker Registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    # Build image Docker cho admin
+    - docker build -t "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA" ./admin
+    # Push image lên registry
+    - docker push "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"
+
+# Giai đoạn deploy: Triển khai các container lên server
+
+deploy:
+  stage: deploy
+  image: ubuntu:latest
+  script:
+    # Cài đặt sshpass để nhập mật khẩu tự động
+    - apt-get update && apt-get install -y sshpass
+
+    # SSH vào server và chạy các lệnh với sshpass (với mật khẩu là '1')
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker login -u '$CI_REGISTRY_USER' -p '$CI_REGISTRY_PASSWORD' '$CI_REGISTRY'"
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker pull $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker pull $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker pull $CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"
+    
+    # Chạy docker-compose
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "cd /path/to/your/docker-compose && docker-compose up -d"
