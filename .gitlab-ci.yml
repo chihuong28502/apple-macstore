@@ -20,6 +20,8 @@ prepare_env:
     - cat ./backend/.env
     - echo "Admin .env:"
     - cat ./admin/.env
+  tags:
+    - dev-server-apple-store
 
 # Giai đoạn build: Xây dựng image Docker cho từng module và đẩy lên registry
 build_frontend:
@@ -34,6 +36,8 @@ build_frontend:
     - docker build -t "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA" ./frontend
     # Push image lên registry
     - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+  tags:
+    - dev-server-apple-store
 
 build_backend:
   stage: build
@@ -47,6 +51,8 @@ build_backend:
     - docker build -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA" ./backend
     # Push image lên registry
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+  tags:
+    - dev-server-apple-store
 
 build_admin:
   stage: build
@@ -60,6 +66,8 @@ build_admin:
     - docker build -t "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA" ./admin
     # Push image lên registry
     - docker push "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"
+  tags:
+    - dev-server-apple-store
 
 # Giai đoạn deploy: Triển khai các container lên server
 
@@ -78,3 +86,5 @@ deploy:
     
     # Chạy docker-compose
     - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "cd /path/to/your/docker-compose && docker-compose up -d"
+  tags:
+    - dev-server-apple-store
