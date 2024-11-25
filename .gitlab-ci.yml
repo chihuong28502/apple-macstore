@@ -13,9 +13,13 @@ build_images:
   stage: build
   image: docker:latest
   services:
-    - docker:dind
+    - name: docker:dind
+      command: ["--insecure-registry=registry.nch.pics"]
   variables:
+    DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: "/certs"  
+    extra_hosts:
+        - "docker:127.0.0.1"
   before_script:
     - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
   script:
