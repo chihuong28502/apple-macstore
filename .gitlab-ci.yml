@@ -1,0 +1,60 @@
+stages:
+  - build
+  - deploy
+
+# Build frontend container và push lên Harbor Docker Registry
+build_frontend:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:19.03.12-dind
+  script:
+    # Đăng nhập vào Harbor Docker Registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    # Build image Docker cho frontend
+    - docker build -t "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA" ./frontend
+    # Push image lên Harbor Docker Registry
+    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
+
+# Build backend container và push lên Harbor Docker Registry
+build_backend:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:19.03.12-dind
+  script:
+    # Đăng nhập vào Harbor Docker Registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    # Build image Docker cho backend
+    - docker build -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA" ./backend
+    # Push image lên Harbor Docker Registry
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
+
+# Build admin container và push lên Harbor Docker Registry
+build_admin:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:19.03.12-dind
+  script:
+    # Đăng nhập vào Harbor Docker Registry
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    # Build image Docker cho admin
+    - docker build -t "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA" ./admin
+    # Push image lên Harbor Docker Registry
+    - docker push "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"
+
+# Deploy vào server (tùy chỉnh theo nhu cầu của bạn)
+deploy:
+  stage: deploy
+  image: ubuntu:latest  # Sử dụng Ubuntu image để cài đặt sshpass
+  before_script:
+    # Cài đặt sshpass và OpenSSH client
+    - apt-get update && apt-get install -y sshpass openssh-client
+  script:
+    - echo "Deploying to production server"
+    # Sử dụng sshpass để tự động nhập mật khẩu khi SSH
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no nch@192.168.211.99 'docker pull "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"'
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no nch@192.168.211.99 'docker pull "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"'
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no nch@192.168.211.99 'docker pull "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"'
+    - sshpass -p '1' ssh -o StrictHostKeyChecking=no nch@192.168.211.99 'docker-compose up -d'
