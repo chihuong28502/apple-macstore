@@ -1,90 +1,84 @@
+variables:
+  # Định nghĩa phiên bản của Docker image sử dụng GitLab CI/CD
+  DOCKER_IMAGE_FE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/frontend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
+  DOCKER_IMAGE_BE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/backend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
+  DOCKER_IMAGE_ADMIN: ${REGISTRY_URL}/${REGISTRY_PROJECT}/admin:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
+  DOCKER_CONTAINER_FE: frontend-container
+  DOCKER_CONTAINER_BE: backend-container
+  DOCKER_CONTAINER_ADMIN: admin-container
+
 stages:
-  - prepare
-  - build
+  - install
+  - buildandpush
   - deploy
 
-# Giai đoạn chuẩn bị: Tạo file .env cho từng module
-prepare_env:
-  stage: prepare
+# Giai đoạn cài đặt dependencies
+install:
+  stage: install
+  image: node:18  # Sử dụng Node.js phù hợp với dự án
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}  # Cache theo nhánh
+    paths:
+      - node_modules/
   script:
-    # Tạo file .env cho frontend từ ENV_FILE_FE
-    - echo "$ENV_FILE_FE" > ./frontend/.env
-    # Tạo file .env cho backend từ ENV_FILE_BE
-    - echo "$ENV_FILE_BE" > ./backend/.env
-    # Tạo file .env cho admin từ ENV_FILE_ADMIN
-    - echo "$ENV_FILE_ADMIN" > ./admin/.env
-    # Kiểm tra nội dung các file .env
+    - npm install
+  tags:
+    - dev-server-apple-store
+
+# Giai đoạn build và push Docker image
+buildandpush:
+  stage: buildandpush
+  image: docker:latest  # Sử dụng image Docker chính thức
+  services:
+    - docker:dind  # Docker in Docker để build và push image
+  before_script:
+    - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
+  script:
+    - docker build -t $DOCKER_IMAGE_FE ./frontend  # Build Docker image cho frontend
+    - docker build -t $DOCKER_IMAGE_BE ./backend  # Build Docker image cho backend
+    - docker build -t $DOCKER_IMAGE_ADMIN ./admin  # Build Docker image cho admin
+    - docker push $DOCKER_IMAGE_FE  # Push Docker image frontend
+    - docker push $DOCKER_IMAGE_BE  # Push Docker image backend
+    - docker push $DOCKER_IMAGE_ADMIN  # Push Docker image admin
+  tags:
+    - dev-server-apple-store
+
+# Giai đoạn deploy
+deploy:
+  stage: deploy
+  image: node:18  # Sử dụng Node.js để chạy ứng dụng
+  before_script:
+    - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
+  script:
+    # Tạo file .env cho frontend từ ENV_FRONTEND
+    - echo "$ENV_FRONTEND" > ./frontend/.env
+    # Tạo file .env cho backend từ ENV_BACKEND
+    - echo "$ENV_BACKEND" > ./backend/.env
+    # Tạo file .env cho admin từ ENV_ADMIN
+    - echo "$ENV_ADMIN" > ./admin/.env
+
+    # Kiểm tra nội dung các file .env (chỉ để kiểm tra, có thể xóa khi deploy thật)
     - echo "Frontend .env:"
     - cat ./frontend/.env
     - echo "Backend .env:"
     - cat ./backend/.env
     - echo "Admin .env:"
     - cat ./admin/.env
-  tags:
-    - dev-server-apple-store
 
-# Giai đoạn build: Xây dựng image Docker cho từng module và đẩy lên registry
-build_frontend:
-  stage: build
-  image: docker:latest
-  services:
-    - docker:19.03.12-dind
-  script:
-    # Đăng nhập vào Docker Registry
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    # Build image Docker cho frontend
-    - docker build -t "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA" ./frontend
-    # Push image lên registry
-    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
-  tags:
-    - dev-server-apple-store
+    # Kéo image từ registry về server và chạy các container cho từng project
+    - docker pull $DOCKER_IMAGE_FE
+    - docker pull $DOCKER_IMAGE_BE
+    - docker pull $DOCKER_IMAGE_ADMIN
 
-build_backend:
-  stage: build
-  image: docker:latest
-  services:
-    - docker:19.03.12-dind
-  script:
-    # Đăng nhập vào Docker Registry
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    # Build image Docker cho backend
-    - docker build -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA" ./backend
-    # Push image lên registry
-    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
-  tags:
-    - dev-server-apple-store
+    # Xoá container cũ nếu có
+    - docker rm -f $DOCKER_CONTAINER_FE || true
+    - docker rm -f $DOCKER_CONTAINER_BE || true
+    - docker rm -f $DOCKER_CONTAINER_ADMIN || true
 
-build_admin:
-  stage: build
-  image: docker:latest
-  services:
-    - docker:19.03.12-dind
-  script:
-    # Đăng nhập vào Docker Registry
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    # Build image Docker cho admin
-    - docker build -t "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA" ./admin
-    # Push image lên registry
-    - docker push "$CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"
-  tags:
-    - dev-server-apple-store
+    # Chạy các container mới với port riêng biệt
+    - docker run --name $DOCKER_CONTAINER_FE -dp 4000:4000 $DOCKER_IMAGE_FE
+    - docker run --name $DOCKER_CONTAINER_BE -dp 5001:5001 $DOCKER_IMAGE_BE
+    - docker run --name $DOCKER_CONTAINER_ADMIN -dp 4001:4001 $DOCKER_IMAGE_ADMIN
 
-# Giai đoạn deploy: Triển khai các container lên server
-
-deploy:
-  stage: deploy
-  image: ubuntu:latest
-  script:
-    # Cài đặt sshpass để nhập mật khẩu tự động
-    - apt-get update && apt-get install -y sshpass
-
-    # SSH vào server và chạy các lệnh với sshpass (với mật khẩu là '1')
-    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker login -u '$CI_REGISTRY_USER' -p '$CI_REGISTRY_PASSWORD' '$CI_REGISTRY'"
-    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker pull $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHORT_SHA"
-    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker pull $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHORT_SHA"
-    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "docker pull $CI_REGISTRY_IMAGE/admin:$CI_COMMIT_SHORT_SHA"
-    
-    # Chạy docker-compose
-    - sshpass -p '1' ssh -o StrictHostKeyChecking=no user@192.168.211.99 "cd /path/to/your/docker-compose && docker-compose up -d"
   tags:
     - dev-server-apple-store
