@@ -1,5 +1,6 @@
 stages:
   - build
+  - deploy
 
 # Biến môi trường chung
 variables:
@@ -27,3 +28,31 @@ build_images:
     - docker push $DOCKER_IMAGE_ADMIN  # Push Docker image cho admin
   tags:
     - dev-server-apple
+
+deploy:
+  stage: deploy
+  image: node:18  # Sử dụng Node.js để chạy ứng dụng, bạn có thể thay bằng image phù hợp nếu cần
+  before_script:
+    - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
+  script:
+    - echo "Pulling Deploy Docker images..."
+    # Kéo các image Docker đã được build
+    - docker pull $DOCKER_IMAGE_FE
+    - docker pull $DOCKER_IMAGE_BE
+    - docker pull $DOCKER_IMAGE_ADMIN
+
+    - echo "Removing existing containers..."
+    # Xóa các container cũ nếu có
+    - docker rm -f $DOCKER_CONTAINER_FE || true
+    - docker rm -f $DOCKER_CONTAINER_BE || true
+    - docker rm -f $DOCKER_CONTAINER_ADMIN || true
+
+    - echo "Running new containers..."
+    # Chạy lại các container mới từ image đã pull
+    - docker run --name $DOCKER_CONTAINER_FE -dp 4000:4000 $DOCKER_IMAGE_FE
+    - docker run --name $DOCKER_CONTAINER_BE -dp 5001:5001 $DOCKER_IMAGE_BE
+    - docker run --name $DOCKER_CONTAINER_ADMIN -dp 4001:4001 $DOCKER_IMAGE_ADMIN
+
+  tags:
+    - dev-server-apple
+
