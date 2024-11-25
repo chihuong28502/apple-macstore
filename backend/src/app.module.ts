@@ -19,6 +19,7 @@ import { TasksModule } from './taskSchedule/tasks.module';
 import { NotifyModule } from './notify/notify.module';
 import { CartModule } from './cart/cart.module';
 import { RedisModule } from './redis/redis.module';
+import { IntroductionModule } from './introduction/introduction.module';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { RedisModule } from './redis/redis.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'), 
+        secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
           expiresIn: configService.get<string>('JWT_EXPIRATION', '1d'),
         },
@@ -54,6 +55,7 @@ import { RedisModule } from './redis/redis.module';
     OrderModule,
     NotifyModule,
     CartModule,
+    IntroductionModule,
     RedisModule
   ],
   providers: [
@@ -63,4 +65,4 @@ import { RedisModule } from './redis/redis.module';
   ],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }

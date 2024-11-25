@@ -23,14 +23,14 @@ export class ProductService {
 
   async create(createProductDto: any): Promise<ResponseDto<Product>> {
     try {
-      const uploadedImages = await Promise.all(
-        createProductDto.images.map(async (base64: any) => {
-          const base64Str = base64.split(',')[1];
-          const buffer = Buffer.from(base64Str, 'base64');
-          const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
-          return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
-        })
-      );
+      // const uploadedImages = await Promise.all(
+      //   createProductDto.images.map(async (base64: any) => {
+      //     const base64Str = base64.split(',')[1];
+      //     const buffer = Buffer.from(base64Str, 'base64');
+      //     const uploadResult = await this.cloudinaryService.uploadMedia(buffer, 'APPLE_STORE', 'image');
+      //     return uploadResult.success ? { image: uploadResult.data.url, publicId: uploadResult.data.publicId } : null;
+      //   })
+      // );
 
       // Lọc những kết quả hợp lệ (không phải null)
       const validUploads = await this.handleImageUpload(createProductDto.images);
@@ -42,7 +42,7 @@ export class ProductService {
 
       // Lưu sản phẩm vào database
       await createdProduct.save();
-
+      this.redisService.clearProductsPageCache()
       return {
         success: true,
         message: 'Product created successfully',
@@ -387,8 +387,10 @@ export class ProductService {
       // Lưu sản phẩm vào database
       await variantData.save();
       const cacheKey = `variants_${productId || 'all'}`;
+      const cacheProductById = `${productId}`;
       await this.redisService.clearCache(cacheKey);
-
+      await this.redisService.clearCache(cacheProductById);
+      await this.redisService.clearProductsPageCache()
       return {
         success: true,
         message: 'variantData created successfully',
@@ -413,7 +415,10 @@ export class ProductService {
         .exec();
       // Xóa cache liên quan
       const cacheKey = `variants_${updatedVariant.productId || 'all'}`;
-      await this.redisService.clearCache(cacheKey); // Xóa cache cũ
+      const cacheProductById = `${updatedVariant.productId}`;
+      await this.redisService.clearCache(cacheKey);
+      await this.redisService.clearCache(cacheProductById);
+      await this.redisService.clearProductsPageCache()
       return {
         success: true,
         message: 'Cập nhật variant thành công',
@@ -440,7 +445,10 @@ export class ProductService {
       }
       await this.variantModel.findByIdAndDelete(id).exec();
       const cacheKey = `variants_${variantToDelete.productId || 'all'}`;
+      const cacheProductById = `${variantToDelete.productId}`;
       await this.redisService.clearCache(cacheKey);
+      await this.redisService.clearCache(cacheProductById);
+      await this.redisService.clearProductsPageCache()
       return {
         success: true,
         message: 'Xóa variant thành công',

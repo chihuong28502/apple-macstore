@@ -123,7 +123,6 @@ function* refreshToken(): Generator<any, void, any> {
       message.error("Hãy đăng nhập");
     }
   } catch (error) {
-    message.error("Hãy đăng nhập");
   }
 }
 // Root saga for authentication

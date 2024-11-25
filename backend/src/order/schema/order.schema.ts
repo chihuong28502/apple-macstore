@@ -62,14 +62,8 @@ export class Order {
   @Prop({ default: 0 })
   shippingFee: number;
 
-  @Prop({ default: Date.now })
-  createdAt: Date;
-
   @Prop()
   lockUntil: Date
-
-  @Prop({ default: null })
-  updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

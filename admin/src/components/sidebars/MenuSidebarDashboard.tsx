@@ -14,7 +14,7 @@ type Props = {
   collapsed?: boolean;
 };
 
-const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
+const   MenuSidebarDashboard = ({ collapsed = false }: Props) => {
   const { resolvedTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
@@ -69,15 +69,15 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       onClick: () => handleOnclickPush("/category"),
     },
     {
-      key: "/promotion",
+      key: "/introduction",
       icon: (
-        <Tooltip title="Promotions" placement="bottom">
+        <Tooltip title="Introductions-Ads" placement="bottom">
           <div className="w-full px-2">
             <FaCartShopping />
           </div>
         </Tooltip>
       ),
-      onClick: () => handleOnclickPush("/orders"),
+      onClick: () => handleOnclickPush("/introduction"),
     },{
       key: "/orders",
       icon: (
@@ -87,7 +87,7 @@ const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
           </div>
         </Tooltip>
       ),
-      onClick: () => handleOnclickPush("/promotion"),
+      onClick: () => handleOnclickPush("/orders"),
     },
   ];
   return (
