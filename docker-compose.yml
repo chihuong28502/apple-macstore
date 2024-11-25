@@ -1,18 +1,18 @@
-version: '3'
-services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "${PORT_DOCKER}:${PORT_BACKEND}"  # Map port 3000 của container ra port 3001 của host
-    environment:
-      - NODE_ENV=production
-      - PORT=${PORT_BACKEND}
-      - MONGODB_URI=${MONGODB_URI}
-    volumes:
-      - ./backend/src:/app/src
-      - /app/node_modules
+# version: '3'
+# services:
+#   backend:
+#     build:
+#       context: ./backend
+#       dockerfile: Dockerfile
+#     ports:
+#       - "${PORT_DOCKER}:${PORT_BACKEND}"  # Map port 3000 của container ra port 3001 của host
+#     environment:
+#       - NODE_ENV=production
+#       - PORT=${PORT_BACKEND}
+#       - MONGODB_URI=${MONGODB_URI}
+#     volumes:
+#       - ./backend/src:/app/src
+#       - /app/node_modules
 
-volumes:
-  mongo-data:
+# volumes:
+#   mongo-data:

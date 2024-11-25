@@ -5,19 +5,19 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package.json and package-lock.json (or yarn.lock)
-COPY backend/package*.json ./
+COPY admin/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application files
-COPY backend/ .
+COPY admin/ .
 
-# Build the Nest.js application
+# Build the Next.js application
 RUN npm run build
 
-# Expose port 3001 (hoặc cổng bạn muốn)
-EXPOSE 5001
+# Expose port 3002
+EXPOSE 4001
 
-# Start the Nest.js application
-CMD ["npm", "run", "start:prod"]
+# Start the Next.js application
+CMD ["npm", "start"]
