@@ -7,6 +7,9 @@ variables:
   DOCKER_IMAGE_FE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/frontend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
   DOCKER_IMAGE_BE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/backend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
   DOCKER_IMAGE_ADMIN: ${REGISTRY_URL}/${REGISTRY_PROJECT}/admin:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
+  DOCKER_CONTAINER_FE: "${CI_PROJECT_NAME}-frontend"
+  DOCKER_CONTAINER_BE: "${CI_PROJECT_NAME}-backend"
+  DOCKER_CONTAINER_ADMIN: "${CI_PROJECT_NAME}-admin"
 
 # Job build Docker images
 build_images:
@@ -31,7 +34,7 @@ build_images:
 
 deploy:
   stage: deploy
-  image: node:18  # Sử dụng Node.js để chạy ứng dụng, bạn có thể thay bằng image phù hợp nếu cần
+  image: node:18 
   before_script:
     - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
   script:
@@ -42,13 +45,10 @@ deploy:
     - docker pull $DOCKER_IMAGE_ADMIN
 
     - echo "Removing existing containers..."
-    # Xóa các container cũ nếu có
     - docker rm -f $DOCKER_CONTAINER_FE || true
     - docker rm -f $DOCKER_CONTAINER_BE || true
     - docker rm -f $DOCKER_CONTAINER_ADMIN || true
-
-    - echo "Running new containers..."
-    # Chạy lại các container mới từ image đã pull
+    - echo "run  containers..."
     - docker run --name $DOCKER_CONTAINER_FE -dp 4000:4000 $DOCKER_IMAGE_FE
     - docker run --name $DOCKER_CONTAINER_BE -dp 5001:5001 $DOCKER_IMAGE_BE
     - docker run --name $DOCKER_CONTAINER_ADMIN -dp 4001:4001 $DOCKER_IMAGE_ADMIN
