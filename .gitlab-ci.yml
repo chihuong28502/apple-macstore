@@ -1,45 +1,47 @@
+variables:
+  DOCKER_IMAGE_FE: "${REGISTRY_URL}/${REGISTRY_PROJECT}/frontend:${CI_COMMIT_TAG:-${CI_COMMIT_REF_NAME}}_${CI_COMMIT_SHORT_SHA}"
+  DOCKER_IMAGE_BE: "${REGISTRY_URL}/${REGISTRY_PROJECT}/backend:${CI_COMMIT_TAG:-${CI_COMMIT_REF_NAME}}_${CI_COMMIT_SHORT_SHA}"
+  DOCKER_IMAGE_ADMIN: "${REGISTRY_URL}/${REGISTRY_PROJECT}/admin:${CI_COMMIT_TAG:-${CI_COMMIT_REF_NAME}}_${CI_COMMIT_SHORT_SHA}"
+  DOCKER_CONTAINER_FE: "${CI_PROJECT_NAME}-frontend"
+  DOCKER_CONTAINER_BE: "${CI_PROJECT_NAME}-backend"
+  DOCKER_CONTAINER_ADMIN: "${CI_PROJECT_NAME}-admin"  
+
 stages:
   - build
   - deploy
 
-# Biến môi trường chung
-variables:
-  DOCKER_IMAGE_FE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/frontend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
-  DOCKER_IMAGE_BE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/backend:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
-  DOCKER_IMAGE_ADMIN: ${REGISTRY_URL}/${REGISTRY_PROJECT}/admin:${CI_COMMIT_TAG}_${CI_COMMIT_SHORT_SHA}
-  DOCKER_CONTAINER_FE: "${CI_PROJECT_NAME}-frontend"
-  DOCKER_CONTAINER_BE: "${CI_PROJECT_NAME}-backend"
-  DOCKER_CONTAINER_ADMIN: "${CI_PROJECT_NAME}-admin"
-
-# Job build Docker images
 build_images:
   stage: build
   image: docker:latest
   services:
-    - name: docker:dind
+    - docker:dind
   before_script:
-    # Đăng nhập vào Docker registry
-    - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
-  script:
-    # Xây dựng các Docker images
-    - echo "Building Docker images..."
-    - docker build -t $DOCKER_IMAGE_FE ./frontend  # Build Docker image cho frontend
-    - docker push $DOCKER_IMAGE_FE  # Push Docker image cho frontend
-    - docker build -t $DOCKER_IMAGE_BE ./backend  # Build Docker image cho backend
-    - docker push $DOCKER_IMAGE_BE  # Push Docker image cho backend
-    - docker build -t $DOCKER_IMAGE_ADMIN ./admin  # Build Docker image cho admin
-    - docker push $DOCKER_IMAGE_ADMIN  # Push Docker image cho admin
-  tags:
-    - dev-server-apple
+    - cat "$FE_ENV_FILE" > ./frontend/.env
+    - cat "$BE_ENV_FILE" > ./backend/.env
+    - cat "$ADMIN_ENV_FILE" > ./admin/.env
 
-deploy:
+    - echo "Logging into Docker registry..."
+    - export DOCKER_BUILDKIT=1 
+    - docker login $REGISTRY_URL -u $REGISTRY_USER -p $REGISTRY_PASSWORD
+  script:
+    - docker build -t ${DOCKER_IMAGE_FE} ./frontend || echo "Error during frontend build"
+    - docker push $DOCKER_IMAGE_FE || echo "Error during frontend push"
+    - docker build -t ${DOCKER_IMAGE_BE} ./backend || echo "Error during backend build"
+    - docker push $DOCKER_IMAGE_BE || echo "Error during backend push"
+    - docker build -t ${DOCKER_IMAGE_ADMIN} ./admin || echo "Error during admin build"
+    - docker push $DOCKER_IMAGE_ADMIN || echo "Error during admin push"
+    - echo "=== Docker Build and Push Completed ==="
+  tags:
+    - dev-apple-macstore
+
+deploy: 
   stage: deploy
-  image: node:18 
+  image: node:18
   before_script:
-    - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD}
+    - echo "Logging into Docker registry..."
+    - docker login $REGISTRY_URL -u $REGISTRY_USER -p $REGISTRY_PASSWORD
   script:
     - echo "Pulling Deploy Docker images..."
-    # Kéo các image Docker đã được build
     - docker pull $DOCKER_IMAGE_FE
     - docker pull $DOCKER_IMAGE_BE
     - docker pull $DOCKER_IMAGE_ADMIN
@@ -52,7 +54,8 @@ deploy:
     - docker run --name $DOCKER_CONTAINER_FE -dp 4000:4000 $DOCKER_IMAGE_FE
     - docker run --name $DOCKER_CONTAINER_BE -dp 5001:5001 $DOCKER_IMAGE_BE
     - docker run --name $DOCKER_CONTAINER_ADMIN -dp 4001:4001 $DOCKER_IMAGE_ADMIN
+  tags: 
+    - dev-apple-macstore
 
-  tags:
-    - dev-server-apple
+
 
