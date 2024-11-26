@@ -1,23 +1,22 @@
-# Use the official Node.js image as the base image
+# Base image
 FROM node:18-alpine
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (or yarn.lock)
-COPY backend/package*.json ./
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application files
-COPY backend/ .
+# Copy source code
+COPY . .
 
-# Build the Nest.js application
+# Build the application
 RUN npm run build
 
-# Expose port 3001 (hoặc cổng bạn muốn)
 EXPOSE 5001
 
-# Start the Nest.js application
-CMD ["npm", "run", "start:prod"]
+# Command to run the application
+CMD ["npm", "run", "start"]
