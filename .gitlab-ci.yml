@@ -17,9 +17,15 @@ build_images:
     - docker:dind
   before_script:
     - cat "$FE_ENV_FILE" > ./frontend/.env
+    - cat ./frontend/.env
     - cat "$BE_ENV_FILE" > ./backend/.env
+    - cat ./backend/.env
     - cat "$ADMIN_ENV_FILE" > ./admin/.env
+    - cat ./admin/.env
 
+    - echo "DOCKER_IMAGE_FE=$DOCKER_IMAGE_FE"
+    - echo "DOCKER_IMAGE_BE=$DOCKER_IMAGE_BE"
+    - echo "DOCKER_IMAGE_ADMIN=$DOCKER_IMAGE_ADMIN"
     - echo "Logging into Docker registry..."
     - export DOCKER_BUILDKIT=1 
     - docker login $REGISTRY_URL -u $REGISTRY_USER -p $REGISTRY_PASSWORD
