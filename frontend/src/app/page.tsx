@@ -55,7 +55,7 @@ export default function Home() {
                     Learn More
                   </Button>
                   <Button type="default" className="flex-1">
-                    Buy
+                    Buy ngay bây giờ
                   </Button>
                 </div>
               </div>
