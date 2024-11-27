@@ -32,7 +32,7 @@ build_images:
     - docker push $DOCKER_IMAGE_ADMIN || echo "Error during admin push"
     - echo "=== Docker Build and Push Completed ==="
   tags:
-    - dev-apple-macstore
+    - cloud-apple
 
 deploy: 
   stage: deploy
@@ -55,7 +55,7 @@ deploy:
     - docker run --name $DOCKER_CONTAINER_BE -dp 5001:5001 $DOCKER_IMAGE_BE
     - docker run --name $DOCKER_CONTAINER_ADMIN -dp 4001:4001 $DOCKER_IMAGE_ADMIN
   tags: 
-    - dev-apple-macstore
+    - cloud-apple
 
 
 
