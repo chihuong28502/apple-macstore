@@ -67,10 +67,12 @@ const Header = () => {
               {auth && <User />}
             </div>
             <div className="flex items-center ml-auto">
-              <CiSearch onClick={() => setIsSearchOpen(!isSearchOpen)} className="text-fontColor text-2xl cursor-pointer" />
+              <div className="px-2">
+                <CiSearch onClick={() => setIsSearchOpen(!isSearchOpen)} className="text-fontColor text-2xl cursor-pointer" />
+              </div>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}  // Toggle mobile menu
-                className=" pl-2 text-fontColor text-2xl md:hidden"
+                className="text-fontColor text-2xl md:hidden"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
