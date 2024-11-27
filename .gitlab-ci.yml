@@ -33,6 +33,8 @@ build_images:
     - echo "=== Docker Build and Push Completed ==="
   tags:
     - cloud-gitlab-apple
+  only:
+    - tags
 
 deploy: 
   stage: deploy
@@ -56,6 +58,8 @@ deploy:
     - docker run --name $DOCKER_CONTAINER_ADMIN -dp 4001:4001 $DOCKER_IMAGE_ADMIN
   tags:
     - cloud-gitlab-apple    
+  only:
+    - tags
 
 
 
