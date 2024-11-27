@@ -34,7 +34,7 @@ build_images:
   tags:
     - cloud-gitlab-apple
   only:
-    - tags
+    - main
 
 deploy: 
   stage: deploy
@@ -59,7 +59,7 @@ deploy:
   tags:
     - cloud-gitlab-apple    
   only:
-    - tags
+    - main
 
 
 
