@@ -84,7 +84,7 @@ const NotificationPopover = () => {
       className=""
       color={resolvedTheme === "dark" ? "#4b4b4b" : "#fff"}
     >
-      <div className="flex items-center p-3  rounded-lg cursor-pointer ">
+      <div className="flex items-center  rounded-lg cursor-pointer ">
         <ConfigProvider
           theme={{
             components: {

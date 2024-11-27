@@ -12,11 +12,10 @@ const LayoutHome = ({ children }: { children: ReactNode }) => {
   }, [width]);
   return (
     <div className="h-screen flex flex-col">
-      <Header
-      />
+      <Header />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar collapsed={false} />
-        <main className="flex-1 overflow-auto p-4 flex flex-col justify-between bg-mainContent">
+        {/* <SideBar collapsed={false} /> */}
+        <main className="flex-1 overflow-auto px-4 flex flex-col justify-between bg-mainContent">
           <div className="flex-grow">{children}</div>
           <div className="">
             <Footer />

@@ -21,7 +21,7 @@ const TripleSlider = ({ slides }: Props) => {
     speed: 500,
     focusOnSelect: true,
     autoplay: true, // Enable autoplay
-    autoplaySpeed: 1000, // Set the speed of the autoplay transition (in milliseconds)
+    autoplaySpeed: 3000, // Set the speed of the autoplay transition (in milliseconds)
     afterChange: (index: number) => setCurrentIndex(index),
     responsive: [
       {
