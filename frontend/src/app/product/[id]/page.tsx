@@ -148,7 +148,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   return (
     <div
-      style={{ minHeight: 'calc(100vh - 97  px)' }}
+      style={{ minHeight: 'calc(100vh - 97px)' }}
       className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">
         <div className="lg:sticky top-0 flex gap-3 w-full">

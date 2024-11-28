@@ -74,7 +74,7 @@ function Page() {
 
   return (
     <div className="min-h-screen text-gray-900 flex justify-center items-center bg-gradient-to-r from-indigo-50 to-indigo-200">
-      <div className="max-w-screen-xl w-full bg-white shadow-lg rounded-lg flex">
+      <div className="max-w-screen-xl w-full bg-white shadow-lg rounded-lg flex justify-between">
         <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
           <div className="text-center">
             <img
