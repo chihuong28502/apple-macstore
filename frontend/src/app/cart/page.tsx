@@ -31,6 +31,7 @@ function CartCheckout() {
     address: "",
     description: ""
   });
+  
   useEffect(() => {
     if (auth?._id) {
       dispatch(CartActions.fetchCartById(auth._id));

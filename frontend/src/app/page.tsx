@@ -31,7 +31,6 @@ export default function Home() {
         <p>Loading banner...</p>
       )}
 
-      {/* Kiểm tra và hiển thị quảng cáo nếu có */}
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-8 p-8">
         {ads.length > 0 ? (
           ads.map((promo) => (

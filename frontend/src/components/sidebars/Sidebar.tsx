@@ -12,13 +12,13 @@ const SideBar = ({ collapsed }: Props) => {
   useEffect(() => {}, [pathname]);
   return (
     <motion.div
-      className="h-full bg-layout pt-3 overflow-y-auto"
-      initial={{ width: 80 }}
+      // className="h-full bg-layout pt-3 overflow-y-auto"
+      // initial={{ width: 80 }}
       style={{
         overflow: "hidden", // Ẩn phần bị cắt trong quá trình chuyển đổi
       }}
     >
-        <MenuSidebar collapsed={collapsed} />
+        {/* <MenuSidebar collapsed={collapsed} /> */}
     </motion.div>
   );
 };

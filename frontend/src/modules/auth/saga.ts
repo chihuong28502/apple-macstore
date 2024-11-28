@@ -33,9 +33,8 @@ function* handleApiError(error: any, onFail: (error: any) => void) {
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
   try {
-    yield delay(500); // Simulate API delay
+    yield delay(500);
     const { success, message, data } = yield call(AuthRequest.login, { email, password });
-
     if (success) {
       const decoded: any = jwt.decode(data.accessToken);
       localStorage.setItem('accessToken', data.accessToken)
@@ -44,7 +43,6 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
         yield put(AuthActions.setUser(response.data));
         onSuccess(data?.user);
       } else {
-        message.error("Failed to retrieve user ID from token.");
         yield put(AuthActions.getInfoUser({}));
       }
     } else {
@@ -57,17 +55,15 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
 
 // Saga for registration
 function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { onSuccess = () => { }, onFail = () => { }, data } = payload;
+  const { onSuccess = () => { }, onFail = () => { } } = payload;
+  const data: any = { ...payload, role: "customer" }
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } = yield call(AuthRequest.register, data);
     yield put(AppAction.hideLoading());
-
     if (res.success) {
       onSuccess(res);
-      message.success("Đăng ký thành công.");
     } else {
-      message.error("Đăng ký thất bại.");
       onFail(res);
     }
   } catch (error: any) {

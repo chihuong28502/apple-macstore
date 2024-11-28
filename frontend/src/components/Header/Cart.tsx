@@ -19,9 +19,10 @@ const Cart = () => {
 
   useEffect(() => {
     if (auth?._id) {
-      dispatch(CartActions.fetchCartById(auth._id));
+      dispatch(CartActions.fetchCartById(auth._id)); // Fetch cart data for logged-in user
     }
   }, [auth?._id, dispatch]);
+
   const { resolvedTheme } = useTheme();
 
   const handleClickPayment = () => {
@@ -42,8 +43,8 @@ const Cart = () => {
       ];
     } else {
       return cart.items.map((item: any) => {
-        const { productId, variantId, quantity, } = item;
-        const { images, name, description } = productId;
+        const { productId, variantId, quantity } = item;
+        const { images, name } = productId;
         const { color, ram, ssd, price, availableStock } = variantId;
 
         return {
@@ -57,7 +58,7 @@ const Cart = () => {
               <Row gutter={[16, 16]} align="middle">
                 <Col span={5} style={{ textAlign: "center" }}>
                   <Image
-                    src={images[0].image} // Use the first image
+                    src={images[0]?.image || ""} // Use first image, check existence
                     alt={name}
                     width={80}
                     height={80}
@@ -66,7 +67,6 @@ const Cart = () => {
                 </Col>
                 <Col span={13}>
                   <span className="font-bold text-lg block">{name}</span>
-                  {/* <span className="text-gray-500 block">{`Mô tả: ${description}`}</span> */}
                   <span className="text-gray-500 block">{`Màu: ${color}`}</span>
                   <span className="text-lg font-semibold text-red-600">
                     {`${price.toLocaleString()}₫`}
@@ -76,14 +76,13 @@ const Cart = () => {
                   <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
                   <div className="text-gray-500 block w-full">{`SSD: ${ssd}`}</div>
                   <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
-                  {/* <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div> */}
                 </Col>
               </Row>
             </Card>
           ),
           key: item._id,
         };
-      }).concat([
+      }).concat([ // Add total and payment button
         {
           label: (
             <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
@@ -117,7 +116,7 @@ const Cart = () => {
       <Dropdown
         placement="bottom"
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={setIsOpen} // Manage dropdown open/close
         menu={{ items: getMenuItems() }}
         dropdownRender={(menu) => (
           <div
@@ -130,7 +129,7 @@ const Cart = () => {
             {menu}
           </div>
         )}
-        trigger={["click"]}
+        trigger={["click"]} // Trigger dropdown on click
       >
         <div className="cursor-pointer p-1.5 pl-0 text-fontColor flex items-center">
           <Badge

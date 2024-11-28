@@ -106,7 +106,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const handleAddToCart = () => {
     // Kiểm tra nếu đã chọn đầy đủ màu sắc, RAM và lưu trữ
     if (!selectedColor || !selectedRam || !selectedStorage) {
-      alert("Please select color, RAM, and storage before adding to the cart.");
       return;
     }
 
@@ -128,7 +127,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         })
       );
     } else {
-      alert("The selected variant is out of stock.");
     }
   };
 
@@ -149,7 +147,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   };
 
   return (
-    <div className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
+    <div
+      style={{ minHeight: 'calc(100vh - 97  px)' }}
+      className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">
         <div className="lg:sticky top-0 flex gap-3 w-full">
           <img
