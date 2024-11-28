@@ -74,7 +74,6 @@
         await registerSchema.validate(formData, { abortEarly: false });
 
         if (!Object.values(errors).some((error) => error)) {
-          console.log(formData);
           dispatch(
             AuthActions.register({
               ...formData,

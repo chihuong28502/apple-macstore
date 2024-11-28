@@ -97,7 +97,7 @@ const Order = () => {
               >
                 <Row gutter={[16, 16]} align="middle">
                   <Col>
-                    <p className="font-bold text-lg ">Mã đơn: <span>{_id}</span> </p>
+                    <p className="font-bold text-lg ">Mã đơn: <span>{_id?.slice(0,10)}</span> </p>
                     <p className="text-lg font-semibold text-red-600">
                       Tổng giá đơn hàng: <span>{totalPrice.toLocaleString()}₫</span>
                     </p>

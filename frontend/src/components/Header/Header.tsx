@@ -7,57 +7,102 @@ import { AuthSelectors } from "@/modules/auth/slice";
 import Link from "next/link";
 import { FaRegUserCircle } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { useState } from "react"; // Import useState
+import { useCallback, useEffect, useState } from "react"; // Import useState
 import Cart from "./Cart";
 import Order from "./Order";
 import User from "./User";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
 import { Dropdown, Menu, Input } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { ProductActions, ProductSelectors } from "@/modules/product/slice";
+import { ProductPage } from "@/type/product.page.type";
+import { debounce } from "lodash";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
-  // State to handle the visibility of mobile menu and search
+  const dispatch = useDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // State for the search term
-  const [filteredData, setFilteredData] = useState([]); // State to store filtered search results
+  const [filteredData, setFilteredData] = useState<any>([]); // State to store filtered search results
+  const [filteredDataProducts, setFilteredDataProducts] = useState<any>([]); // State to store filtered search results
   // Mock data for the search
-  const mockData = [
-    { id: 1, name: "MacBook Pro 14-inch" },
-    { id: 2, name: "MacBook Air M2" },
-    { id: 3, name: "iMac 24-inch" },
-    { id: 4, name: "AirPods Pro" },
-    { id: 5, name: "iPhone 15" },
-  ];
-
+  const categories = useSelector(ProductSelectors.categories) as ProductPage.Category[];
+  const products = useSelector(ProductSelectors.productList);
   // Auth selector to check user authentication
   const auth = useAppSelector(AuthSelectors.user);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      dispatch(ProductActions.fetchCategories());
+    };
+    fetchCategories();
+    const fetchProducts = async () => {
+      dispatch(ProductActions.fetchPaginatedProducts({
+        page: 1,
+        limit: 1,
+        minPrice: 0,
+        maxPrice: 10000000000,
+      }));
+    };
+    fetchProducts();
+  }, [dispatch]);
 
-  // Function to toggle the mobile menu
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
+
   const toggleSearch = () => {
     setIsSearchOpen((prev) => !prev);
     if (isSearchOpen) {
       setSearchTerm("");
       setFilteredData([]);
+      setFilteredDataProducts([]);
     }
     setIsMenuOpen(false); // Close mobile menu if open
   };
   // Function to handle search term input
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback(
+    debounce((value: string, categories: any[], products: any[], setFilteredDataProducts: (data: any[]) => void, setFilteredData: (data: any[]) => void) => {
+      if (value.trim() === "") {
+        setFilteredData([]);
+        setFilteredDataProducts([]);
+      } else {
+        const results = categories.filter((item) =>
+          item.name.toLowerCase().includes(value.toLowerCase())
+        );
+        const resultsProducts = products.filter((item) =>
+          item.name.toLowerCase().includes(value.toLowerCase())
+        );
+
+        setFilteredData(results);
+        setFilteredDataProducts(resultsProducts)
+      }
+    }, 1500), // Debounce với thời gian là 1.5 giây
+    []
+  );
+  const onSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    // Filter the mock data based on the search term
-    if (value.trim() === "") {
-      setFilteredData([]);
-    } else {
-      const results: any = mockData.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredData(results);
-    }
+    handleSearchChange(value, categories, products, setFilteredDataProducts, setFilteredData);
   };
+  const fetchProducts = useCallback(
+    (params: ProductPage.FetchProductsParams) => {
+      dispatch(ProductActions.fetchPaginatedProducts(params));
+    },
+    [dispatch]
+  );
+  const handleCategoryChange = (categoryId: string) => {
+    fetchProducts({
+      page: 1,
+      limit: 1,
+      minPrice: 0,
+      maxPrice: 100000000000,
+      categoryId: categoryId !== "all" ? categoryId : undefined,
+    });
+  };
+  const onClickCategory = (id: any) => {
+    handleCategoryChange(id)
+  }
 
   // Menu for search input with filtered data
   const searchMenu = (
@@ -66,24 +111,52 @@ const Header = () => {
         <Input
           placeholder="Search..."
           value={searchTerm}
-          onChange={handleSearchChange}
+          onChange={onSearchInputChange}
           autoFocus
         />
         <ul>
-          {filteredData.map((item: any) => (
-            <Menu.Item key={item.id}>
-              <Link href={`/product/${item.id}`} className="block">
-                {item.name}
-              </Link>
-            </Menu.Item>
-          ))}
-          {filteredData.length === 0 && (
+          {filteredData?.length > 0 && (
+            <>
+              <div className="text-sm text-gray-700 font-medium py-1">-- Category --</div>
+              {filteredData?.map((item: any) => (
+                <Menu.Item key={item._id} className="hover:bg-gray-200 transition duration-200">
+                  <Link
+                    onClick={(e) => onClickCategory(item?._id)}
+                    href={`/product?categoryId=${item._id}`}
+                    className="block cursor-pointer py-0.5 rounded-md"
+                  >
+                    {item.name}
+                  </Link>
+                </Menu.Item>
+              ))}
+            </>
+          )}
+  
+          {filteredDataProducts?.length > 0 && (
+            <>
+              <div className="text-sm text-gray-700 font-medium py-1">-- Product --</div>
+              {filteredDataProducts?.map((item: any) => (
+                <Menu.Item key={item._id} className="hover:bg-gray-200 transition duration-200">
+                  <Link
+                    href={`/product/${item._id}`}
+                    className="block cursor-pointer py-0.5 rounded-md"
+                  >
+                    {item.name}
+                  </Link>
+                </Menu.Item>
+              ))}
+            </>
+          )}
+  
+          {/* Hiển thị thông báo khi không có kết quả tìm kiếm */}
+          {filteredData.length === 0 && filteredDataProducts.length === 0 && (
             <Menu.Item className="text-gray-500">No results found</Menu.Item>
           )}
         </ul>
       </div>
     </Menu>
   );
+  
 
   return (
     <div className="fixed w-full px-4 z-20 shadow-lg backdrop-blur-sm bg-white/50">

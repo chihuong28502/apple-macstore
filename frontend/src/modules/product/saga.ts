@@ -83,7 +83,6 @@ function* fetchCategories() {
   }
 }
 
-
 export function* ProductSaga() {
   yield takeLeading(ProductActions.fetchCategories, fetchCategories);
   yield takeLeading(ProductActions.createProduct, createProduct);

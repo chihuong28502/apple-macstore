@@ -3,7 +3,7 @@ import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { type ProductPage } from "@/type/product.page.type";
 import { Pagination, Skeleton } from "antd";
 import { debounce } from "lodash";
-import { usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { BreadcrumbNav } from "./components/BreadcrumbNav";
@@ -13,6 +13,8 @@ import { ProductGrid } from "./components/ProductGrid";
 
 const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  const categoryId: any = searchParams.get("categoryId");
   const allProducts = useSelector(
     ProductSelectors.productList
   ) as ProductPage.Product[];
@@ -99,7 +101,9 @@ const ProductPage: React.FC = () => {
     setSelectedRangeId(range.id);
     setPriceRange([range.min, range.max]);
   };
-
+  useEffect(() => {
+    setSelectedCategory(categoryId)
+  }, [searchParams])
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
