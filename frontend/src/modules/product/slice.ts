@@ -1,4 +1,4 @@
-import { createSlice,PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "@/core/services/store";
 
@@ -10,7 +10,8 @@ type ProductState = {
   isLoading: boolean;
   categories: any[];
   listCategories: any[],
-
+  isLoadingProducts: boolean;
+  isLoadingCategories: boolean;
 };
 
 const initialState: ProductState = {
@@ -20,6 +21,8 @@ const initialState: ProductState = {
   productList: [],
   totalProducts: 0,
   isLoading: false,
+  isLoadingProducts: false, // Loading cho product
+  isLoadingCategories: false,
 };
 
 const ProductSlice = createSlice({
@@ -65,6 +68,12 @@ const ProductSlice = createSlice({
     setLoading: (state: ProductState, { payload }: PayloadAction<boolean>) => {
       state.isLoading = payload;
     },
+    setLoadingCategories: (state: ProductState, { payload }: PayloadAction<boolean>) => {
+      state.isLoadingCategories = payload;
+    },
+    setLoadingProducts: (state: ProductState, { payload }: PayloadAction<boolean>) => {
+      state.isLoadingProducts  = payload;
+    },
     fetchCategories: (state: ProductState) => { state.isLoading = true; },
     setCategories: (state: ProductState, { payload }: PayloadAction<any[]>) => {
       state.categories = payload;
@@ -82,5 +91,7 @@ export const ProductSelectors = {
   productList: (state: RootState) => state.product.productList,
   totalProducts: (state: RootState) => state.product.totalProducts,
   isLoading: (state: RootState) => state.product.isLoading,
+  isLoadingProducts: (state: RootState) => state.product.isLoadingProducts,
+  isLoadingCategories: (state: RootState) => state.product.isLoadingCategories,
   categories: (state: RootState) => state.product.categories,
 };

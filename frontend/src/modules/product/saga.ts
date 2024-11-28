@@ -26,7 +26,7 @@ function* createProduct({ payload }: PayloadAction<any>) {
 }
 
 function* fetchProductById({ payload }: PayloadAction<any>) {
-  const { id, onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
+  const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
     yield put(ProductActions.setLoading(true));
     const response: { success: boolean; data: any } = yield ProductRequest.getProductById(payload);
@@ -51,32 +51,34 @@ function* fetchPaginatedProducts({ payload }: PayloadAction<{
 }>) {
   const { page, limit, categoryId, minPrice, maxPrice } = payload;
   try {
-    yield put(ProductActions.setLoading(true));
+    yield put(ProductActions.setLoadingProducts(true));
 
     const response: { success: boolean; data: any; total: number } = yield ProductRequest.getAllProducts({ page, limit, categoryId, minPrice, maxPrice });
-    yield put(ProductActions.setLoading(false));
+    yield put(ProductActions.setLoadingProducts(false));
 
     if (response.success) {
       yield put(ProductActions.setProductList(response.data.products));
       yield put(ProductActions.setTotalProducts(response.data.total));
     }
   } catch (e) {
+    yield put(ProductActions.setLoadingProducts(false));
     console.error("Error fetching products:", e);
   }
 }
 
 function* fetchCategories() {
   try {
-    yield put(ProductActions.setLoading(true));
+    yield put(ProductActions.setLoadingCategories(true));
 
     const response: { success: boolean; data: any[] } = yield ProductRequest.getAllCategories();
 
-    yield put(ProductActions.setLoading(false));
+    yield put(ProductActions.setLoadingCategories(false));
 
     if (response.success) {
       yield put(ProductActions.setCategories(response.data)); // Store categories in Redux state
     }
   } catch (e) {
+    yield put(ProductActions.setLoadingCategories(false));
     console.error("Error fetching categories:", e);
   }
 }

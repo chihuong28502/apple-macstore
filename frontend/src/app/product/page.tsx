@@ -13,7 +13,6 @@ import { ProductGrid } from "./components/ProductGrid";
 
 const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
-  const pathname = usePathname();
   const allProducts = useSelector(
     ProductSelectors.productList
   ) as ProductPage.Product[];
@@ -21,8 +20,8 @@ const ProductPage: React.FC = () => {
   const categories = useSelector(
     ProductSelectors.categories
   ) as ProductPage.Category[];
-  const loading = useSelector(ProductSelectors.isLoading) as boolean;
-
+  const loadingCategories = useSelector(ProductSelectors.isLoadingCategories) as boolean;
+  const loadingProducts = useSelector(ProductSelectors.isLoadingProducts) as boolean;
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000000000]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(8);
@@ -43,7 +42,6 @@ const ProductPage: React.FC = () => {
     const fetchCategories = async () => {
       dispatch(ProductActions.fetchCategories());
     };
-
     fetchCategories();
   }, [dispatch]);
 
@@ -60,7 +58,7 @@ const ProductPage: React.FC = () => {
     }, 500),
     [fetchProducts]
   );
- 
+
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setCurrentPage(1);
@@ -105,14 +103,14 @@ const ProductPage: React.FC = () => {
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {loading ? (
+        {loadingCategories ? (
           <Skeleton active />
         ) : (
           <BreadcrumbNav
             onCategoryChange={handleCategoryChange}
             selectedCategory={selectedCategory}
             categories={categories}
-            loading={loading}
+            loading={loadingCategories}
           />
         )}
 
@@ -120,29 +118,35 @@ const ProductPage: React.FC = () => {
           categories={categories}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
-          loading={loading}
+          loading={loadingCategories}
         />
 
         <PriceFilter
           priceRanges={priceRanges}
           selectedRangeId={selectedRangeId}
           onPriceChange={handlePriceRangeChange}
-          loading={loading}
+          loading={loadingCategories}
         />
-        <ProductGrid products={allProducts} loading={loading} />
-        {totalProducts > pageSize && allProducts?.length > 0 && (
-          <div className="mt-8 flex justify-center">
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={totalProducts}
-              onChange={(page: number, size: number) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              }}
-              className="bg-white p-4 rounded-lg shadow-md"
-            />
-          </div>
+
+        {loadingProducts ? (
+          <Skeleton active />
+        ) : (
+          <>
+            <ProductGrid products={allProducts} loading={loadingProducts} />
+            {totalProducts > pageSize && allProducts?.length > 0 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={totalProducts}
+                  onChange={(page: number, size: number) => {
+                    setCurrentPage(page);
+                    setPageSize(size);
+                  }}
+                  className="bg-white p-4 rounded-lg shadow-md"
+                />
+              </div>
+            )}</>
         )}
       </div>
     </div>
