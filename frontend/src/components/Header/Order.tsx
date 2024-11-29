@@ -82,7 +82,7 @@ const Order = () => {
           const { _id, totalPrice, status, createdAt } = order;
           const statusStyles: any = {
             success: "bg-green-100",
-            cancelled: "disabled opacity-70",
+            cancelled: " bg-gray-300",
             shipping: "bg-gray-100",
           };
           return {

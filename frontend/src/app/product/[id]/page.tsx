@@ -1,5 +1,4 @@
 "use client";
-import { getCache } from "@/cache/cacheLocal";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions } from "@/modules/cart/slice";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
@@ -153,6 +152,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">
         <div className="lg:sticky top-0 flex gap-3 w-full">
           <img
+            loading="lazy"
             src={mainImage}
             alt={productById?.name}
             className="w-3/4 rounded-lg object-cover shadow-lg"
@@ -160,6 +160,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           <div className="w-20 flex flex-col gap-3">
             {productById?.images?.map((image: Image, index: number) => (
               <img
+                loading="lazy"
                 key={index}
                 src={image.image}
                 alt={`Product Image ${index}`}

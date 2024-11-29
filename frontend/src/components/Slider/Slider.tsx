@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useState } from "react";
 import Slider from "react-slick";
 
@@ -54,13 +53,11 @@ const TripleSlider = ({ slides }: Props) => {
               onClick={() => handleSlideClick(index)}
             >
               <div className="relative w-full h-[600px] overflow-hidden rounded-lg shadow-lg cursor-pointer">
-                <Image
+                <img
+                  loading="lazy"
                   src={slide.images.image}
                   alt={slide.name}
-                  layout="fill"
-                  objectFit="contain"
-                  objectPosition="center"
-                  priority
+                  className="w-full h-full object-contain object-center"
                 />
                 <div className="absolute inset-0 bg-black opacity-0 transition-opacity duration-300 hover:opacity-20"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">

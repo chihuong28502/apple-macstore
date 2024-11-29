@@ -2,7 +2,6 @@
 import TripleSlider from "@/components/Slider/Slider";
 import { IntroductionActions, IntroductionSelectors } from "@/modules/introduction/slice";
 import { Button, Skeleton } from "antd";
-import Image from "next/image";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "slick-carousel/slick/slick-theme.css";
@@ -44,12 +43,13 @@ export default function Home() {
               key={promo._id}
               className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden"
             >
-              <Image
+              <img
+                loading="lazy"
                 width={300}
                 height={300}
                 src={promo.images?.image || "/placeholder.png"}
                 alt={promo.images?.publicId || "placeholder"}
-                className="w-full h-56 object-cover"
+                className="w-full h-56 object-contain"
               />
               <div className="p-6 flex flex-col flex-1">
                 <h3 className="text-xl font-bold text-gray-800">{promo.name}</h3>

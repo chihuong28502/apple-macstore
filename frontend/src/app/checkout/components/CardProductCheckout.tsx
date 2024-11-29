@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 
 function CardProductCheckout({ item }: any) {
   return (
@@ -13,7 +12,8 @@ function CardProductCheckout({ item }: any) {
             <h3 className="text-base text-fontColor font-bold text-nowrap">
               {item?.productName}
             </h3>
-            <Image
+            <img
+              loading="lazy"
               width={140}
               height={140}
               alt={item?.productImages[0]._id}

@@ -4,7 +4,6 @@ import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { Badge, Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoCartOutline } from "react-icons/io5";
@@ -50,32 +49,33 @@ const Cart = () => {
         return {
           label: (
             <Card
-              className={`my-2 mx-auto w-full ${availableStock === 0 ? "disabled opacity-70" : ""}`}
+              className={`my-2 ${availableStock === 0 ? "disabled opacity-70" : ""}`}
               hoverable
               bordered={false}
-              style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+              style={{ borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
             >
               <Row gutter={[16, 16]} align="middle">
                 <Col span={5} style={{ textAlign: "center" }}>
-                  <Image
-                    src={images[0]?.image || ""} // Use first image, check existence
+                  <img
+                    loading="lazy"
+                    src={images[0]?.image || ""}
                     alt={name}
-                    width={80}
-                    height={80}
+                    width={100}
+                    height={100}
                     className="object-cover rounded"
                   />
                 </Col>
-                <Col span={13}>
+                <Col span={12}>
                   <span className="font-bold text-lg block">{name}</span>
                   <span className="text-gray-500 block">{`Màu: ${color}`}</span>
                   <span className="text-lg font-semibold text-red-600">
                     {`${price.toLocaleString()}₫`}
                   </span>
                 </Col>
-                <Col span={6} className="text-right">
+                <Col span={7} className="text-right">
                   <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
                   <div className="text-gray-500 block w-full">{`SSD: ${ssd}`}</div>
-                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
+                  <div className="text-red-600 block w-full">{`Số lượng: ${quantity}`}</div>
                 </Col>
               </Row>
             </Card>
@@ -120,6 +120,7 @@ const Cart = () => {
         menu={{ items: getMenuItems() }}
         dropdownRender={(menu) => (
           <div
+            className="bg-[#e0e0e0] shadow-[15px_15px_30px_#bebebe,-15px_-15px_30px_#ffffff]"
             style={{
               borderRadius: "8px",
               maxHeight: "400px",
@@ -129,7 +130,7 @@ const Cart = () => {
             {menu}
           </div>
         )}
-        trigger={["click"]} // Trigger dropdown on click
+        trigger={["click"]}
       >
         <div className="cursor-pointer p-1.5 pl-0 text-fontColor flex items-center">
           <Badge
