@@ -133,7 +133,20 @@ const ProductPage: React.FC = () => {
         />
 
         {loadingProducts ? (
-          <Skeleton active />
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden" >
+                <div className="w-full h-56 bg-gray-300 animate-pulse"></div>
+                <div className="p-6">
+                  <div className="h-4 bg-gray-300 rounded-md animate-pulse"></div>
+                  <div className="mt-4 flex gap-4">
+                    <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                    <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </section>
         ) : (
           <>
             <ProductGrid products={allProducts} loading={loadingProducts} />

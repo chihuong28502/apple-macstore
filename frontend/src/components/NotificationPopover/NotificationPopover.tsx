@@ -57,7 +57,7 @@ const NotificationPopover = () => {
   }, [socket]);
   const { resolvedTheme } = useTheme();
   const content = (
-    <div className="w-80 bg-inputBackground rounded-lg shadow-xl shadow-gray-300/50 dark:shadow-gray-800/50  overflow-hidden cursor-pointer">
+    <div className="w-80 bg-inputBackground rounded-lg shadow-xl shadow-gray-300/50 overflow-hidden cursor-pointer">
       <div className="px-4 py-3 border-b border-gray-700 flex justify-between items-center bg-inputBackground">
         <h3 className="text-fontColor font-semibold text-lg">
           Thông báo mới nhận

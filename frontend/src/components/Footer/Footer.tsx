@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="bg-transparent">
-      <hr className="my-3 border-gray-200 dark:border-gray-700" />
+      <hr className="my-3 border-gray-200 " />
       <div className="flex flex-col items-center sm:flex-row sm:justify-between">
         <p className="text-sm text-fontColor">
           © Copyright 2024. All Rights Reserved.
@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex mt-3 -mx-2 sm:mt-0">
           <a
             href="#"
-            className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor dark:hover:text-gray-300"
+            className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor "
             aria-label="Reddit"
           >
             {" "}
@@ -17,7 +17,7 @@ const Footer = () => {
           </a>
           <a
             href="#"
-            className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor dark:hover:text-gray-300"
+            className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor "
             aria-label="Reddit"
           >
             {" "}
@@ -25,7 +25,7 @@ const Footer = () => {
           </a>
           <a
             href="#"
-            className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor dark:hover:text-gray-300"
+            className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor "
             aria-label="Reddit"
           >
             {" "}

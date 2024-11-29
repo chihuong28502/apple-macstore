@@ -10,6 +10,7 @@ import { CiSearch } from "react-icons/ci";
 import { useCallback, useEffect, useState } from "react"; // Import useState
 import Cart from "./Cart";
 import Order from "./Order";
+import DarkModeSwitch from '../DarkModeSwitch'
 import User from "./User";
 import BtnAuth from "../headerBtnAuth/BtnAuth";
 import { Dropdown, Menu, Input } from "antd";
@@ -18,6 +19,7 @@ import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { ProductPage } from "@/type/product.page.type";
 import { debounce } from "lodash";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -147,11 +149,6 @@ const Header = () => {
               ))}
             </>
           )}
-  
-          {/* Hiển thị thông báo khi không có kết quả tìm kiếm */}
-          {filteredData.length === 0 && filteredDataProducts.length === 0 && (
-            <Menu.Item className="text-gray-500">No results found</Menu.Item>
-          )}
         </ul>
       </div>
     </Menu>
@@ -219,7 +216,15 @@ const Header = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
+          <div
+        className={cn(
+          "flex items-center h-10 my-0.5 z-0 justify-center ml-2",
+        )}
+      >
+        <DarkModeSwitch />
+      </div>
         </div>
+        
       </div>
 
       {isMenuOpen && (
@@ -257,6 +262,7 @@ const Header = () => {
           </ul>
         </div>
       )}
+     
     </div>
   );
 };

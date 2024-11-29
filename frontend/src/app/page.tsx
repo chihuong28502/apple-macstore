@@ -1,8 +1,7 @@
 "use client";
-
 import TripleSlider from "@/components/Slider/Slider";
 import { IntroductionActions, IntroductionSelectors } from "@/modules/introduction/slice";
-import { Button } from "antd";
+import { Button, Skeleton } from "antd";
 import Image from "next/image";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,7 +10,7 @@ import "slick-carousel/slick/slick.css";
 
 export default function Home() {
   const dispatch = useDispatch();
-  
+
   const ads = useSelector(IntroductionSelectors.introductionByAds) || [];
   const banner = useSelector(IntroductionSelectors.introductionByBanner) || [];
 
@@ -22,16 +21,23 @@ export default function Home() {
 
   return (
     <div className="bg-mainLayout rounded-xl p-4">
-      {/* Kiểm tra và hiển thị banner nếu có */}
       {banner.length > 0 ? (
         <div className="w-full h-full">
           <TripleSlider slides={banner} />
         </div>
       ) : (
-        <p>Loading banner...</p>
+        <div className="bg-mainLayout rounded-xl p-4">
+          <div className="w-full h-full">
+            <Skeleton.Image className="w-full h-64" active={true} />
+            <div className="mt-4 flex gap-4">
+              <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+              <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+            </div>
+          </div>
+        </div>
       )}
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-8">
         {ads.length > 0 ? (
           ads.map((promo) => (
             <div
@@ -61,7 +67,27 @@ export default function Home() {
             </div>
           ))
         ) : (
-          <p>No promotions available.</p>
+          Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden m-1"
+            >
+              {/* Skeleton cho hình ảnh */}
+              <div className="w-full h-56 bg-gray-300 animate-pulse"></div>
+
+              {/* Skeleton cho nội dung */}
+              <div className="p-6">
+                <div className="h-6 bg-gray-300 rounded-md animate-pulse mb-4"></div>
+                <div className="h-4 bg-gray-300 rounded-md animate-pulse mb-2"></div>
+                <div className="h-4 bg-gray-300 rounded-md animate-pulse mb-2"></div>
+                <div className="h-4 bg-gray-300 rounded-md animate-pulse"></div>
+                <div className="mt-4 flex gap-4">
+                  <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                  <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </section>
     </div>

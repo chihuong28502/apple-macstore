@@ -85,7 +85,7 @@ const Cart = () => {
       }).concat([ // Add total and payment button
         {
           label: (
-            <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
+            <div className="text-fontColor flex items-center justify-between w-full">
               <span className="font-bold">
                 {`Tổng: ${cart.items.reduce((acc: any, item: any) => {
                   const { price } = item.variantId;
@@ -108,7 +108,7 @@ const Cart = () => {
       theme={{
         components: {
           Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+            colorBgElevated: resolvedTheme === "dark" ? "#f9f9f9" : "#fff",
           },
         },
       }}

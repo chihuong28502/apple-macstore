@@ -62,7 +62,7 @@ const User = () => {
       theme={{
         components: {
           Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+            colorBgElevated: resolvedTheme === "dark" ? "#fff" : "#fff",
           },
         },
       }}
