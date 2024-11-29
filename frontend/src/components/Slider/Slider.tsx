@@ -20,8 +20,8 @@ const TripleSlider = ({ slides }: Props) => {
     slidesToShow: 1,
     speed: 500,
     focusOnSelect: true,
-    autoplay: true, // Enable autoplay
-    autoplaySpeed: 3000, // Set the speed of the autoplay transition (in milliseconds)
+    autoplay: true,
+    autoplaySpeed: 3000,
     afterChange: (index: number) => setCurrentIndex(index),
     responsive: [
       {
@@ -43,24 +43,22 @@ const TripleSlider = ({ slides }: Props) => {
 
 
   return (
-    <div className="relative w-full h-full mb-20">
+    <div className="relative w-full h-full mb-16">
       <Slider {...settings}>
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
           return (
             <div
               key={slide._id}
-              className={`w-full ${!isActive ? "grayscale" : ""} relative`}
+              className={`w-full overflow-hidden ${!isActive ? "grayscale" : ""} relative`}
               onClick={() => handleSlideClick(index)}
             >
               <div className="relative w-full h-[600px] overflow-hidden rounded-lg shadow-lg cursor-pointer">
-                <Image
+                <img
+                  loading="lazy"
                   src={slide.images.image}
                   alt={slide.name}
-                  layout="fill"
-                  objectFit="contain"
-                  objectPosition="center"
-                  priority
+                  className="w-full h-full object-contain object-center"
                 />
                 <div className="absolute inset-0 bg-black opacity-0 transition-opacity duration-300 hover:opacity-20"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">

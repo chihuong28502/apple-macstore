@@ -15,14 +15,12 @@ const User = () => {
   const auth = useAppSelector(AuthSelectors.user);
   const dispatch = useAppDispatch();
   const { resolvedTheme } = useTheme();
-
   const handleLogout = () => {
     dispatch(
       AuthActions.logout({})
     );
     setIsOpen(false);
   };
-
 
   const getMenuItems = (): MenuProps["items"] => {
     if (_.isEmpty(auth)) {
@@ -62,7 +60,7 @@ const User = () => {
       theme={{
         components: {
           Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+            colorBgElevated: resolvedTheme === "dark" ? "#fff" : "#fff",
           },
         },
       }}

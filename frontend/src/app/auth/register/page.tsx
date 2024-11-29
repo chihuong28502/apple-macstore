@@ -1,12 +1,12 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { message, Input, Button } from "antd";
 import { AuthActions } from "@/modules/auth/slice";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
+import { Button, Input, message } from "antd";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import * as Yup from "yup";
-import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 
 const registerSchema = Yup.object().shape({
   firstName: Yup.string().required('First Name is required'),
@@ -125,6 +125,7 @@ function Register() {
         <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
           <div className="text-center">
             <img
+              loading="lazy"
               src="https://storage.googleapis.com/devitary-image-host.appspot.com/15846435184459982716-LogoMakr_7POjrN.png"
               className="w-32 mx-auto"
               alt="logo"
