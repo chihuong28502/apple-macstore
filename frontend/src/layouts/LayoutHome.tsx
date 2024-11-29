@@ -5,11 +5,17 @@ import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
 import SideBar from "@/components/sidebars/Sidebar";
 import { useWindowSize } from "@/hooks/breakpoint";
+import { useTheme } from "next-themes";
 
 const LayoutHome = ({ children }: { children: ReactNode }) => {
   const { width } = useWindowSize();
+  const { setTheme, } = useTheme();
   useEffect(() => {
+
   }, [width]);
+  useEffect(() => {
+    setTheme("light")
+  }, [])
   return (
     <div className="overflow-hidden flex flex-col">
       <Header />

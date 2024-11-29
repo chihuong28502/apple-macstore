@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useState } from "react";
 import Slider from "react-slick";
 
@@ -19,8 +20,8 @@ const TripleSlider = ({ slides }: Props) => {
     slidesToShow: 1,
     speed: 500,
     focusOnSelect: true,
-    autoplay: true, // Enable autoplay
-    autoplaySpeed: 3000, // Set the speed of the autoplay transition (in milliseconds)
+    autoplay: true,
+    autoplaySpeed: 3000,
     afterChange: (index: number) => setCurrentIndex(index),
     responsive: [
       {
@@ -42,14 +43,14 @@ const TripleSlider = ({ slides }: Props) => {
 
 
   return (
-    <div className="relative w-full h-full mb-20">
+    <div className="relative w-full h-full mb-16">
       <Slider {...settings}>
         {slides.map((slide, index) => {
           const isActive = index === currentIndex;
           return (
             <div
               key={slide._id}
-              className={`w-full ${!isActive ? "grayscale" : ""} relative`}
+              className={`w-full overflow-hidden ${!isActive ? "grayscale" : ""} relative`}
               onClick={() => handleSlideClick(index)}
             >
               <div className="relative w-full h-[600px] overflow-hidden rounded-lg shadow-lg cursor-pointer">
