@@ -10,24 +10,24 @@ interface ProductSectionProps {
   className?: string
 }
 
-export function ProductSection({ 
-  title, 
+export function ProductSection({
+  title,
   subtitle,
   logo,
   background,
   textColor = 'dark',
   className = ''
 }: ProductSectionProps) {
-  const textColorClasses = textColor === 'dark' 
-    ? 'text-[#1d1d1f]' 
+  const textColorClasses = textColor === 'dark'
+    ? 'text-[#1d1d1f]'
     : 'text-white'
 
-  const linkColor = textColor === 'dark' 
-    ? 'text-[#06c]' 
-    : 'text-[#2997ff]'
+  const linkColor = textColor === 'dark'
+    ? 'text-[#fff]'
+    : 'text-[#fff]'
 
   return (
-    <section 
+    <section
       className={`min-h-[624px] rounded-xl flex flex-col items-center justify-end pb-[52px] ${className}`}
       style={{
         background: `url(${background}) center top no-repeat`,
@@ -47,21 +47,19 @@ export function ProductSection({
           {title}
         </h2>
       )}
-      
+
       {subtitle && (
         <p className={`text-[28px] leading-[1.10722] font-normal ${textColorClasses} mb-[13px]`}>
           {subtitle}
         </p>
       )}
-      
-      <div className="flex items-center justify-center gap-[35px]">
-        <Link href="#" className={`${linkColor} text-[21px] leading-[1.381] font-normal hover:underline`}>
+
+      <div className="flex items-center justify-center gap-4">
+        <Link href="#" className={`${linkColor} bg-slate-400 px-4 py-2 rounded-3xl text-xl  leading-[1.381] font-thin hover:opacity-75`}>
           Tìm hiểu thêm
-          <span className="ml-[0.15em]">{'>'}</span>
         </Link>
-        <Link href="#" className={`${linkColor} text-[21px] leading-[1.381] font-normal hover:underline`}>
+        <Link href="#" className={`border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-1 rounded-3xl  text-xl  leading-[1.381] font-thin`}>
           Mua
-          <span className="ml-[0.15em]">{'>'}</span>
         </Link>
       </div>
     </section>

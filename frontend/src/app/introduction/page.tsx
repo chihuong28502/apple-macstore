@@ -7,17 +7,12 @@ import Slider from 'react-slick'
 
 function Page() {
   const sliderSettings = {
-    dots: true, // Hiển thị điểm đánh dấu
     infinite: true, // Lặp lại slider
     speed: 500, // Tốc độ chuyển đổi
     slidesToShow: 1, // Hiển thị 1 ảnh mỗi lần
     slidesToScroll: 1, // Chuyển 1 ảnh mỗi lần
     autoplay: true, // Tự động chuyển đổi
     autoplaySpeed: 5000,
-    customPaging: (i: any) => (
-      <div className="w-2.5 h-2.5 mx-2 bg-white rounded-full cursor-pointer">
-      </div>
-    ),
   };
   const slides = [
     {
@@ -31,6 +26,23 @@ function Page() {
         'https://www.apple.com/v/home/bv/images/heroes/holiday-2024/hero_holiday_2024_startframe__kdegyfjrojm2_mediumtall.jpg',
       title: 'Sức mạnh công nghệ.',
       subtitle: 'Đưa những sáng tạo của bạn lên tầm cao mới.',
+    },
+  ];
+
+  const productData = [
+    {
+      title: "Macbook Pro M4",
+      subtitle: "Chuyên nghiệp. Mạnh mẽ. Đột phá.",
+      background: "https://www.apple.com/v/home/bv/images/promos/macbook-pro/promo_macbookpro_announce__gdf98j6tj2ie_large.jpg",
+      textColor: "light",
+      className: "bg-black",
+    },
+    {
+      title: "iPhone 16",
+      subtitle: "Thần kỳ, đa màu sắc, ấn tượng.",
+      background: "https://www.apple.com/vn/home/images/heroes/iphone-16/hero_iphone16_avail__euwzls69btea_largetall.jpg",
+      textColor: "dark",
+      className: "bg-[#fafafa]",
     },
   ];
 
@@ -66,21 +78,16 @@ function Page() {
       </Slider>
 
       <div className="grid grid-cols-1 gap-3">
-        <ProductSection
-          title="iPhone 16 Pro"
-          subtitle="Chuyên nghiệp. Mạnh mẽ. Đột phá."
-          background="https://www.apple.com/v/home/bv/images/promos/macbook-pro/promo_macbookpro_announce__gdf98j6tj2ie_large.jpg"
-          textColor="light"
-          className="bg-black"
-        />
-
-        <ProductSection
-          title="iPhone 16"
-          subtitle="Thần kỳ, đa màu sắc, ấn tượng."
-          background="https://www.apple.com/vn/home/images/heroes/iphone-16/hero_iphone16_avail__euwzls69btea_largetall.jpg"
-          textColor="dark"
-          className="bg-[#fafafa]"
-        />
+        {productData.map((product, index) => (
+          <ProductSection
+            key={index}
+            title={product.title}
+            subtitle={product.subtitle}
+            background={product.background}
+            textColor={product.textColor as any}
+            className={product.className}
+          />
+        ))}
         <ProductGrid />
         <TVCarousel />
       </div>

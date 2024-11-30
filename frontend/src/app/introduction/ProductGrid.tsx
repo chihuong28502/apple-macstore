@@ -1,5 +1,6 @@
+'use client'
 import Link from 'next/link'
-import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const products = [
   {
@@ -17,56 +18,43 @@ const products = [
     textColor: 'text-black'
   },
   {
-    name: 'iMac',
-    description: 'Sáng sáng.',
-    image: 'https://www.apple.com/v/home/bv/images/promos/ipad-air/promo_ipadair_ai__3fv1eitzqv6y_large.jpg',
-    background: 'bg-white',
-    textColor: 'text-black'
-  },
-  {
     name: 'iPad air',
     description: 'Hai kích cỡ. Chip nhanh hơn. Đa zi năng.',
     image: 'https://www.apple.com/v/home/bv/images/promos/ipad-air/promo_ipadair_ai__3fv1eitzqv6y_large.jpg',
     background: 'bg-black',
-    textColor: 'text-white'
+    textColor: 'text-black'
   },
   {
     name: 'WATCH SERIES 10',
     description: 'Mỏng hơn. Mãi đỉnh.',
     image: 'https://www.apple.com/v/home/bv/images/promos/apple-watch-series-10/promo_apple_watch_series_10_avail_lte__c70y29goir42_large.jpg',
     background: 'bg-black',
-    textColor: 'text-white'
-  },
-  {
-    name: 'AirPods Pro',
-    description: 'Nay với tính năng Chủ Động Khử Tiếng Ồn.',
-    image: 'https://www.apple.com/v/home/bv/images/promos/apple-watch-series-10/promo_apple_watch_series_10_avail_lte__c70y29goir42_large.jpg',
-    background: 'bg-white',
     textColor: 'text-black'
   }
 ]
 
 export function ProductGrid() {
+  const route = useRouter()
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 py-3">
+    <Link href={`/product`} className="grid grid-cols-1 md:grid-cols-2 gap-3 px-3 py-3 hover:cursor-pointer">
       {products.map((product) => (
-        <div key={product.name} className={`${product.background} ${product.textColor} p-12 flex flex-col items-center justify-end text-center rounded-3xl`}>
-          <h3 className="text-4xl font-semibold mb-2">{product.name}</h3>
-          <p className="text-xl mb-4">{product.description}</p>
-          <div className="flex space-x-4 mb-6">
-            <Link href="#" className="text-[#2997ff] text-xl hover:underline">
-              Tìm hiểu thêm
-              <span className="ml-1">{'>'}</span>
-            </Link>
-            <Link href="#" className="text-[#2997ff] text-xl hover:underline">
-              Mua
-              <span className="ml-1">{'>'}</span>
-            </Link>
+        <div
+          key={product.name}
+          className={`${product.background} ${product.textColor} hover:scale-[1.02] shadow-2xl py-40 flex flex-col items-center justify-between text-center rounded-3xl relative`}
+          style={{
+            backgroundImage: `url(${product.image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            transition: 'transform 0.3s ease-in-out', 
+          }}
+        >
+          <div className="absolute top-3 z-10">
+            <h3 className="text-xl font-semibold my-1">{product.name}</h3>
+            <p className="text-sm my-1">{product.description}</p>
           </div>
-          <Image src={product.image} alt={product.name} width={400} height={300} className="w-full h-auto" />
         </div>
       ))}
-    </div>
+    </Link>
+
   )
 }
-

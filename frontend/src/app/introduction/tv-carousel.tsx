@@ -3,8 +3,6 @@
 import { useState, useRef } from 'react'
 import Image from 'next/image'
 import Slider from 'react-slick'
-import "slick-carousel/slick/slick.css"
-import "slick-carousel/slick/slick-theme.css"
 
 const tvShows = [
   {
@@ -17,7 +15,6 @@ const tvShows = [
     subtitle: "Tất cả chúng ta đều có can đảm để thay đổi số phận.",
     image: "https://is1-ssl.mzstatic.com/image/thumb/Tu3M0fknOkn-cPuWZrjA1A/980x551.jpg"
   },
-  // Add more TV shows as needed
 ]
 
 export function TVCarousel() {
@@ -32,11 +29,6 @@ export function TVCarousel() {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
-    beforeChange: (oldIndex: number, newIndex: number) => setCurrentSlide(newIndex),
-    customPaging: (i: any) => (
-      <div className="w-2.5 h-2.5 mx-2 bg-white rounded-full cursor-pointer">
-      </div>
-    ),
   }
 
   return (
@@ -49,7 +41,7 @@ export function TVCarousel() {
                 src={show.image}
                 alt={show.title}
                 layout="fill"
-                objectFit="center"
+                objectFit="contain"
                 priority={index === 0}
                 quality={90}
               />
