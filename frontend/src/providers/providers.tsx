@@ -4,6 +4,7 @@ import ReduxProvider from "@/core/components/ReduxProvider";
 import LayoutHome from "@/layouts/LayoutHome";
 import AuthProvider from "./AuthProvider";
 import { RootStyleRegistry } from "./RootStyleRegistry";
+import 'antd/dist/reset.css';
 
 export async function Providers({ children }: { children: ReactNode }) {
   return (
