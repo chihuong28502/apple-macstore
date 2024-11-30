@@ -3,7 +3,6 @@ import { ReactNode, useEffect } from "react";
 
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/Header/Header";
-import SideBar from "@/components/sidebars/Sidebar";
 import { useWindowSize } from "@/hooks/breakpoint";
 import { useTheme } from "next-themes";
 

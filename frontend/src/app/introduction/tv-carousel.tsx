@@ -1,0 +1,69 @@
+'use client'
+
+import { useState, useRef } from 'react'
+import Image from 'next/image'
+import Slider from 'react-slick'
+import "slick-carousel/slick/slick.css"
+import "slick-carousel/slick/slick-theme.css"
+
+const tvShows = [
+  {
+    title: "Miễn Trừ Trách Nhiệm",
+    subtitle: "Giật gân - Mọi chuyện đều chỉ là trùng hợp.",
+    image: "https://is1-ssl.mzstatic.com/image/thumb/iUZiuKb8A9o5jIx0hJSvjw/980x551.jpg"
+  },
+  {
+    title: "Tâm Ý",
+    subtitle: "Tất cả chúng ta đều có can đảm để thay đổi số phận.",
+    image: "https://is1-ssl.mzstatic.com/image/thumb/Tu3M0fknOkn-cPuWZrjA1A/980x551.jpg"
+  },
+  // Add more TV shows as needed
+]
+
+export function TVCarousel() {
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const sliderRef = useRef<Slider>(null)
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    beforeChange: (oldIndex: number, newIndex: number) => setCurrentSlide(newIndex),
+    customPaging: (i: any) => (
+      <div className="w-2.5 h-2.5 mx-2 bg-white rounded-full cursor-pointer">
+      </div>
+    ),
+  }
+
+  return (
+    <div className="relative overflow-hidden">
+      <Slider ref={sliderRef} {...settings} className="tv-carousel">
+        {tvShows.map((show, index) => (
+          <div key={index} className="outline-none">
+            <div className="relative h-[600px]">
+              <Image
+                src={show.image}
+                alt={show.title}
+                layout="fill"
+                objectFit="center"
+                priority={index === 0}
+                quality={90}
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-8 text-white">
+                <h3 className="text-4xl font-semibold mb-2">{show.title}</h3>
+                <p className="text-xl mb-4">{show.subtitle}</p>
+                <button className="bg-white text-black px-6 py-2 rounded-full text-lg font-semibold hover:bg-opacity-90 transition-colors">
+                  Xem ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </Slider>
+    </div>
+  )
+}

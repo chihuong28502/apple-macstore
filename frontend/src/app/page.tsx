@@ -19,7 +19,7 @@ export default function Home() {
   }, [dispatch]);
 
   return (
-    <div className="bg-mainLayout rounded-xl p-4">
+    <div className="bg-mainLayout rounded-xl p-4 mx-4 ">
       {banner.length > 0 ? (
         <div className="w-full h-full">
           <TripleSlider slides={banner} />
