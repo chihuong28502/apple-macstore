@@ -5,7 +5,6 @@ import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { CustomerActions, CustomerSelectors } from "@/modules/customer/slice";
 import { OrderActions } from "@/modules/order/slice";
 import { Button, Card, Checkbox, Col, Empty, Input, List, message, Modal, Row, Space, Tooltip } from "antd";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
@@ -31,6 +30,7 @@ function CartCheckout() {
     address: "",
     description: ""
   });
+
   useEffect(() => {
     if (auth?._id) {
       dispatch(CartActions.fetchCartById(auth._id));
@@ -127,7 +127,8 @@ function CartCheckout() {
                 />
               </Col>
               <Col span={4} style={{ textAlign: "center" }}>
-                <Image
+                <img
+                  loading="lazy"
                   src={productId.images[0].image}
                   alt={productId.name}
                   width={80}

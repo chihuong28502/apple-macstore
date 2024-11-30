@@ -15,7 +15,7 @@ import {
 } from '@ant-design/icons';
 import { Avatar, Button, Card, List, message, Modal, Tag } from 'antd';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 type OrderItem = {
   productImages: { image: string }[];
@@ -37,7 +37,7 @@ function Orders() {
   const dispatch = useDispatch();
   const auth = useAppSelector(AuthSelectors.user);
   const allOrder: Order[] = useAppSelector(OrderSelectors.allOrder);
-
+  const isLoadingOrder = useSelector(OrderSelectors.isLoading)
   useEffect(() => {
     if (auth?._id) {
       dispatch(OrderActions.getAllOrderById(auth._id));
@@ -97,7 +97,6 @@ function Orders() {
         }
       },
     });
-
   };
 
   const handleMarkAsReceived = (orderId: string) => {
@@ -125,9 +124,34 @@ function Orders() {
     });
   };
 
+  if (isLoadingOrder) {
+    return (
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden m-1"
+          >
+            <div className="w-full h-40 bg-gray-300 animate-pulse"></div>
+            <div className="p-6">
+              <div className="h-6 bg-gray-300 rounded-md animate-pulse mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded-md animate-pulse mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded-md animate-pulse mb-2"></div>
+              <div className="h-4 bg-gray-300 rounded-md animate-pulse"></div>
+              <div className="mt-4 flex gap-4">
+                <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </section>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6 text-center">My Orders</h1>
+    <div className="container mx-auto p-4 ">
+      <h1 className="text-2xl font-bold mb-6 text-center text-fontColor">My Orders</h1>
       {allOrder?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {allOrder.map((order) => (

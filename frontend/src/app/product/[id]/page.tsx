@@ -1,5 +1,4 @@
 "use client";
-import { getCache } from "@/cache/cacheLocal";
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions } from "@/modules/cart/slice";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
@@ -106,7 +105,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const handleAddToCart = () => {
     // Kiểm tra nếu đã chọn đầy đủ màu sắc, RAM và lưu trữ
     if (!selectedColor || !selectedRam || !selectedStorage) {
-      alert("Please select color, RAM, and storage before adding to the cart.");
       return;
     }
 
@@ -128,7 +126,6 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         })
       );
     } else {
-      alert("The selected variant is out of stock.");
     }
   };
 
@@ -149,10 +146,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   };
 
   return (
-    <div className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
+    <div
+      style={{ minHeight: 'calc(100vh - 115px)' }}
+      className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
       <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">
         <div className="lg:sticky top-0 flex gap-3 w-full">
           <img
+            loading="lazy"
             src={mainImage}
             alt={productById?.name}
             className="w-3/4 rounded-lg object-cover shadow-lg"
@@ -160,6 +160,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
           <div className="w-20 flex flex-col gap-3">
             {productById?.images?.map((image: Image, index: number) => (
               <img
+                loading="lazy"
                 key={index}
                 src={image.image}
                 alt={`Product Image ${index}`}
@@ -172,8 +173,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         <div>
           <h2 className="text-2xl font-bold text-fontColor">{productById?.name}</h2>
           <p className="text-[#d02525]">{productById?.description}</p>
-          <div className="flex flex-wrap gap-2">
-            <h3 className="text-xl font-bold text-fontColor">Colors: </h3>
+          <div className="flex flex-wrap gap-2 items-center">
+            <h3 className="text-md font-bold text-fontColor my-0">Colors: </h3>
             {Array.from(
               new Map(
                 productById?.variants?.map((variant: Variant) => [variant.color, variant.colorCode])
@@ -183,7 +184,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 <button
                   type="button"
                   onClick={() => handleColorClick(color)}
-                  className={`rounded-full p-3 border-2 transition-all duration-300 ${selectedColor === color ? "border-fontColor" : ""}`}
+                  className={`rounded-full p-2.5 border-4 transition-all duration-300 ${selectedColor === color ? "border-[green]" : ""}`}
                   style={{ backgroundColor: colorCode }}
                 />
               </Tooltip>

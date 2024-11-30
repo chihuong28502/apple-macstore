@@ -10,8 +10,10 @@ import { OrderActions } from "./slice";
 function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
   try {
     yield put(AppAction.showLoading());
+    yield put(OrderActions.setLoading(true))
     const res: { success: boolean; data: any } =
       yield OrderRequest.getOrderById(payload);
+    yield put(OrderActions.setLoading(false))
     yield put(AppAction.hideLoading());
     if (res.success) {
       yield put(OrderActions.setAllOrder(res.data));

@@ -1,6 +1,5 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { put, takeLeading } from "redux-saga/effects";
-
 import { NotifyRequest } from "./request";
 import { NotifyActions } from "./slice";
 function* fetchdNotifyById({ payload }: PayloadAction<any>) {
@@ -20,8 +19,6 @@ function* fetchdNotifyById({ payload }: PayloadAction<any>) {
     onFail(e);
   }
 }
-
-
 
 export function* NotifySaga() {
   yield takeLeading(NotifyActions.fetchNotifyById, fetchdNotifyById);

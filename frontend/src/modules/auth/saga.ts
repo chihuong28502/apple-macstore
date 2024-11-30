@@ -7,7 +7,6 @@ import { call, delay, put, takeLeading } from "redux-saga/effects";
 import { CustomerActions } from "../customer/slice";
 import { AuthRequest } from "./request";
 import { AuthActions } from "./slice";
-
 const getUserIdFromToken = () => {
   // Lấy accessToken từ localStorage
   const accessToken = localStorage.getItem('accessToken');
@@ -19,59 +18,47 @@ const getUserIdFromToken = () => {
   return null; // Trả về null nếu không có accessToken
 };
 
-// Utility function to handle API errors
-function* handleApiError(error: any, onFail: (error: any) => void) {
-  if (error instanceof AxiosError) {
-    message.error(error?.response?.data?.error || "API error occurred.");
-  } else {
-    message.error("An unexpected error occurred.");
-  }
-  onFail && onFail(error);
-}
 
 // Saga for login
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
+  const { email, password,onSuccess = () => { }, } = payload;
   try {
-    yield delay(500); // Simulate API delay
-    const { success, message, data } = yield call(AuthRequest.login, { email, password });
-
+    yield delay(500);
+    const { success, data } = yield call(AuthRequest.login, { email, password });
     if (success) {
       const decoded: any = jwt.decode(data.accessToken);
-      localStorage.setItem('accessToken', data.accessToken)
+      localStorage.setItem('accessToken', data.accessToken);
       if (decoded) {
         const response = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(response.data));
         onSuccess(data?.user);
       } else {
-        message.error("Failed to retrieve user ID from token.");
         yield put(AuthActions.getInfoUser({}));
+        message.error("Đăng nhập không thành công."); // Hiển thị thông báo lỗi
       }
     } else {
-      onFail(message, data);
+      message.error("Đăng nhập không thành công."); // Hiển thị thông báo lỗi
     }
   } catch (error) {
-    yield* handleApiError(error, onFail);
+    message.error("Đăng nhập không thành công."); // Hiển thị thông báo lỗi
+    console.error("Error during login process:", error);
   }
 }
 
 // Saga for registration
 function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { onSuccess = () => { }, onFail = () => { }, data } = payload;
+  const { onSuccess = () => { }, onFail = () => { } } = payload;
+  const data: any = { ...payload, role: "customer" }
   try {
     yield put(AppAction.showLoading());
     const res: { success: boolean; data: any } = yield call(AuthRequest.register, data);
     yield put(AppAction.hideLoading());
-
     if (res.success) {
       onSuccess(res);
-      message.success("Đăng ký thành công.");
     } else {
-      message.error("Đăng ký thất bại.");
       onFail(res);
     }
   } catch (error: any) {
-    yield* handleApiError(error, onFail);
     yield put(AppAction.hideLoading());
   }
 }
@@ -104,7 +91,6 @@ function* logout(): Generator<any, void, any> {
       window.location.replace('/')
     }
   } catch (error) {
-    yield* handleApiError(error, () => { });
   }
 }
 function* refreshToken(): Generator<any, void, any> {

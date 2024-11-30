@@ -50,7 +50,7 @@ const Order = () => {
   const { resolvedTheme } = useTheme();
 
   const getMenuItems = (): MenuProps["items"] => {
-    if (!allOrder || allOrder?.length === 0) {
+    if (!allOrder || allOrder.length === 0) {
       return [
         {
           label: (
@@ -62,72 +62,76 @@ const Order = () => {
         },
       ];
     } else {
-      return allOrder?.map((order: any) => {
-        const { _id, items, totalPrice, status, createdAt } = order;
-        const statusStyles: any = {
-          success: "bg-green-100",
-          cancelled: "disabled opacity-70",
-          shipping: "bg-gray-100"
-        }
-        return {
-          label: (
-            <Card
-              className={`mx-auto w-full ${statusStyles[status] || ""}`}
-              hoverable
-              bordered={false}
-              style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-            >
-              <Row gutter={[16, 16]} align="middle">
-                <Col>
-                  <p className="font-bold text-lg ">Mã đơn: <span>{_id}</span> </p>
-                  <p className="text-lg font-semibold text-red-600">
-                    Tổng giá đơn hàng: <span>{totalPrice.toLocaleString()}₫</span>
-                  </p>
-                  <div className="flex justify-between  mt-1">
-                    <span className="text-gray-500 block">{`Trạng thái: ${status}`}</span>
-                    <div className="text-gray-500 flex justify-end">
-                      {formatTimeDifference(createdAt)}
-                    </div>
-                  </div>
-                </Col>
-              </Row>
-              {["shipping", "pending"].includes(status) && (
-                <Button
-                  type="primary"
-                  danger={status === "cancelled"}
-                  style={{ marginTop: "10px" }}
-                  onClick={() => handleCancelOrder(_id)}
-                >
-                  CANCEL
-                </Button>
-              )}
-            </Card>
-          ),
-          key: _id,
-        };
-      }).concat([
-        {
-          label: (
-            <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
-              <Button
+      return [
+        // {
+        //   label: (
+        //     <div className="text-fontColor flex items-center justify-between border-b w-full">
+        //       <Button
+        //         className="w-full"
+        //         onClick={() => router.push('/orders')}
+        //         type="primary"
+        //         style={{ marginLeft: '10px' }}
+        //       >
+        //         Show All
+        //       </Button>
+        //     </div>
+        //   ),
+        //   key: "showAll",
+        // },
+        ...(allOrder ?? []).map((order: any) => {
+          const { _id, totalPrice, status, createdAt } = order;
+          const statusStyles: any = {
+            success: "bg-green-100",
+            cancelled: " bg-gray-300",
+            shipping: "bg-gray-100",
+          };
+          return {
+            label: (
+              <Card
                 onClick={() => router.push('/orders')}
-                type="primary" style={{ marginLeft: '10px' }}>
-                Show All
-              </Button>
-            </div>
-          ),
-          key: "total",
-        }
-      ]);
+                className={`w-full ${statusStyles[status] || ""}`}
+                hoverable
+                bordered={false}
+                style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+              >
+                <Row gutter={[16, 16]} align="middle">
+                  <Col>
+                    <p className="font-bold text-lg ">Mã đơn: <span>{_id?.slice(0, 10)}</span> </p>
+                    <p className="text-lg font-semibold text-red-600">
+                      Tổng giá đơn hàng: <span>{totalPrice.toLocaleString()}₫</span>
+                    </p>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 block">{`Trạng thái: ${status}`}</span>
+                      <div className="text-gray-500 flex justify-end">
+                        {formatTimeDifference(createdAt)} {/* Hiển thị thời gian tạo đơn */}
+                      </div>
+                    </div>
+                  </Col>
+                </Row>
+                {["shipping", "pending"].includes(status) && (
+                  <Button
+                    type="primary"
+                    danger={status === "cancelled"}
+                    style={{ marginTop: "10px" }}
+                    onClick={() => handleCancelOrder(_id)}
+                  >
+                    CANCEL
+                  </Button>
+                )}
+              </Card>
+            ),
+            key: _id,
+          };
+        }),
+      ];
     }
   };
-
   return (
     <ConfigProvider
       theme={{
         components: {
           Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+            colorBgElevated: resolvedTheme === "dark" ? "#f9f9f9" : "#fff",
           },
         },
       }}
@@ -136,9 +140,7 @@ const Order = () => {
         placement="bottom"
         open={isOpen}
         onOpenChange={setIsOpen}
-        menu={{
-          items: getMenuItems(),
-        }}
+        menu={{ items: getMenuItems()}}
         dropdownRender={(menu) => (
           <div
             style={{

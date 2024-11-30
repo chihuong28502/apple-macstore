@@ -3,7 +3,7 @@ import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { type ProductPage } from "@/type/product.page.type";
 import { Pagination, Skeleton } from "antd";
 import { debounce } from "lodash";
-import { usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { BreadcrumbNav } from "./components/BreadcrumbNav";
@@ -13,7 +13,8 @@ import { ProductGrid } from "./components/ProductGrid";
 
 const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
-  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const categoryId: any = searchParams.get("categoryId");
   const allProducts = useSelector(
     ProductSelectors.productList
   ) as ProductPage.Product[];
@@ -21,8 +22,8 @@ const ProductPage: React.FC = () => {
   const categories = useSelector(
     ProductSelectors.categories
   ) as ProductPage.Category[];
-  const loading = useSelector(ProductSelectors.isLoading) as boolean;
-
+  const loadingCategories = useSelector(ProductSelectors.isLoadingCategories) as boolean;
+  const loadingProducts = useSelector(ProductSelectors.isLoadingProducts) as boolean;
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000000000]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(8);
@@ -43,7 +44,6 @@ const ProductPage: React.FC = () => {
     const fetchCategories = async () => {
       dispatch(ProductActions.fetchCategories());
     };
-
     fetchCategories();
   }, [dispatch]);
 
@@ -60,7 +60,7 @@ const ProductPage: React.FC = () => {
     }, 500),
     [fetchProducts]
   );
- 
+
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setCurrentPage(1);
@@ -101,18 +101,20 @@ const ProductPage: React.FC = () => {
     setSelectedRangeId(range.id);
     setPriceRange([range.min, range.max]);
   };
-
+  useEffect(() => {
+    setSelectedCategory(categoryId)
+  }, [searchParams])
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {loading ? (
+        {loadingCategories ? (
           <Skeleton active />
         ) : (
           <BreadcrumbNav
             onCategoryChange={handleCategoryChange}
             selectedCategory={selectedCategory}
             categories={categories}
-            loading={loading}
+            loading={loadingCategories}
           />
         )}
 
@@ -120,29 +122,48 @@ const ProductPage: React.FC = () => {
           categories={categories}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
-          loading={loading}
+          loading={loadingCategories}
         />
 
         <PriceFilter
           priceRanges={priceRanges}
           selectedRangeId={selectedRangeId}
           onPriceChange={handlePriceRangeChange}
-          loading={loading}
+          loading={loadingCategories}
         />
-        <ProductGrid products={allProducts} loading={loading} />
-        {totalProducts > pageSize && allProducts?.length > 0 && (
-          <div className="mt-8 flex justify-center">
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={totalProducts}
-              onChange={(page: number, size: number) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              }}
-              className="bg-white p-4 rounded-lg shadow-md"
-            />
-          </div>
+
+        {loadingProducts ? (
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden" >
+                <div className="w-full h-56 bg-gray-300 animate-pulse"></div>
+                <div className="p-6">
+                  <div className="h-4 bg-gray-300 rounded-md animate-pulse"></div>
+                  <div className="mt-4 flex gap-4">
+                    <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                    <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </section>
+        ) : (
+          <>
+            <ProductGrid products={allProducts} loading={loadingProducts} />
+            {totalProducts > pageSize && allProducts?.length > 0 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={totalProducts}
+                  onChange={(page: number, size: number) => {
+                    setCurrentPage(page);
+                    setPageSize(size);
+                  }}
+                  className="bg-white p-4 rounded-lg shadow-md"
+                />
+              </div>
+            )}</>
         )}
       </div>
     </div>

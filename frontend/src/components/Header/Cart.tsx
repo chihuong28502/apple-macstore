@@ -4,7 +4,6 @@ import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { Badge, Button, Card, Col, ConfigProvider, Dropdown, Empty, MenuProps, Row } from "antd";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoCartOutline } from "react-icons/io5";
@@ -19,9 +18,10 @@ const Cart = () => {
 
   useEffect(() => {
     if (auth?._id) {
-      dispatch(CartActions.fetchCartById(auth._id));
+      dispatch(CartActions.fetchCartById(auth._id)); // Fetch cart data for logged-in user
     }
   }, [auth?._id, dispatch]);
+
   const { resolvedTheme } = useTheme();
 
   const handleClickPayment = () => {
@@ -42,51 +42,50 @@ const Cart = () => {
       ];
     } else {
       return cart.items.map((item: any) => {
-        const { productId, variantId, quantity, } = item;
-        const { images, name, description } = productId;
+        const { productId, variantId, quantity } = item;
+        const { images, name } = productId;
         const { color, ram, ssd, price, availableStock } = variantId;
 
         return {
           label: (
             <Card
-              className={`my-2 mx-auto w-full ${availableStock === 0 ? "disabled opacity-70" : ""}`}
+              className={`my-2 ${availableStock === 0 ? "disabled opacity-70" : ""}`}
               hoverable
               bordered={false}
-              style={{ borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+              style={{ borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
             >
               <Row gutter={[16, 16]} align="middle">
                 <Col span={5} style={{ textAlign: "center" }}>
-                  <Image
-                    src={images[0].image} // Use the first image
+                  <img
+                    loading="lazy"
+                    src={images[0]?.image || ""}
                     alt={name}
-                    width={80}
-                    height={80}
+                    width={100}
+                    height={100}
                     className="object-cover rounded"
                   />
                 </Col>
-                <Col span={13}>
+                <Col span={12}>
                   <span className="font-bold text-lg block">{name}</span>
-                  {/* <span className="text-gray-500 block">{`Mô tả: ${description}`}</span> */}
                   <span className="text-gray-500 block">{`Màu: ${color}`}</span>
                   <span className="text-lg font-semibold text-red-600">
                     {`${price.toLocaleString()}₫`}
                   </span>
                 </Col>
-                <Col span={6} className="text-right">
+                <Col span={7} className="text-right">
                   <div className="text-gray-500 block">{`RAM: ${ram}`}</div>
                   <div className="text-gray-500 block w-full">{`SSD: ${ssd}`}</div>
-                  <div className="text-gray-500 block w-full">{`Số lượng: ${quantity}`}</div>
-                  {/* <div className="text-gray-500 block w-full">{`Tồn kho: ${stock}`}</div> */}
+                  <div className="text-red-600 block w-full">{`Số lượng: ${quantity}`}</div>
                 </Col>
               </Row>
             </Card>
           ),
           key: item._id,
         };
-      }).concat([
+      }).concat([ // Add total and payment button
         {
           label: (
-            <div className="text-fontColor flex items-center justify-between py-2 border-t w-full">
+            <div className="text-fontColor flex items-center justify-between w-full">
               <span className="font-bold">
                 {`Tổng: ${cart.items.reduce((acc: any, item: any) => {
                   const { price } = item.variantId;
@@ -109,7 +108,7 @@ const Cart = () => {
       theme={{
         components: {
           Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+            colorBgElevated: resolvedTheme === "dark" ? "#f9f9f9" : "#fff",
           },
         },
       }}
@@ -117,10 +116,11 @@ const Cart = () => {
       <Dropdown
         placement="bottom"
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={setIsOpen} // Manage dropdown open/close
         menu={{ items: getMenuItems() }}
         dropdownRender={(menu) => (
           <div
+            className="bg-[#e0e0e0] shadow-[15px_15px_30px_#bebebe,-15px_-15px_30px_#ffffff]"
             style={{
               borderRadius: "8px",
               maxHeight: "400px",

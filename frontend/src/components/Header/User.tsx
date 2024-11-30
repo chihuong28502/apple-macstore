@@ -15,14 +15,12 @@ const User = () => {
   const auth = useAppSelector(AuthSelectors.user);
   const dispatch = useAppDispatch();
   const { resolvedTheme } = useTheme();
-
   const handleLogout = () => {
     dispatch(
       AuthActions.logout({})
     );
     setIsOpen(false);
   };
-
 
   const getMenuItems = (): MenuProps["items"] => {
     if (_.isEmpty(auth)) {
@@ -37,9 +35,6 @@ const User = () => {
         {
           label: (
             <div className="text-fontColor flex flex-col items-center justify-center ">
-              {/* <div className="size-10 min-w-10 min-h-10 max-w-10 max-h-10">
-                <img src={auth?.snippet?.thumbnails?.default?.url} alt="" className="rounded-full w-full h-full object-cover" />
-              </div> */}
               <span>{auth?.email}</span>
             </div>
           ),
@@ -48,7 +43,7 @@ const User = () => {
         {
           label: (
             <div
-              className="flex items-center gap-1 text-fontColor cursor-pointer "
+              className="flex items-center text-fontColor cursor-pointer "
               onClick={handleLogout}
             >
               <TbLogout /> <span>Đăng xuất</span>
@@ -65,7 +60,7 @@ const User = () => {
       theme={{
         components: {
           Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#4b4b4b" : "#fff",
+            colorBgElevated: resolvedTheme === "dark" ? "#fff" : "#fff",
           },
         },
       }}
@@ -76,7 +71,7 @@ const User = () => {
         menu={{ items: getMenuItems() }}
         trigger={["click"]}
       >
-        <div className="cursor-pointer p-1.5 pl-0  text-fontColor">
+        <div className="cursor-pointer text-fontColor">
           <FiUser className="size-5" />
         </div>
       </Dropdown>

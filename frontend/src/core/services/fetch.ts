@@ -53,18 +53,14 @@ const registerInterceptorResponse = (clientInstance: AxiosInstance) => {
             return Promise.reject(error);
 
           case 403:
-            message.error("Bạn không có quyền");
             return Promise.reject(error);
           case 404:
-            message.error("Not Found.");
             return Promise.reject(error);
 
           case 500:
-            message.error("Server Error.");
             return Promise.reject(error);
 
           default:
-            message.error("Unexpected Error");
             return Promise.reject(error);
         }
       } else {
