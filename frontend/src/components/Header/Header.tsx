@@ -169,8 +169,8 @@ const Header = () => {
             <span>Products</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
           </Link>
-          <Link href="/faq" className="group relative">
-            <span>FAQ</span>
+          <Link href="/introduction" className="group relative">
+            <span>Introduction</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
           </Link>
           <Link href="/shipping" className="group relative">
@@ -237,8 +237,8 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link href="/faq" className="block text-gray-800 text-base font-medium group relative">
-                <span>FAQ</span>
+              <Link href="/introduction" className="block text-gray-800 text-base font-medium group relative">
+                <span>Introduction</span>
                 <span className="absolute left-0 bottom-0 h-[2px] w-full bg-blue-600 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-300"></span>
               </Link>
             </li>

@@ -4,8 +4,6 @@ import { IntroductionActions, IntroductionSelectors } from "@/modules/introducti
 import { Button, Skeleton } from "antd";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import "slick-carousel/slick/slick-theme.css";
-import "slick-carousel/slick/slick.css";
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -19,7 +17,7 @@ export default function Home() {
   }, [dispatch]);
 
   return (
-    <div className="bg-mainLayout rounded-xl p-4">
+    <div className="bg-mainLayout rounded-xl p-4 mx-4 ">
       {banner.length > 0 ? (
         <div className="w-full h-full">
           <TripleSlider slides={banner} />
