@@ -12,7 +12,7 @@ const products = [
 
 export default function ProductShowcase() {
   return (
-    <section className="py-20 bg-gray-800">
+    <section className="py-20 bg-gray-800 rounded-lg">
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold mb-12 text-center">Our Products</h2>
         <Carousel autoplay>
