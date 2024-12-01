@@ -1,92 +1,98 @@
-"use client";
-import TripleSlider from "@/components/Slider/Slider";
-import { IntroductionActions, IntroductionSelectors } from "@/modules/introduction/slice";
-import { Button, Skeleton } from "antd";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+'use client'
+import { Button } from 'antd'
 
-export default function Home() {
-  const dispatch = useDispatch();
+import Slider from 'react-slick'
+import { TVCarousel } from './components/tv-carousel';
+import { ProductGrid } from './components/ProductGrid';
+import { ProductSection } from './components/product-section';
 
-  const ads = useSelector(IntroductionSelectors.introductionByAds) || [];
-  const banner = useSelector(IntroductionSelectors.introductionByBanner) || [];
+function Page() {
+  const sliderSettings = {
+    infinite: true, // Lặp lại slider
+    speed: 500, // Tốc độ chuyển đổi
+    slidesToShow: 1, // Hiển thị 1 ảnh mỗi lần
+    slidesToScroll: 1, // Chuyển 1 ảnh mỗi lần
+    autoplay: true, // Tự động chuyển đổi
+    autoplaySpeed: 5000,
+  };
+  const slides = [
+    {
+      image:
+        'https://www.apple.com/v/home/bv/images/heroes/holiday-2024/hero_holiday_2024_startframe__kdegyfjrojm2_mediumtall.jpg',
+      title: 'Tặng món quà diệu kỳ.',
+      subtitle: 'Hãy biến điều ước ngày lễ của người ấy thành hiện thực.',
+    },
+    {
+      image:
+        'https://www.apple.com/v/home/bv/images/heroes/holiday-2024/hero_holiday_2024_startframe__kdegyfjrojm2_mediumtall.jpg',
+      title: 'Sức mạnh công nghệ.',
+      subtitle: 'Đưa những sáng tạo của bạn lên tầm cao mới.',
+    },
+  ];
 
-  useEffect(() => {
-    dispatch(IntroductionActions.fetchIntroductionByAds());
-    dispatch(IntroductionActions.fetchIntroductionByBanner());
-  }, [dispatch]);
+  const productData = [
+    {
+      title: "Macbook Pro M4",
+      subtitle: "Chuyên nghiệp. Mạnh mẽ. Đột phá.",
+      background: "https://www.apple.com/v/home/bv/images/promos/macbook-pro/promo_macbookpro_announce__gdf98j6tj2ie_large.jpg",
+      textColor: "light",
+      className: "bg-black",
+    },
+    {
+      title: "iPhone 16",
+      subtitle: "Thần kỳ, đa màu sắc, ấn tượng.",
+      background: "https://www.apple.com/vn/home/images/heroes/iphone-16/hero_iphone16_avail__euwzls69btea_largetall.jpg",
+      textColor: "dark",
+      className: "bg-[#fafafa]",
+    },
+  ];
 
   return (
-    <div className="bg-mainLayout rounded-xl p-4 mx-4 ">
-      {banner.length > 0 ? (
-        <div className="w-full h-full">
-          <TripleSlider slides={banner} />
-        </div>
-      ) : (
-        <div className="bg-mainLayout rounded-xl p-4">
-          <div className="w-full h-full">
-            <Skeleton.Image className="w-full h-64" active={true} />
-            <div className="mt-4 flex gap-4">
-              <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
-              <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
+    <div className="bg-[#f5f5f7] min-h-screen">
+      <Slider {...sliderSettings}>
+        {slides.map((slide, index) => (
+          <div key={index} className="relative flex justify-center">
+            {/* Hình ảnh */}
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="object-contain"
+            />
+            {/* Lớp phủ màu với nội dung */}
+            <div className="absolute inset-0 flex flex-col justify-end items-center text-black bottom-6">
+              <h1 className="text-5xl leading-[1.07143] font-semibold tracking-[-0.005em] mb-4">
+                {slide.title}
+              </h1>
+              <p className="text-[28px] leading-[1.10722] font-normal mb-6">
+                {slide.subtitle}
+              </p>
+              <Button
+                type="primary"
+                href="#"
+                className="h-[36px] px-[17px] bg-[#0071e3] hover:bg-[#0077ED] rounded-[980px] text-[17px] leading-[1.17648] font-normal"
+              >
+                Mua sắm quà tặng
+              </Button>
             </div>
           </div>
-        </div>
-      )}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-8">
-        {ads.length > 0 ? (
-          ads.map((promo) => (
-            <div
-              key={promo._id}
-              className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden"
-            >
-              <img
-                loading="lazy"
-                width={300}
-                height={300}
-                src={promo.images?.image || "/placeholder.png"}
-                alt={promo.images?.publicId || "placeholder"}
-                className="w-full h-56 object-contain"
-              />
-              <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-gray-800">{promo.name}</h3>
-                <p className="mt-2 text-gray-600">{promo.description}</p>
+        ))}
+      </Slider>
 
-                <div className="mt-4 flex gap-4">
-                  <Button type="primary" className="flex-1">
-                    Learn More
-                  </Button>
-                  <Button type="default" className="flex-1">
-                    Buy ngay bây giờ 123
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden m-1"
-            >
-              {/* Skeleton cho hình ảnh */}
-              <div className="w-full h-56 bg-gray-300 animate-pulse"></div>
-
-              {/* Skeleton cho nội dung */}
-              <div className="p-6">
-                <div className="h-6 bg-gray-300 rounded-md animate-pulse mb-4"></div>
-                <div className="h-4 bg-gray-300 rounded-md animate-pulse mb-2"></div>
-                <div className="h-4 bg-gray-300 rounded-md animate-pulse mb-2"></div>
-                <div className="h-4 bg-gray-300 rounded-md animate-pulse"></div>
-                <div className="mt-4 flex gap-4">
-                  <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
-                  <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </section>
+      <div className="grid grid-cols-1 gap-3">
+        {productData.map((product, index) => (
+          <ProductSection
+            key={index}
+            title={product.title}
+            subtitle={product.subtitle}
+            background={product.background}
+            textColor={product.textColor as any}
+            className={product.className}
+          />
+        ))}
+        <ProductGrid />
+        <TVCarousel />
+      </div>
     </div>
-  );
+  )
 }
+export default Page

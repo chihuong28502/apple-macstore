@@ -1,51 +1,28 @@
-"use client";
+'use client'
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions } from "@/modules/cart/slice";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
-import { Tooltip } from "antd";
+import { Image as AntImage, Button, Card, Col, Divider, Row, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CustomizationOptions from "../components/CustomizationOptions";
+import QuantitySelector from "./components/Quantity";
+import Reviews from "./components/Review";
 
-interface Variant {
-  color: string;
-  colorCode: string;
-  ram: string;
-  ssd: string;
-  price: number;
-  availableStock: number;
-  stock: number;
-  _id: string;
-}
-
-interface Image {
-  image: string;
-}
-
-interface Product {
-  name: string;
-  description: string;
-  images: Image[];
-  variants: Variant[];
-}
+const { Meta } = Card;
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const dispatch = useDispatch();
   const productId = params.id;
-  const productById: Product | undefined = useSelector(ProductSelectors.product);
+  const productById = useSelector(ProductSelectors.product);
   const auth = useSelector(AuthSelectors.user);
+
   const [mainImage, setMainImage] = useState<string | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [selectedRam, setSelectedRam] = useState<string | undefined>(undefined);
   const [selectedStorage, setSelectedStorage] = useState<string | undefined>(undefined);
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState<number>(1);
 
   useEffect(() => {
-    // const cachedProduct = getCache("productById");
-    // if (cachedProduct && cachedProduct._id === productId) {
-    //   dispatch(ProductActions.setProduct(cachedProduct));
-    //   return;
-    // }
     dispatch(ProductActions.fetchProductById(productId));
   }, [dispatch, productId]);
 
@@ -55,199 +32,172 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     }
   }, [productById]);
 
-  const handleImageClick = (imageUrl: string) => setMainImage(imageUrl);
-
-  const handleColorClick = (color: string) => {
-    setSelectedColor(color);
-    resetSelections();
-    setQuantity(0);
-  };
-
-  const handleRamClick = (ram: string) => {
-    setSelectedRam(ram);
-    setQuantity(0);
-  };
-
-  const handleStorageClick = (storage: string) => {
-    setSelectedStorage(storage);
-    setQuantity(0);
-  };
-
-  const resetSelections = () => {
-    setSelectedRam(undefined);
-    setSelectedStorage(undefined);
-  };
-
-  const getVariantsForSelectedColor = () => {
-    return productById?.variants?.filter((variant: Variant) => variant.color === selectedColor) || [];
-  };
-
-  const availableRamsForSelectedColor = () => {
-    const variants = getVariantsForSelectedColor();
-    const rams = Array.from(new Set(variants.map((variant: Variant) => variant.ram)));
-    return rams;
-  };
-
-  const availableStorageForSelectedRamAndColor = () => {
-    const variants = getVariantsForSelectedColor();
-    const storages = Array.from(
-      new Set(variants.filter((variant: Variant) => variant.ram === selectedRam).map((variant: Variant) => variant.ssd))
-    );
-    return storages;
-  };
-
-  const getStockForSelectedOptions = () => {
-    return getVariantsForSelectedColor().find(
-      (variant: Variant) => variant.ram === selectedRam && variant.ssd === selectedStorage
-    );
-  };
-
   const handleAddToCart = () => {
-    // Kiểm tra nếu đã chọn đầy đủ màu sắc, RAM và lưu trữ
-    if (!selectedColor || !selectedRam || !selectedStorage) {
-      return;
-    }
+    if (!selectedColor || !selectedRam || !selectedStorage) return;
 
-    // Tìm variant tương ứng với các lựa chọn
-    const selectedStock = getStockForSelectedOptions();
+    const selectedVariant = productById?.variants.find(
+      (variant: any) =>
+        variant.color === selectedColor &&
+        variant.ram === selectedRam &&
+        variant.ssd === selectedStorage
+    );
 
-    if (selectedStock) {
-      // Tạo sản phẩm cần thêm vào giỏ hàng với chỉ productId, variantId và quantity
-      const productToAdd = {
-        productId: productId, // ID sản phẩm
-        variantId: selectedStock._id, // ID variant (stockId)
-        quantity: quantity > selectedStock.stock ? selectedStock.stock : quantity, // Số lượng, giới hạn với số tồn kho
-      };
-
+    if (selectedVariant) {
       dispatch(
         CartActions.addProductToCart({
-          id: auth._id, // ID người dùng
-          item: productToAdd, // Sản phẩm cần thêm
+          id: auth._id,
+          item: {
+            productId: productId,
+            variantId: selectedVariant._id,
+            quantity: Math.min(quantity, selectedVariant.availableStock),
+          },
         })
       );
-    } else {
     }
   };
 
-  const handleIncreaseQuantity = () => {
-    const selectedStock = getStockForSelectedOptions();
-    if (selectedStock?.availableStock === 0) {
-      setQuantity(0)
-    }
-    if (quantity < (selectedStock?.availableStock || 0)) {
-      setQuantity(quantity + 1);
-    }
-  };
+  const variantsByColor = productById?.variants.filter((variant: any) => variant.color === selectedColor);
 
-  const handleDecreaseQuantity = () => {
-    if (quantity >= 1) {
-      setQuantity(quantity - 1);
-    }
-  };
+  const availableRams = Array.from(
+    new Set(variantsByColor?.map((variant: any) => variant.ram))
+  );
+
+  const availableStorages = Array.from(
+    new Set(
+      variantsByColor
+        ?.filter((variant: any) => variant.ram === selectedRam)
+        .map((variant: any) => variant.ssd)
+    )
+  );
+
+  const selectedVariant = productById?.variants.find(
+    (variant: any) =>
+      variant.color === selectedColor &&
+      variant.ram === selectedRam &&
+      variant.ssd === selectedStorage
+  );
 
   return (
-    <div
-      style={{ minHeight: 'calc(100vh - 115px)' }}
-      className="font-sans p-4 max-w-6xl max-md:max-w-xl mx-auto">
-      <div className="grid items-start grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="lg:sticky top-0 flex gap-3 w-full">
-          <img
-            loading="lazy"
+    <div className="min-h-screen py-8 px-4 max-w-6xl mx-auto">
+      <Row gutter={16}>
+        <Col xs={24} md={12}>
+          <AntImage
             src={mainImage}
             alt={productById?.name}
-            className="w-3/4 rounded-lg object-cover shadow-lg"
+            className="rounded-lg shadow-md"
           />
-          <div className="w-20 flex flex-col gap-3">
-            {productById?.images?.map((image: Image, index: number) => (
-              <img
-                loading="lazy"
+          <div className="flex gap-2 mt-4 overflow-auto">
+            {productById?.images.map((img: any, index: any) => (
+              <AntImage
                 key={index}
-                src={image.image}
+                width={64}
+                height={64}
+                src={img.image}
                 alt={`Product Image ${index}`}
-                className="w-full cursor-pointer rounded-lg hover:opacity-75 transition-opacity"
-                onClick={() => handleImageClick(image.image)}
+                className="cursor-pointer hover:opacity-80"
+                onClick={() => setMainImage(img.image)}
               />
             ))}
           </div>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-fontColor">{productById?.name}</h2>
-          <p className="text-[#d02525]">{productById?.description}</p>
-          <div className="flex flex-wrap gap-2 items-center">
-            <h3 className="text-md font-bold text-fontColor my-0">Colors: </h3>
-            {Array.from(
-              new Map(
-                productById?.variants?.map((variant: Variant) => [variant.color, variant.colorCode])
-              )
-            ).map(([color, colorCode]) => (
-              <Tooltip title={color} key={color}>
-                <button
-                  type="button"
-                  onClick={() => handleColorClick(color)}
-                  className={`rounded-full p-2.5 border-4 transition-all duration-300 ${selectedColor === color ? "border-[green]" : ""}`}
-                  style={{ backgroundColor: colorCode }}
-                />
-              </Tooltip>
-            ))}
-          </div>
-
-          {selectedColor && (
-            <CustomizationOptions
-              label="Available RAM"
-              options={availableRamsForSelectedColor()}
-              handleClick={handleRamClick}
-              selectedOption={selectedRam}
+        </Col>
+        <Col xs={24} md={12}>
+          <Card>
+            <Meta
+              title={<h2 className="text-xl font-bold">{productById?.name}</h2>}
+              description={<p className="text-gray-600">{productById?.description}</p>}
             />
-          )}
+            <Divider />
 
-          {selectedColor && selectedRam && (
-            <CustomizationOptions
-              label="Available Storage"
-              options={availableStorageForSelectedRamAndColor()}
-              handleClick={handleStorageClick}
-              selectedOption={selectedStorage}
-            />
-          )}
-
-          {selectedColor && selectedRam && selectedStorage && (
-            <div className="mt-5">
-              {(() => {
-                const selectedStock = getStockForSelectedOptions();
-
-                return selectedStock && selectedStock.price ? (
-
-                  <>
-                    <p className="text-lg font-bold !text-black">
-                      Giá: {selectedStock.price.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      })}
-                    </p>
-                    <p className="text-[#999]">Tồn kho: {selectedStock.availableStock} sản phẩm</p>
-                  </>
-                ) : null;
-              })()}
+            {/* Colors */}
+            <div className="mb-4">
+              <h3 className="font-semibold mb-2">Colors</h3>
+              <div className="flex gap-2">
+                {Array.from(
+                  new Map(
+                    productById?.variants.map((v: any) => [v.color, v.colorCode])
+                  )
+                ).map(([color, colorCode]: any) => (
+                  <Tooltip title={color} key={color}>
+                    <button
+                      className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-black" : "border-gray-300"
+                        }`}
+                      style={{ backgroundColor: colorCode }}
+                      onClick={() => setSelectedColor(color)}
+                    />
+                  </Tooltip>
+                ))}
+              </div>
             </div>
-          )}
 
-          <div className="mt-5 flex items-center gap-4">
-            <button onClick={handleDecreaseQuantity} className="px-3 bg-layout rounded text-fontColor font-bold">-</button>
-            <span className="text-lg font-bold text-fontColor">{quantity}</span>
-            <button onClick={handleIncreaseQuantity} className="px-3 bg-layout rounded text-fontColor font-bold">+</button>
-          </div>
+            {/* RAM */}
+            {selectedColor && (
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Available RAM</h3>
+                <div className="flex gap-2">
+                  {availableRams.map((ram: any, index) => (
+                    <Button
+                      key={index}
+                      type={selectedRam === ram ? "primary" : "default"}
+                      onClick={() => setSelectedRam(ram)}
+                    >
+                      {ram}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          <div className="mt-5 flex flex-wrap gap-4">
-            <button
-              onClick={handleAddToCart}
-              disabled={(quantity == 0)}
-              type="button"
-              className={`${quantity === 0 ? "disabled opacity-70 cursor-not-allowed" : "hover:bg-gray-900"} flex items-center justify-center px-8 py-4 bg-gray-800  text-white border border-gray-800 text-base rounded-lg shadow-md transition duration-300`}
-            >
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </div>
+            {/* Storage */}
+            {selectedColor && selectedRam && (
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Available Storage</h3>
+                <div className="flex gap-2">
+                  {availableStorages.map((ssd: any, index) => (
+                    <Button
+                      key={index}
+                      type={selectedStorage === ssd ? "primary" : "default"}
+                      onClick={() => setSelectedStorage(ssd)}
+                    >
+                      {ssd}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Price & Stock */}
+            {selectedVariant && (
+              <div className="mt-4">
+                <p className="text-lg font-bold">
+                  Price:{" "}
+                  {selectedVariant.price.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </p>
+                <p>Available Stock: {selectedVariant.availableStock}</p>
+              </div>
+            )}
+
+            {/* Quantity */}
+            <div className="mt-4 flex items-center gap-4">
+              <QuantitySelector
+                selectedVariant={selectedVariant}
+                quantity={quantity}
+                setQuantity={setQuantity}
+              />
+              <Button
+                type="primary"
+                onClick={handleAddToCart}
+                disabled={!selectedColor || !selectedRam || !selectedStorage}
+              >
+                Add to Cart
+              </Button>
+            </div>
+            <Reviews />
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

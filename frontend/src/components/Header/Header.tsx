@@ -165,6 +165,10 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-8 text-gray-700 text-sm font-medium">
+          <Link href="/" className="group relative">
+            <span>Home</span>
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
+          </Link>
           <Link href="/product" className="group relative">
             <span>Products</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
@@ -230,6 +234,12 @@ const Header = () => {
       {isMenuOpen && (
         <div className="shadow-lg backdrop-blur-md bg-white/90 absolute top-12 right-0 p-4 w-56 rounded-xl z-30">
           <ul className="flex flex-col gap-3">
+          <li>
+              <Link href="/" className="block text-gray-800 text-base font-medium group relative">
+                <span>Home</span>
+                <span className="absolute left-0 bottom-0 h-[2px] w-full bg-blue-600 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-300"></span>
+              </Link>
+            </li>
             <li>
               <Link href="/product" className="block text-gray-800 text-base font-medium group relative">
                 <span>Products</span>
