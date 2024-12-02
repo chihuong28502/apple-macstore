@@ -262,7 +262,6 @@ export class OrderService {
     }
   }
 
-
   async remove(id: string): Promise<ResponseDto<Order>> {
     try {
       const keyCacheAllOrder = `order_all`;
