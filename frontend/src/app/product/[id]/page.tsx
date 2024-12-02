@@ -2,11 +2,12 @@
 import { AuthSelectors } from "@/modules/auth/slice";
 import { CartActions } from "@/modules/cart/slice";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
-import { Image as AntImage, Button, Card, Col, Divider, Row, Tooltip } from "antd";
+import { Image as AntImage, Button, Card, Col, Divider, Row, Tooltip, Skeleton } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import QuantitySelector from "./components/Quantity";
 import Reviews from "./components/Review";
+import { AnimatePresence, motion } from "framer-motion";
 
 const { Meta } = Card;
 
@@ -14,6 +15,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const dispatch = useDispatch();
   const productId = params.id;
   const productById = useSelector(ProductSelectors.product);
+  const isLoadingProductById = useSelector(ProductSelectors.isLoadingProductById);
   const auth = useSelector(AuthSelectors.user);
 
   const [mainImage, setMainImage] = useState<string | undefined>(undefined);
@@ -81,103 +83,152 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     <div className="min-h-screen py-8 px-4 max-w-6xl mx-auto">
       <Row gutter={16}>
         <Col xs={24} md={12}>
-          <AntImage
-            src={mainImage}
-            alt={productById?.name}
-            className="rounded-lg shadow-md"
-          />
+          {isLoadingProductById ? (
+            <div className="aspect-w-1 aspect-h-1 w-full">
+              <Skeleton.Image className="w-full h-[300px] rounded-lg" active />
+            </div>
+          ) : (
+            <AntImage
+              src={mainImage}
+              alt={productById?.name}
+              className="rounded-lg shadow-md"
+            />
+          )}
           <div className="flex gap-2 mt-4 overflow-auto">
-            {productById?.images.map((img: any, index: any) => (
-              <AntImage
-                key={index}
-                width={64}
-                height={64}
-                src={img.image}
-                alt={`Product Image ${index}`}
-                className="cursor-pointer hover:opacity-80"
-                onClick={() => setMainImage(img.image)}
-              />
-            ))}
+            {isLoadingProductById ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton.Image key={index} className="w-16 h-16 rounded-md" active />
+              ))
+            ) : (
+              productById?.images.map((img: any, index: any) => (
+                <AntImage
+                  key={index}
+                  width={64}
+                  height={64}
+                  src={img.image}
+                  alt={`Product Image ${index}`}
+                  className="cursor-pointer hover:opacity-80"
+                  onClick={() => setMainImage(img.image)}
+                />
+              ))
+            )}
           </div>
         </Col>
         <Col xs={24} md={12}>
           <Card>
-            <Meta
-              title={<h2 className="text-xl font-bold">{productById?.name}</h2>}
-              description={<p className="text-gray-600">{productById?.description}</p>}
-            />
+            {isLoadingProductById ? (
+              <Skeleton active paragraph={{ rows: 2 }} />
+            ) : (
+              <Meta
+                title={<h2 className="text-xl font-bold">{productById?.name}</h2>}
+                description={<p className="text-gray-600">{productById?.description}</p>}
+              />
+            )}
             <Divider />
 
             {/* Colors */}
             <div className="mb-4">
               <h3 className="font-semibold mb-2">Colors</h3>
-              <div className="flex gap-2">
-                {Array.from(
-                  new Map(
-                    productById?.variants.map((v: any) => [v.color, v.colorCode])
-                  )
-                ).map(([color, colorCode]: any) => (
-                  <Tooltip title={color} key={color}>
-                    <button
-                      className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-black" : "border-gray-300"
-                        }`}
-                      style={{ backgroundColor: colorCode }}
-                      onClick={() => setSelectedColor(color)}
-                    />
-                  </Tooltip>
-                ))}
-              </div>
+              {isLoadingProductById ? (
+                <div className="skeleton-container">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <Skeleton.Button key={index} active size="large" shape="circle" className="mr-2" />
+                  ))}
+                </div>
+
+              ) : (
+                <div className="flex gap-2">
+                  {Array.from(
+                    new Map(
+                      productById?.variants.map((v: any) => [v.color, v.colorCode])
+                    )
+                  ).map(([color, colorCode]: any) => (
+                    <Tooltip title={color} key={color}>
+                      <button
+                        className={`w-8 h-8 rounded-full border-2 ${selectedColor === color ? "border-black" : "border-gray-300"
+                          }`}
+                        style={{ backgroundColor: colorCode }}
+                        onClick={() => setSelectedColor(color)}
+                      />
+                    </Tooltip>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* RAM */}
-            {selectedColor && (
-              <div className="mb-4">
-                <h3 className="font-semibold mb-2">Available RAM</h3>
-                <div className="flex gap-2">
-                  {availableRams.map((ram: any, index) => (
-                    <Button
-                      key={index}
-                      type={selectedRam === ram ? "primary" : "default"}
-                      onClick={() => setSelectedRam(ram)}
-                    >
-                      {ram}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {selectedColor && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-4 overflow-hidden"
+                >
+                  <h3 className="font-semibold mb-2">Available RAM</h3>
+                  <div className="flex gap-2">
+                    {availableRams.map((ram: any, index) => (
+                      <Button
+                        key={index}
+                        type={selectedRam === ram ? "primary" : "default"}
+                        onClick={() => setSelectedRam(ram)}
+                      >
+                        {ram}
+                      </Button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Storage */}
-            {selectedColor && selectedRam && (
-              <div className="mb-4">
-                <h3 className="font-semibold mb-2">Available Storage</h3>
-                <div className="flex gap-2">
-                  {availableStorages.map((ssd: any, index) => (
-                    <Button
-                      key={index}
-                      type={selectedStorage === ssd ? "primary" : "default"}
-                      onClick={() => setSelectedStorage(ssd)}
-                    >
-                      {ssd}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {selectedColor && selectedRam && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-4 overflow-hidden"
+                >
+                  <h3 className="font-semibold mb-2">Available Storage</h3>
+                  <div className="flex gap-2">
+                    {availableStorages.map((ssd: any, index) => (
+                      <Button
+                        key={index}
+                        type={selectedStorage === ssd ? "primary" : "default"}
+                        onClick={() => setSelectedStorage(ssd)}
+                      >
+                        {ssd}
+                      </Button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Price & Stock */}
-            {selectedVariant && (
-              <div className="mt-4">
-                <p className="text-lg font-bold">
-                  Price:{" "}
-                  {selectedVariant.price.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  })}
-                </p>
-                <p>Available Stock: {selectedVariant.availableStock}</p>
-              </div>
-            )}
+            <AnimatePresence>
+              {selectedVariant && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 overflow-hidden"
+                >
+                  <p className="text-lg font-bold">
+                    Price:{" "}
+                    {selectedVariant.price.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })}
+                  </p>
+                  <p>Available Stock: {selectedVariant.availableStock}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Quantity */}
             <div className="mt-4 flex items-center gap-4">
@@ -201,3 +252,4 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     </div>
   );
 }
+
