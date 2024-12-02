@@ -20,6 +20,7 @@ import { NotifyModule } from './notify/notify.module';
 import { CartModule } from './cart/cart.module';
 import { RedisModule } from './redis/redis.module';
 import { IntroductionModule } from './introduction/introduction.module';
+import { ReviewsModule } from './reviews/review.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { IntroductionModule } from './introduction/introduction.module';
     NotifyModule,
     CartModule,
     IntroductionModule,
+    ReviewsModule,
     RedisModule
   ],
   providers: [

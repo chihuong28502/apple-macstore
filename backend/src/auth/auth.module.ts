@@ -3,7 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
+import { CartsGateway } from 'src/cart/cart.gateway';
+import { CartService } from 'src/cart/cart.service';
+import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
 import { JwtStrategy } from 'src/common/guards/jwt/jwt.strategy';
+import { NotificationsGateway } from 'src/notify/notifications.gateway';
 import { NotifyModule } from 'src/notify/notify.module';
 import { NotifyService } from 'src/notify/notify.service';
 import { Notify, NotifySchema } from 'src/notify/schema/notify.schema';
@@ -15,10 +19,6 @@ import { AuthService } from './auth.service';
 import { CookiesService } from './cookies.service';
 import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
-import { NotificationsGateway } from 'src/notify/notifications.gateway';
-import { Cart, CartSchema } from 'src/cart/schema/cart.schema';
-import { CartService } from 'src/cart/cart.service';
-import { CartsGateway } from 'src/cart/cart.gateway';
 
 @Module({
   imports: [

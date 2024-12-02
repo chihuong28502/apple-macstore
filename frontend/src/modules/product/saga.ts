@@ -28,9 +28,9 @@ function* createProduct({ payload }: PayloadAction<any>) {
 function* fetchProductById({ payload }: PayloadAction<any>) {
   const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
-    yield put(ProductActions.setLoading(true));
+    yield put(ProductActions.setLoadingProductById(true));
     const response: { success: boolean; data: any } = yield ProductRequest.getProductById(payload);
-    yield put(ProductActions.setLoading(false));
+    yield put(ProductActions.setLoadingProductById(false));
     if (response.success) {
       yield put(ProductActions.setProduct(response.data));
       // setCache('productById', response.data);
