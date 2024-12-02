@@ -37,14 +37,14 @@ export function TVCarousel() {
         {tvShows.map((show, index) => (
           <div key={index} className="outline-none">
             <div className="relative h-[600px]">
-              <Image
+              <img
                 src={show.image}
                 alt={show.title}
-                layout="fill"
-                objectFit="contain"
-                priority={index === 0}
-                quality={90}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                loading={index === 0 ? "eager" : "lazy"} 
+                width="600"
               />
+
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-8 text-white">
                 <h3 className="text-4xl font-semibold mb-2">{show.title}</h3>
                 <p className="text-xl mb-4">{show.subtitle}</p>

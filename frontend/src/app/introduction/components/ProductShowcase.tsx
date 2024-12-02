@@ -24,11 +24,11 @@ export default function ProductShowcase() {
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 className="bg-gray-900 rounded-lg overflow-hidden shadow-xl"
               >
-                <Image
+                <img
                   src={product.image}
                   alt={product.name}
-                  width={600}
-                  height={400}
+                  width="600"
+                  height="400"
                   className="w-full h-64 object-cover"
                 />
                 <div className="p-6">
