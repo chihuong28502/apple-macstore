@@ -8,9 +8,8 @@ import { ReviewsService } from './review.service';
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) { }
 
-  @Post()
+  @Post('create')
   async create(@Res() res: Response, @Body() createReviewDto: CreateReviewDto) {
-    console.log("🚀 ~ ReviewsController ~ createReviewDto:", createReviewDto)
     const result = await this.reviewsService.createReview(createReviewDto);
     const statusCode = result.success ? 201 : 500;
     return res.status(statusCode).json(result);
@@ -23,14 +22,14 @@ export class ReviewsController {
     return res.status(statusCode).json(result);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   async update(@Res() res: Response, @Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
     const result = await this.reviewsService.updateReview(id, updateReviewDto);
     const statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
     return res.status(statusCode).json(result);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async delete(@Res() res: Response, @Param('id') id: string) {
     const result = await this.reviewsService.deleteReview(id);
     const statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
@@ -39,7 +38,6 @@ export class ReviewsController {
 
   @Get(':productId')
   async getReviewsByProduct(@Res() res: Response, @Param('productId') productId: string) {
-    console.log("🚀 ~ ReviewsController ~ productId:", productId)
     const result = await this.reviewsService.getReviewsByProduct(productId);
     const statusCode = result.success ? 200 : result.message.includes('not found') ? 404 : 500;
     return res.status(statusCode).json(result);

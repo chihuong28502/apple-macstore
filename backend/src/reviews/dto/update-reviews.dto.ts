@@ -9,6 +9,10 @@ export class UpdateReviewDto {
   @IsOptional()
   user_id?: string;     // ID của người dùng (có thể cập nhật)
 
+  @IsMongoId()
+  @IsOptional()
+  variant_id: string;
+
   @IsNumber()
   @Min(1)
   @Max(5)

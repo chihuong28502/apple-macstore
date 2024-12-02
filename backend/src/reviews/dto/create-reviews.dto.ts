@@ -7,7 +7,11 @@ export class CreateReviewDto {
 
   @IsMongoId()
   @IsNotEmpty()
-  user_id: string;     // ID của người dùng
+  user_id: string;     
+  
+  @IsMongoId()
+  @IsNotEmpty()
+  variant_id: string;
 
   @IsNumber()
   @Min(1)

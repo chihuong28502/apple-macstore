@@ -5,6 +5,7 @@ import { IntroductionSaga } from "@/modules/introduction/saga";
 import { NotifySaga } from "@/modules/notify/saga";
 import { OrderSaga } from "@/modules/order/saga";
 import { ProductSaga } from "@/modules/product/saga";
+import { ReviewSaga } from "@/modules/review/saga";
 import { all, call } from "redux-saga/effects";
 
 function* rootSaga() {
@@ -16,6 +17,7 @@ function* rootSaga() {
     call(CartSaga),
     call(OrderSaga),
     call(IntroductionSaga),
+    call(ReviewSaga),
   ]);
 }
 export default rootSaga;

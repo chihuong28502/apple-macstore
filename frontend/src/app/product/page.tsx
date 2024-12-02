@@ -15,13 +15,9 @@ const ProductPage: React.FC = () => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const categoryId: any = searchParams.get("categoryId");
-  const allProducts = useSelector(
-    ProductSelectors.productList
-  ) as ProductPage.Product[];
+  const allProducts = useSelector(ProductSelectors.productList) as ProductPage.Product[];
   const totalProducts = useSelector(ProductSelectors.totalProducts) as number;
-  const categories = useSelector(
-    ProductSelectors.categories
-  ) as ProductPage.Category[];
+  const categories = useSelector(ProductSelectors.categories) as ProductPage.Category[];
   const loadingCategories = useSelector(ProductSelectors.isLoadingCategories) as boolean;
   const loadingProducts = useSelector(ProductSelectors.isLoadingProducts) as boolean;
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000000000]);
@@ -47,17 +43,15 @@ const ProductPage: React.FC = () => {
     fetchCategories();
   }, [dispatch]);
 
-  const fetchProducts = useCallback(
-    (params: ProductPage.FetchProductsParams) => {
-      dispatch(ProductActions.fetchPaginatedProducts(params));
-    },
+  const fetchProducts = useCallback((params: ProductPage.FetchProductsParams) => {
+    dispatch(ProductActions.fetchPaginatedProducts(params));
+  },
     [dispatch]
   );
 
-  const debouncedFetchProducts = useCallback(
-    debounce((params: ProductPage.FetchProductsParams) => {
-      fetchProducts(params);
-    }, 500),
+  const debouncedFetchProducts = useCallback(debounce((params: ProductPage.FetchProductsParams) => {
+    fetchProducts(params);
+  }, 500),
     [fetchProducts]
   );
 
@@ -86,24 +80,18 @@ const ProductPage: React.FC = () => {
       maxPrice: priceRange[1],
       categoryId: selectedCategory !== "all" ? selectedCategory : undefined,
     });
-    return () => {
-      debouncedFetchProducts.cancel();
-    };
-  }, [
-    priceRange,
-    currentPage,
-    pageSize,
-    selectedCategory,
-    debouncedFetchProducts,
-  ]);
+    return () => { debouncedFetchProducts.cancel() }
+  }, [priceRange, currentPage, pageSize, selectedCategory, debouncedFetchProducts]);
 
   const handlePriceRangeChange = (range: ProductPage.PriceRange) => {
     setSelectedRangeId(range.id);
     setPriceRange([range.min, range.max]);
   };
+
   useEffect(() => {
     setSelectedCategory(categoryId)
   }, [searchParams])
+  
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -163,7 +151,8 @@ const ProductPage: React.FC = () => {
                   className="bg-white p-4 rounded-lg shadow-md"
                 />
               </div>
-            )}</>
+            )}
+          </>
         )}
       </div>
     </div>

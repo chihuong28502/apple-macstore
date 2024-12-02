@@ -194,7 +194,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 Add to Cart
               </Button>
             </div>
-            <Reviews />
+            <Reviews productId={productId} />
           </Card>
         </Col>
       </Row>

@@ -34,7 +34,8 @@ export class ReviewsService {
       const newReview = new this.reviewModel({
         ...createReviewDto,
         product_id: new Types.ObjectId(createReviewDto.product_id),
-        user_id: new Types.ObjectId(createReviewDto.user_id)
+        user_id: new Types.ObjectId(createReviewDto.user_id),
+        variant_id: new Types.ObjectId(createReviewDto.variant_id)
       });
       console.log("🚀 ~ ReviewsService ~ newReview:", newReview)
       const savedReview = await newReview.save();
@@ -216,7 +217,19 @@ export class ReviewsService {
       };
     }
     try {
-      const reviews = await this.reviewModel.find({ product_id: new Types.ObjectId(productId) }).lean().exec();
+      const reviews = await this.reviewModel.find({ product_id: new Types.ObjectId(productId) })
+        .populate({
+          path: 'user_id', // Lấy thông tin người dùng
+          select: 'name email', // Chỉ lấy trường name và email
+        })
+        .populate({
+          path: 'product_id', // Lấy thông tin sản phẩm
+          select: 'name', // Chỉ lấy tên sản phẩm
+        })
+        .populate({
+          path: 'variant_id', // Lấy thông tin sản phẩm
+          select: 'color ram ssd ', // Chỉ lấy tên sản phẩm
+        }).lean().exec();
       await this.redisService.setCache(cacheKey, reviews, this.CACHE_TTL);
       return {
         success: true,

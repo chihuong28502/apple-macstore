@@ -11,6 +11,9 @@ export class Review {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user_id: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'Variant', required: true })
+  variant_id: Types.ObjectId;
+
   @Prop({ required: true, min: 1, max: 5 }) // Xếp hạng từ 1 đến 5
   rating: number;
 

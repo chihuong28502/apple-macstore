@@ -8,6 +8,7 @@ import { Review, ReviewSchema } from './schema/review.schema';
 import { User, UserSchema } from 'src/user/schema/user.schema';
 import { Product, ProductSchema } from 'src/product/schema/product.schema';
 import { Order, OrderSchema } from 'src/order/schema/order.schema';
+import { Variant, VariantSchema } from 'src/product/schema/variants.schema';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { Order, OrderSchema } from 'src/order/schema/order.schema';
       { name: User.name, schema: UserSchema },
       { name: Product.name, schema: ProductSchema },
       { name: Order.name, schema: OrderSchema },
+      { name: Variant.name, schema: VariantSchema },
     ]),
     RedisModule,
   ],
