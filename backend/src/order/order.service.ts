@@ -15,6 +15,8 @@ import { SepayDto } from './dto/sepay.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersGateway } from './order.gateway';
 import { Order, OrderDocument } from './schema/order.schema';
+import { CreateNotifyDto } from 'src/notify/dto/create-notify.dto';
+import { NotifyService } from 'src/notify/notify.service';
 
 
 @Injectable()
@@ -28,6 +30,7 @@ export class OrderService {
     @InjectModel(Variant.name) private variantModel: Model<VariantDocument>,
     private readonly redisService: RedisService,
     private configService: ConfigService,
+    private notifyService: NotifyService,
     private readonly ordersGateway: OrdersGateway,
     private readonly cartsGateway: CartsGateway
   ) { }
@@ -229,10 +232,6 @@ export class OrderService {
 
             // Cập nhật stock
             variant.stock -= item.quantity;
-            console.log("🚀 ~ OrderService ~  variant.stock:", variant.stock)
-            console.log("🚀 ~ OrderService ~ item.quantity:", item.quantity)
-            console.log("🚀 ~ OrderService ~ variant.reservedStock:", variant.reservedStock)
-
             // Đảm bảo không âm giá trị stock
             if (variant.stock < 0) {
               variant.stock = 0;
@@ -306,6 +305,13 @@ export class OrderService {
       await order.save();
       await this.ordersGateway.sendOrder(order);
       this.redisService.clearCache(keyCache)
+      const notifyDto: CreateNotifyDto = {
+        title: `Thanh toán: ${new Date(new Date)}`,
+        content: `Thanh toán thành công`,
+        isRead: false,
+        customer: order.userId,
+      };
+      await this.notifyService.createNotify(notifyDto)
       return {
         success: true,
         message: 'Order thanh toán thành công',
