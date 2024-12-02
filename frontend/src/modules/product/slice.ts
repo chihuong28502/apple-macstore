@@ -12,6 +12,7 @@ type ProductState = {
   listCategories: any[],
   isLoadingProducts: boolean;
   isLoadingCategories: boolean;
+  isLoadingProductById: boolean;
 };
 
 const initialState: ProductState = {
@@ -22,6 +23,7 @@ const initialState: ProductState = {
   totalProducts: 0,
   isLoading: false,
   isLoadingProducts: false, // Loading cho product
+  isLoadingProductById: false, // Loading cho product
   isLoadingCategories: false,
 };
 
@@ -34,7 +36,7 @@ const ProductSlice = createSlice({
       state: ProductState,
       { payload }: PayloadAction<string>
     ) => {
-      state.isLoading = true;
+      state.isLoadingProductById = true;
     },
     fetchPaginatedProducts: (
       state: ProductState,
@@ -72,7 +74,10 @@ const ProductSlice = createSlice({
       state.isLoadingCategories = payload;
     },
     setLoadingProducts: (state: ProductState, { payload }: PayloadAction<boolean>) => {
-      state.isLoadingProducts  = payload;
+      state.isLoadingProducts = payload;
+    },
+    setLoadingProductById: (state: ProductState, { payload }: PayloadAction<boolean>) => {
+      state.isLoadingProductById = payload;
     },
     fetchCategories: (state: ProductState) => { state.isLoading = true; },
     setCategories: (state: ProductState, { payload }: PayloadAction<any[]>) => {
@@ -93,5 +98,6 @@ export const ProductSelectors = {
   isLoading: (state: RootState) => state.product.isLoading,
   isLoadingProducts: (state: RootState) => state.product.isLoadingProducts,
   isLoadingCategories: (state: RootState) => state.product.isLoadingCategories,
+  isLoadingProductById: (state: RootState) => state.product.isLoadingProductById,
   categories: (state: RootState) => state.product.categories,
 };

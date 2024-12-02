@@ -9,6 +9,7 @@ import { combineReducers } from "@reduxjs/toolkit";
 import AppReducer from "../components/AppSlice";
 import { IntroductionSaga } from "@/modules/introduction/saga";
 import IntroductionReducer from "@/modules/introduction/slice";
+import ReviewReducer from "@/modules/review/slice";
 
 export const reducers = combineReducers({
   app: AppReducer,
@@ -20,4 +21,5 @@ export const reducers = combineReducers({
   cart: CartReducer,
   order: OrderReducer,
   introduction: IntroductionReducer,
+  review: ReviewReducer,
 });
