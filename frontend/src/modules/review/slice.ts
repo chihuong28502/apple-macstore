@@ -85,4 +85,5 @@ export const ReviewSelectors = {
   reviewById: (state: RootState) => state.review.reviewById,
   reviewByProductId: (state: RootState) => state.review.reviewByProductId,
   isLoading: (state: RootState) => state.review.isLoading,
+  isLoadingReviewByProductId: (state: RootState) => state.review.isLoadingReviewByProductId,
 };

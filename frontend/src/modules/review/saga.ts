@@ -22,6 +22,7 @@ function* fetchdReviewByProductId({ payload }: PayloadAction<any>) {
 function* editReview({ payload }: PayloadAction<any>) {
   const { id, payload: updateData } = payload
   try {
+    yield put(ReviewActions.setLoadingReviewByProductId(true));
     const response: { success: boolean; data: any } = yield ReviewRequest.updateReview(
       id,
       payload
@@ -30,7 +31,9 @@ function* editReview({ payload }: PayloadAction<any>) {
       const setAPI: { success: boolean; data: any } = yield ReviewRequest.getAllReviews(payload.productId);
       if (setAPI.success) {
         yield put(ReviewActions.setReviewByProductId(setAPI.data));
+        yield put(ReviewActions.setLoadingReviewByProductId(false));
         message.success("Sửa nhận xét thành công!")
+
       }
     } else {
       message.error("Sửa nhận xét thất bại!")
@@ -43,6 +46,7 @@ function* editReview({ payload }: PayloadAction<any>) {
 function* deleteReview({ payload }: PayloadAction<{ productId: string, reviewId: string }>) {
   try {
     // Gọi API xóa đánh giá
+    yield put(ReviewActions.setLoadingReviewByProductId(true));
     const response: { success: boolean; data: any } = yield ReviewRequest.deleteReview(payload.reviewId);
     if (response.success) {
       // Nếu xóa thành công, lấy lại tất cả các đánh giá của sản phẩm
@@ -50,6 +54,7 @@ function* deleteReview({ payload }: PayloadAction<{ productId: string, reviewId:
       if (setAPI.success) {
         // Cập nhật lại danh sách đánh giá trong Redux store
         yield put(ReviewActions.setReviewByProductId(setAPI.data));
+        yield put(ReviewActions.setLoadingReviewByProductId(false));
         message.success("Xóa nhận xét thành công!");
       }
     } else {
