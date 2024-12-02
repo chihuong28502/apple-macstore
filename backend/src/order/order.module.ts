@@ -11,6 +11,9 @@ import { OrderController } from './order.controller';
 import { OrdersGateway } from './order.gateway';
 import { OrderService } from './order.service';
 import { Order, OrderSchema } from './schema/order.schema';
+import { Notify, NotifySchema } from 'src/notify/schema/notify.schema';
+import { NotifyService } from 'src/notify/notify.service';
+import { NotificationsGateway } from 'src/notify/notifications.gateway';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -19,6 +22,8 @@ import { Order, OrderSchema } from './schema/order.schema';
     { name: Cart.name, schema: CartSchema },
     { name: Product.name, schema: ProductSchema },
     { name: Variant.name, schema: VariantSchema },
+    { name: Notify.name, schema: NotifySchema },
+
 
   ]),
     CartsGateway,
@@ -27,7 +32,9 @@ import { Order, OrderSchema } from './schema/order.schema';
   controllers: [OrderController],
   providers: [
     OrderService, OrdersGateway,
-    CartsGateway, RedisService],
+    CartsGateway, RedisService,
+    NotifyService, NotificationsGateway
+  ],
   exports: [OrderService],
 })
 export class OrderModule { }
