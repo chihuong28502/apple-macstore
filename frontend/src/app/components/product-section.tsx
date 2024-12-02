@@ -35,12 +35,12 @@ export function ProductSection({
       }}
     >
       {logo ? (
-        <Image
+        <img
           src={logo}
           alt={title}
-          width={198}
-          height={69}
-          className="mb-[11px]"
+          width="198"
+          height="69"
+          className="mb-[11px] "
         />
       ) : (
         <h2 className={`text-[56px] leading-[1.07143] font-semibold tracking-[-0.005em] ${textColorClasses} mb-[6px]`}>

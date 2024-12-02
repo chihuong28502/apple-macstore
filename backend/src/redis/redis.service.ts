@@ -46,4 +46,13 @@ export class RedisService {
       console.error('Error clearing product page cache:', error);
     }
   }
+  async clearAllCacheReviews(): Promise<void> {
+    try {
+      const reviewKeys = await this.scanKeys('reviews_*'); // Match all review-related keys
+      await this.deleteKeys(reviewKeys); // Delete all the found keys
+      console.log(`Cleared ${reviewKeys.length} review-related cache keys.`);
+    } catch (error) {
+      console.error('Error clearing review cache:', error);
+    }
+  }
 }
