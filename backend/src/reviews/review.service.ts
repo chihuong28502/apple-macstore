@@ -37,7 +37,6 @@ export class ReviewsService {
         user_id: new Types.ObjectId(createReviewDto.user_id),
         variant_id: new Types.ObjectId(createReviewDto.variant_id)
       });
-      console.log("🚀 ~ ReviewsService ~ newReview:", newReview)
       const savedReview = await newReview.save();
 
       // Gửi đánh giá mới đến tất cả client

@@ -84,13 +84,6 @@ export class AuthService {
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
-    const notifyDto: CreateNotifyDto = {
-      title: `New Login ${new Date(new Date)}`,
-      content: `User ${user.username} logged in.`,
-      isRead: false,
-      customer: user._id,
-    };
-    await this.notifyService.createNotify(notifyDto)
     return {
       message: 'Login success',
       success: true,

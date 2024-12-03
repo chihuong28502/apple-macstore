@@ -42,7 +42,6 @@ export class TasksService {
       order.status = 'cancelled';
       await order.save();
     }
-    console.log('Stocks released and orders updated');
   }
 
   // @Cron(CronExpression.EVERY_DAY_AT_10PM) // Mỗi 30 phút chạy
