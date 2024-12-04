@@ -8,23 +8,25 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 import { Model } from 'mongoose';
+import * as nodemailer from 'nodemailer';
+import { CartService } from 'src/cart/cart.service';
+import { NotifyService } from 'src/notify/notify.service';
+import { Admin, AdminDocument } from 'src/user/schema/admin.schema';
 import { User, UserDocument } from 'src/user/schema/user.schema';
+import { ResponseDto } from 'src/utils/dto/response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { LoginGoogleDto } from './dto/login-google.dto';
+import { LoginAdminDto } from './dto/login.admin.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshToken, RefreshTokenDocument } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
-import { ResponseDto } from 'src/utils/dto/response.dto';
-import { LoginAdminDto } from './dto/login.admin.dto';
-import { Admin, AdminDocument } from 'src/user/schema/admin.schema';
-import { NotifyService } from 'src/notify/notify.service';
-import { CreateNotifyDto } from 'src/notify/dto/create-notify.dto';
-import { CartService } from 'src/cart/cart.service';
-
+import { generatePassword } from './utils/genPassword';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-
+  private readonly transporter: nodemailer.Transporter;
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
@@ -34,8 +36,76 @@ export class AuthService {
     private configService: ConfigService,
     private notifyService: NotifyService,
     private cartService: CartService,
-  ) { }
+  ) {
+    this.transporter = nodemailer.createTransport({
+      host: this.configService.getOrThrow('EMAIL_HOST'),
+      port: parseInt(this.configService.getOrThrow('EMAIL_PORT')),
+      secure: false,
+      auth: {
+        user: this.configService.getOrThrow('EMAIL_USER'),
+        pass: this.configService.getOrThrow('EMAIL_PASS'),
+      },
+    });
+  }
+  async loginGoogle({ token }: LoginGoogleDto, deviceInfo: string, ipAddress: string) {
+    const client = new OAuth2Client(
+      this.configService.getOrThrow('CLIENT_ID_GOOGLE_CONSOLE'),
+    );
 
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: this.configService.getOrThrow('CLIENT_ID_GOOGLE_CONSOLE'),
+    });
+    const payload = ticket.getPayload();
+    const { email } = payload;
+    let user: UserDocument;
+    try {
+      user = await this.userModel.findOne({ email });
+    } catch (error) {
+      const password = generatePassword();
+      await this.sendEmail(
+        email,
+        `
+      Chào bạn,
+
+      Cảm ơn bạn đã đăng ký tài khoản với chúng tôi. Đây là  mật khẩu đăng nhập của bạn:
+      
+      Mật khẩu: ${password}
+      
+      Vui lòng sử dụng , này để đăng nhập và thay đổi. 
+      
+      Trân trọng !
+      `,
+        'Mật khẩu đăng nhập kwt',
+      );
+      user = await this.userModel.create({
+        email,
+        username: email,
+        isVerify: true,
+        role: 'customer',
+        password: await this.hashPassword(password),
+        code: await this.generateUniqueCode()
+      });
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const refreshToken = await this.generateRefreshToken(user);
+    await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
+    await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
+    return {
+      message: 'Login success',
+      success: true,
+      data: {
+        user: {
+          id: user._id.toString(),
+          username: user.username,
+          role: user.role,
+        },
+        accessToken,
+        refreshToken
+      },
+    };
+  }
 
   async createAdmin(): Promise<void> {
     const adminUsername = 'admin';
@@ -93,8 +163,7 @@ export class AuthService {
           username: user.username,
           role: user.role,
         },
-        accessToken,
-        refreshToken,
+        accessToken, refreshToken
       },
     };
   }
@@ -268,5 +337,20 @@ export class AuthService {
   private async getAllCodes(): Promise<string[]> {
     const users = await this.userModel.find().select('code');
     return users.map(user => user.code);
+  }
+  async sendEmail(to: string, text: string, subject: string) {
+    try {
+      const mailOptions = {
+        from: process.env.EMAIL_SENDER,
+        to,
+        subject,
+        text,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      throw new Error('Failed to send email');
+    }
   }
 }

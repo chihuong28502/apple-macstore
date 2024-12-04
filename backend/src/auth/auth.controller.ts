@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UserService } from 'src/user/user.service';
@@ -13,6 +13,7 @@ import { LoginAdminDto } from './dto/login.admin.dto';
 import { Admin } from 'src/user/schema/admin.schema';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RulesGuard } from 'src/common/guards/auth.guard';
+import { LoginGoogleDto } from './dto/login-google.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,16 +22,30 @@ export class AuthController {
     private readonly userService: UserService,
     private readonly cookiesService: CookiesService,
   ) { }
- 
+
   async onModuleInit() {
     await this.authService.createAdmin();
   }
-  
+
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
     return this.authService.register(createUserDto);
+  }
+  @Public()
+  @Post('login-google')
+  @HttpCode(HttpStatus.OK)
+  async loginGoogle(
+    @Body() loginGoogleDto: LoginGoogleDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ResponseDto<User>> {
+    const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
+    const ipAddress = req.ip || 'Unknown IP';
+    const result = await this.authService.loginGoogle(loginGoogleDto, deviceInfo, ipAddress);
+    this.cookiesService.setAuthCookies(res, result.data.accessToken, result.data.refreshToken);
+    return result;
   }
 
   @Public()
@@ -69,7 +84,7 @@ export class AuthController {
     return this.userService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard,RulesGuard)
+  @UseGuards(JwtAuthGuard, RulesGuard)
   @Roles('admin')
   @Get('user-admin/:id')
   async getAdmin(@Param('id') id: string): Promise<ResponseDto<Admin>> {

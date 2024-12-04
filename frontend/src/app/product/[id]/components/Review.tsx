@@ -12,6 +12,7 @@ const Reviews: React.FC<any> = ({ productId }) => {
   const auth = useSelector(AuthSelectors.user);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false); // New state for adding reviews
   const [editingReview, setEditingReview] = useState<any>(null);
 
   // Fetch reviews when productId changes
@@ -79,6 +80,24 @@ const Reviews: React.FC<any> = ({ productId }) => {
 
   const ratingPercentages = calculateRatingPercentages();
 
+  // Hàm mở modal thêm review
+  const showAddModal = () => setIsAddModalVisible(true);
+
+  // Hàm đóng modal thêm review
+  const handleAddCancel = () => setIsAddModalVisible(false);
+
+  // Hàm xử lý thêm review
+  const handleAdd = (values: any) => {
+    if (auth) {
+      dispatch(ReviewActions.addReview({
+        product_id: productId,
+        user_id: auth._id,
+        ...values,
+      }));
+      setIsAddModalVisible(false);
+    }
+  };
+
   return (
     <div className="mt-8">
       <h3 className="text-xl font-bold text-gray-800">Reviews ({reviewsByProductId?.length})</h3>
@@ -105,44 +124,24 @@ const Reviews: React.FC<any> = ({ productId }) => {
             ))}
           </div>
         </>
-      )
-      }
-      {/* Hiển thị các review hoặc loading spinner */}
-      {isLoadingByProductId ? (
-        <section className="grid grid-cols-1 gap-3">
-          {Array.from({ length: 1 }).map((_, index) => (
-            <div key={index} className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="p-6">
-                <div className="h-4 bg-gray-300 rounded-md animate-pulse"></div>
-                <div className="mt-4 flex gap-4">
-                  <div className="flex-1 h-10 bg-gray-300 rounded-md animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-      ) : (
-        reviewsByProductId?.length > 0 && (
-          <div className="flex items-start mt-8">
-            <img src="https://readymadeui.com/team-2.webp" className="w-12 h-12 rounded-full border-2 border-white" alt="Reviewer" />
-            <div className="ml-3">
-              <h4 className="text-sm font-bold">{reviewsByProductId[0]?.user_id?.email}</h4>
-              <div className="flex space-x-1 mt-1">
-                {[...Array(5)].map((_, index) => (
-                  <svg key={index} className={`w-4 ${index < reviewsByProductId[0]?.rating ? 'fill-orange-400' : 'fill-[#CED5D8]'}`} viewBox="0 0 14 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 0L9.4687 3.60213L13.6574 4.83688L10.9944 8.29787L11.1145 12.6631L7 11.2L2.8855 12.6631L3.00556 8.29787L0.342604 4.83688L4.5313 3.60213L7 0Z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-xs mt-4">{reviewsByProductId[0]?.review_text}</p>
-            </div>
-          </div>
-        )
       )}
 
-      <Button className="w-full mt-8 px-4 py-2.5 bg-transparent border border-orange-400 text-gray-800 font-semibold rounded-lg" onClick={showAllReviews}>
+      <Button
+        className="w-full mt-8 px-4 py-2.5 bg-transparent border border-orange-400 text-gray-800 font-semibold rounded-lg"
+        onClick={showAllReviews}
+      >
         Read all reviews
       </Button>
+
+      {/* Button to open Add Review modal */}
+      {auth && (
+        <Button
+          className="w-full mt-4 px-4 py-2.5 bg-blue-500 text-white font-semibold rounded-lg"
+          onClick={showAddModal}
+        >
+          Add Review
+        </Button>
+      )}
 
       {/* Modal hiển thị tất cả các review */}
       <Modal title="All Reviews" visible={isModalVisible} onCancel={handleCancel} footer={null} width={800}>
@@ -193,7 +192,7 @@ const Reviews: React.FC<any> = ({ productId }) => {
                       </svg>
                     ))}
                   </div>
-                  <p className="text-xs mt-4">{review.review_text}</p>
+                  <p className="text-gray-600 mt-2">{review.review_text}</p>
                 </div>
               </div>
             ))
@@ -201,27 +200,44 @@ const Reviews: React.FC<any> = ({ productId }) => {
         </div>
       </Modal>
 
-      {/* Modal chỉnh sửa review */}
+      {/* Add Review Modal */}
+      <Modal
+        title="Add Review"
+        visible={isAddModalVisible}
+        onCancel={handleAddCancel}
+        footer={null}
+        width={600}
+      >
+        <Form onFinish={handleAdd}>
+          <Form.Item name="rating" rules={[{ required: true, message: 'Please select a rating!' }]}>
+            <Rate />
+          </Form.Item>
+          <Form.Item name="review_text" rules={[{ required: true, message: 'Please provide a review_text!' }]}>
+            <Input.TextArea rows={4} placeholder="Write your review" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" className="w-full bg-blue-500">Submit Review</Button>
+        </Form>
+      </Modal>
+
+      {/* Edit Review Modal */}
       <Modal
         title="Edit Review"
         visible={isEditModalVisible}
         onCancel={handleEditCancel}
         footer={null}
-        width={800}
+        width={600}
       >
-        <Form initialValues={editingReview} onFinish={handleEdit}>
-          <Form.Item
-            name="review_text"
-            rules={[{ required: true, message: 'Please enter your review' }]}
-          >
-            <Input.TextArea placeholder="Your review" />
-          </Form.Item>
-          <Form.Item name="rating" rules={[{ required: true, message: 'Please rate the product' }]}>
+        <Form
+          initialValues={{ rating: editingReview?.rating, review_text: editingReview?.review_text }}
+          onFinish={handleEdit}
+        >
+          <Form.Item name="rating" rules={[{ required: true, message: 'Please select a rating!' }]}>
             <Rate />
           </Form.Item>
-          <Button type="primary" htmlType="submit" block>
-            Submit
-          </Button>
+          <Form.Item name="review_text" rules={[{ required: true, message: 'Please provide a review_text!' }]}>
+            <Input.TextArea rows={4} placeholder="Update your review" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" className="w-full bg-blue-500">Update Review</Button>
         </Form>
       </Modal>
     </div>
