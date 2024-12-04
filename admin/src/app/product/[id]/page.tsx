@@ -170,7 +170,6 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       route.push('/product')
 
     } catch (error) {
-    console.log("🚀 ~ error:", error)
     } finally {
       setIsSubmitting(false);
     }

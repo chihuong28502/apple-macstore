@@ -1,4 +1,4 @@
-import { createSlice,PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "@/core/services/store";
 
@@ -17,6 +17,7 @@ const AuthSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    googleSignIn: (state: AuthState, { payload }: PayloadAction<any>) => { },
     login: (state: AuthState, { payload }: PayloadAction<any>) => { },
     register: (state: AuthState, { payload }: PayloadAction<any>) => { },
     setUser: (state: AuthState, { payload }: PayloadAction<any>) => {
@@ -29,7 +30,6 @@ const AuthSlice = createSlice({
     logout: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
       state.user = null;
     },
-
   },
 });
 

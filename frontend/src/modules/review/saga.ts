@@ -3,6 +3,27 @@ import { put, takeLeading } from "redux-saga/effects";
 import { ReviewRequest } from "./request";
 import { ReviewActions } from "./slice";
 import { message } from "antd";
+
+
+function* addReview({ payload }: PayloadAction<any>) {
+  const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
+  try {
+    yield put(ReviewActions.setLoadingReviewByProductId(true));
+    const response: { success: boolean; data: any } = yield ReviewRequest.addReview(payload);
+    yield put(ReviewActions.setLoadingReviewByProductId(false));
+    if (response.success) {
+      const setAPI: { success: boolean; data: any } = yield ReviewRequest.getAllReviews(payload.product_id);
+      yield put(ReviewActions.setReviewByProductId(setAPI.data));
+      yield put(ReviewActions.setLoadingReviewByProductId(false));
+      onSuccess(response.data);
+    } else {
+      onFail(response);
+    }
+  } catch (e) {
+    onFail(e);
+  }
+}
+
 function* fetchdReviewByProductId({ payload }: PayloadAction<any>) {
   const { onSuccess = (rs: any) => { }, onFail = (rs: any) => { } } = payload;
   try {
@@ -19,6 +40,7 @@ function* fetchdReviewByProductId({ payload }: PayloadAction<any>) {
     onFail(e);
   }
 }
+
 function* editReview({ payload }: PayloadAction<any>) {
   const { id, payload: updateData } = payload
   try {
@@ -67,6 +89,7 @@ function* deleteReview({ payload }: PayloadAction<{ productId: string, reviewId:
 }
 
 export function* ReviewSaga() {
+  yield takeLeading(ReviewActions.addReview, addReview);
   yield takeLeading(ReviewActions.fetchReviewByProductId, fetchdReviewByProductId);
   yield takeLeading(ReviewActions.editReview, editReview);
   yield takeLeading(ReviewActions.deleteReview, deleteReview);
