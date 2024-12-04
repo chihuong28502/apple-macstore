@@ -28,7 +28,6 @@ function* fetchIntroductions() {
     yield put(IntroductionActions.setLoading(true));
 
     const response: { success: boolean; data: any[] } = yield IntroductionRequest.getAllIntroductions();
-    console.log("🚀 ~ response:", response.data)
 
     yield put(IntroductionActions.setLoading(false));
 

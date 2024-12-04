@@ -48,11 +48,6 @@ export class ReviewsGateway implements OnGatewayConnection, OnGatewayDisconnect 
   // Lắng nghe sự kiện gửi đánh giá từ client
   @SubscribeMessage('submitReview')
   handleSubmitReview(client: Socket, payload: any) {
-    // Xử lý đánh giá từ client
-    console.log(`Received review from client ${client.id}:`, payload);
-
-    // Có thể thực hiện lưu trữ đánh giá vào cơ sở dữ liệu ở đây
-
     // Gửi lại đánh giá cho tất cả client
     this.sendReview(payload);
   }

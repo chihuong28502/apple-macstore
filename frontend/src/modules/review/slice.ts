@@ -59,6 +59,8 @@ const ReviewSlice = createSlice({
     },
     deleteReview: (state, action: PayloadAction<{ productId: string; reviewId: string }>) => {
     },
+    addReview: (state, action: PayloadAction<{ productId: string; reviewId: string }>) => {
+    },
     removeReview: (state, action: PayloadAction<string>) => {
       state.reviewByProductId = state.reviewByProductId.filter((review: any) => review._id !== action.payload);
     },

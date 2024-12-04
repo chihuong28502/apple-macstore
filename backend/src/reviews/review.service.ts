@@ -35,19 +35,15 @@ export class ReviewsService {
         ...createReviewDto,
         product_id: new Types.ObjectId(createReviewDto.product_id),
         user_id: new Types.ObjectId(createReviewDto.user_id),
-        variant_id: new Types.ObjectId(createReviewDto.variant_id)
+        variant_id: createReviewDto.variant_id ? new Types.ObjectId(createReviewDto.variant_id) : null
       });
-      console.log("🚀 ~ ReviewsService ~ newReview:", newReview)
       const savedReview = await newReview.save();
 
       // Gửi đánh giá mới đến tất cả client
-      this.reviewsGateway.sendReview(savedReview);
+      // this.reviewsGateway.sendReview(savedReview);
 
       // Xóa cache liên quan
       await this.redisService.clearAllCacheReviews();
-      // await this.redisService.clearCache('reviews_all');
-      // await this.redisService.clearCache(`reviews_user_${createReviewDto.user_id}`);
-      // await this.redisService.clearCache(`reviews_product_${createReviewDto.product_id}`);
 
       return {
         success: true,

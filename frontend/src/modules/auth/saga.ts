@@ -21,7 +21,7 @@ const getUserIdFromToken = () => {
 
 // Saga for login
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { email, password,onSuccess = () => { }, } = payload;
+  const { email, password, onSuccess = () => { }, } = payload;
   try {
     yield delay(500);
     const { success, data } = yield call(AuthRequest.login, { email, password });
@@ -45,6 +45,28 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
   }
 }
 
+function* googleSignIn({ payload }: any): Generator<any, void, any> {
+  const { googleToken, onSuccess = () => { }, onFail = () => { }, } = payload;
+  try {
+    const { success, data }: any = yield call(AuthRequest.loginGoogle, googleToken);
+    if (success) {
+      const decoded: any = jwt.decode(data.accessToken);
+      localStorage.setItem("accessToken", data.accessToken);
+      if (decoded) {
+        const response: any = yield call(AuthRequest.getUserInfo, decoded._id);
+        yield put(AuthActions.setUser(response.data));
+        onSuccess();
+      } else {
+        message.error("Đăng nhập không thành công.");
+      }
+    } else {
+      message.error("Đăng nhập không thành công.");
+    }
+  } catch (e) {
+    console.log("🚀 ~ e:", e)
+    message.error("Đăng nhập không thành công.");
+  }
+}
 // Saga for registration
 function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { onSuccess = () => { }, onFail = () => { } } = payload;
@@ -93,6 +115,7 @@ function* logout(): Generator<any, void, any> {
   } catch (error) {
   }
 }
+
 function* refreshToken(): Generator<any, void, any> {
   try {
     const response: any = yield call(AuthRequest.refreshToken);
@@ -111,6 +134,7 @@ function* refreshToken(): Generator<any, void, any> {
   } catch (error) {
   }
 }
+
 // Root saga for authentication
 export function* AuthSaga() {
   yield takeLeading(AuthActions.refreshToken, refreshToken);
@@ -118,4 +142,6 @@ export function* AuthSaga() {
   yield takeLeading(AuthActions.register, register);
   yield takeLeading(AuthActions.getInfoUser, getInfoUser);
   yield takeLeading(AuthActions.logout, logout);
+  yield takeLeading(AuthActions.googleSignIn, googleSignIn);
+
 }
