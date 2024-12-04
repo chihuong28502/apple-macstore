@@ -58,10 +58,8 @@ export class AuthService {
     });
     const payload = ticket.getPayload();
     const { email } = payload;
-    let user: UserDocument;
-    try {
-      user = await this.userModel.findOne({ email });
-    } catch (error) {
+    let user = await this.userModel.findOne({ email });
+    if (!user) {
       const password = generatePassword();
       await this.sendEmail(
         email,
