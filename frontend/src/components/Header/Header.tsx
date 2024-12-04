@@ -4,22 +4,19 @@ import { CustomIcon } from "@/asset/svg";
 import NotificationPopover from "@/components/NotificationPopover/NotificationPopover";
 import { useAppSelector } from "@/core/services/hook";
 import { AuthSelectors } from "@/modules/auth/slice";
-import Link from "next/link";
-import { FaRegUserCircle } from "react-icons/fa";
-import { CiSearch } from "react-icons/ci";
-import { useCallback, useEffect, useState } from "react"; // Import useState
-import Cart from "./Cart";
-import Order from "./Order";
-import DarkModeSwitch from '../DarkModeSwitch'
-import User from "./User";
-import BtnAuth from "../headerBtnAuth/BtnAuth";
-import { Dropdown, Menu, Input } from "antd";
-import { useDispatch, useSelector } from "react-redux";
 import { ProductActions, ProductSelectors } from "@/modules/product/slice";
 import { ProductPage } from "@/type/product.page.type";
+import { Dropdown, Input, Menu } from "antd";
 import { debounce } from "lodash";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react"; // Import useState
+import { CiSearch } from "react-icons/ci";
+import { FaRegUserCircle } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import BtnAuth from "../headerBtnAuth/BtnAuth";
+import Cart from "./Cart";
+import Order from "./Order";
+import User from "./User";
 
 const Header = () => {
   const dispatch = useDispatch();

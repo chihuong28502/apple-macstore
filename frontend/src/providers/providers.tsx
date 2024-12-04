@@ -7,14 +7,20 @@ import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import AuthProvider from "./AuthProvider";
 import { RootStyleRegistry } from "./RootStyleRegistry";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 export async function Providers({ children }: { children: ReactNode }) {
   return (
     <ReduxProvider>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <RootStyleRegistry>
-          <AuthProvider>
-            <LayoutHome>{children}</LayoutHome>
-          </AuthProvider>
+          <GoogleOAuthProvider
+            clientId={
+              process.env.NEXT_PUBLIC_ID_GOOGLE_CLOUND || ""}
+          >
+            <AuthProvider>
+              <LayoutHome>{children}</LayoutHome>
+            </AuthProvider>
+          </GoogleOAuthProvider>
         </RootStyleRegistry>
       </ThemeProvider>
     </ReduxProvider>
