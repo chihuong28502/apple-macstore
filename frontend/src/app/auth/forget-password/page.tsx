@@ -1,7 +1,7 @@
 "use client";
 import { AuthActions } from "@/modules/auth/slice";
 import { EyeInvisibleOutlined, EyeOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Steps } from "antd";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -176,52 +176,102 @@ function ForgetPassword() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-6"
-    >
-      <div className="flex h-[84vh] shadow-2xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
-        <div className="flex w-full flex-col lg:w-1/2 bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white">
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Progress Steps */}
+        <Steps
+          current={step - 1}
+          items={[
+            { title: 'Verify Email' },
+            { title: 'Enter OTP' },
+            { title: 'Reset Password' }
+          ]}
+          className="mb-12"
+        />
+
+        {/* Main Content */}
+        <div className="max-w-md mx-auto">
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-1 flex-col justify-between p-8 sm:p-4 lg:p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <div className="space-y-2 text-center">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Forget Password</h1>
-              <p className="text-gray-500 dark:text-gray-400">Step {step} of 3</p>
+            {/* Step Title and Description */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                {step === 1 && "Reset Your Password"}
+                {step === 2 && "Enter Verification Code"}
+                {step === 3 && "Create New Password"}
+              </h1>
+              <p className="text-gray-500">
+                {step === 1 && "Enter your email address to receive a verification code"}
+                {step === 2 && "We've sent a code to your email"}
+                {step === 3 && "Choose a strong password to protect your account"}
+              </p>
             </div>
 
-            <div className="text-center mb-4">
-              <img src={`/images/step${step}.png`} alt={`Step ${step}`} />
-            </div>
-
+            {/* Form */}
             <Form
               form={form}
               layout="vertical"
               onFinish={handleNextStep}
-              className="space-y-4"
+              className="space-y-6"
             >
               {renderStepContent()}
 
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <div className="space-y-4">
                 <Button
                   type="primary"
                   htmlType="submit"
                   loading={loading}
-                  className="h-12 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg"
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-lg text-base font-medium"
                 >
-                  {step === 3 ? 'Reset Password' : 'Next'}
+                  {step === 3 ? 'Reset Password' : 'Continue'}
                 </Button>
-              </motion.div>
+
+                {step > 1 && (
+                  <Button
+                    type="link"
+                    onClick={() => setStep(step - 1)}
+                    className="w-full text-blue-600"
+                  >
+                    Back
+                  </Button>
+                )}
+              </div>
             </Form>
+
+            {/* Help Text */}
+            <div className="mt-8 text-center text-sm text-gray-500">
+              {step === 1 && (
+                <p>
+                  Remember your password?{' '}
+                  <a href="/auth/login" className="text-blue-600 hover:underline">
+                    Sign in
+                  </a>
+                </p>
+              )}
+              {step === 2 && (
+                <button 
+                  onClick={() => setStep(1)}
+                  className="text-blue-600 hover:underline"
+                >
+                  Resend OTP
+                </button>
+              )}
+              {step === 3 && (
+                <p>
+                  Already have an account?{' '}
+                  <a href="/auth/login" className="text-blue-600 hover:underline">
+                    Sign in
+                  </a>
+                </p>
+              )}
+            </div>
           </motion.div>
         </div>
-      </div>
-    </motion.div>
+      </main>
+    </div>
   );
 }
 
