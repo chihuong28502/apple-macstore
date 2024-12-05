@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
-import LoginGoogleButton from "./components/LoginGoogle";
+import LoginGoogleButton from "../components/LoginGoogle";
+import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 
 function Page() {
   const route = useRouter();
@@ -15,6 +16,7 @@ function Page() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
   const [otp, setOtp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Hàm xử lý đăng nhập
   const handleLogin = async () => {
@@ -91,74 +93,61 @@ function Page() {
               <span className="text-lg font-semibold">APPLE</span>
             </div>
             {/* Form */}
-            <div className="mx-auto w-full max-w-sm space-y-8">
+            <div className="mx-auto w-full max-w-sm">
               <div className="space-y-2 text-center">
                 <h1 className="text-3xl font-bold text-fontColor">Welcome Back</h1>
                 <p className="text-sm text-gray-400">
                   Log in to your account to continue
                 </p>
               </div>
-              <div className="space-y-4">
-                {/* Social Logins */}
-                <div className="w-full bg-transparent text-fontColor hover:bg-white/10">
-                  {/* <LoginGoogle /> */}
-                </div>
-                <div className="relative">
+                <div className="space-y-4 !mt-3">
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-background px-2 text-gray-400">OR</span>
                   </div>
-                </div>
-                {/* Email & Password Form */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-400">Email Address</label>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      className="h-11 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
-                    />
+                  <div className="w-full bg-transparent text-fontColor hover:bg-white/10">
+                    <LoginGoogleButton />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-gray-400">Password</label>
-                    </div>
-                    <div className="relative">
+                  {/* Email & Password Form */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-400">Email Address</label>
                       <Input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter your password"
-                        className="h-11 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
                       />
-                      <button className="absolute right-3 top-3 text-gray-400">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-4 w-4"
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-gray-400">Password</label>
+                      </div>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter your password"
+                          className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                         >
-                          <path d="M17 10H3M10 3l7 7-7 7" />
-                        </svg>
-                      </button>
+                          {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  <Button
+                    onClick={handleLogin}
+                    className="h-9 w-full bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 transition-all"
+                  >
+                    Log In
+                  </Button>
                 </div>
-                <LoginGoogleButton />
-                <Button
-                  onClick={handleLogin}
-                  className="h-11 w-full bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 transition-all"
-                >
-                  Log In
-                </Button>
-              </div>
             </div>
             {/* Register link */}
             <p className="text-center text-sm text-gray-400">
@@ -241,3 +230,4 @@ function Page() {
 }
 
 export default Page;
+

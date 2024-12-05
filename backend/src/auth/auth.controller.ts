@@ -33,6 +33,12 @@ export class AuthController {
   async register(@Body() createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
     return this.authService.register(createUserDto);
   }
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Body() changePassword: CreateUserDto): Promise<ResponseDto<User>> {
+    return this.authService.changePassword(changePassword);
+  }
+
   @Public()
   @Post('login-google')
   @HttpCode(HttpStatus.OK)

@@ -72,15 +72,14 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { onSuccess = () => { }, onFail = () => { } } = payload;
   const data: any = { ...payload, role: "customer" }
   try {
-    yield put(AppAction.showLoading());
-    const res: { success: boolean; data: any } = yield call(AuthRequest.register, data);
-    yield put(AppAction.hideLoading());
+    const res: { success: boolean; data: any; message: any } = yield call(AuthRequest.register, data);
     if (res.success) {
       onSuccess(res);
     } else {
       onFail(res);
     }
   } catch (error: any) {
+    message.error(error.response.data.message)
     yield put(AppAction.hideLoading());
   }
 }
@@ -105,12 +104,13 @@ function* getInfoUser({ payload }: PayloadAction<any>): Generator<any, void, any
 }
 
 // Saga for logout
-function* logout(): Generator<any, void, any> {
+function* logout({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { onSuccess = () => { }, onError = () => { } } = payload;
   try {
     const { success } = yield call(AuthRequest.logout);
+    onSuccess()
     if (success) {
       yield put(AuthActions.logout({}));
-      window.location.replace('/')
     }
   } catch (error) {
   }
@@ -135,6 +135,24 @@ function* refreshToken(): Generator<any, void, any> {
   }
 }
 
+function* changePassword({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { info, onSuccess } = payload;
+  try {
+    const res: { success: boolean; data: any; message: string } =
+      yield AuthRequest.changePassword(info);
+    if (res.success) {
+      message.success(res.message);
+      onSuccess && onSuccess();
+    } else {
+      message.error(res.message);
+    }
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      message.error(error?.response?.data.message);
+    }
+  }
+}
+
 // Root saga for authentication
 export function* AuthSaga() {
   yield takeLeading(AuthActions.refreshToken, refreshToken);
@@ -143,5 +161,6 @@ export function* AuthSaga() {
   yield takeLeading(AuthActions.getInfoUser, getInfoUser);
   yield takeLeading(AuthActions.logout, logout);
   yield takeLeading(AuthActions.googleSignIn, googleSignIn);
+  yield takeLeading(AuthActions.changePassword, changePassword);
 
 }
