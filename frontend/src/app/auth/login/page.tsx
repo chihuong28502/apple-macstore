@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Link from "next/link";
-import LoginGoogleButton from "./components/LoginGoogle";
+import LoginGoogleButton from "../components/LoginGoogle";
 
 function Page() {
   const route = useRouter();
@@ -99,14 +99,11 @@ function Page() {
                 </p>
               </div>
               <div className="space-y-4">
-                {/* Social Logins */}
-                <div className="w-full bg-transparent text-fontColor hover:bg-white/10">
-                  {/* <LoginGoogle /> */}
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-gray-400">OR</span>
                 </div>
-                <div className="relative">
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-gray-400">OR</span>
-                  </div>
+                <div className="w-full bg-transparent text-fontColor hover:bg-white/10">
+                  <LoginGoogleButton />
                 </div>
                 {/* Email & Password Form */}
                 <div className="space-y-4">
@@ -117,7 +114,7 @@ function Page() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
-                      className="h-11 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
+                      className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -130,7 +127,7 @@ function Page() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
-                        className="h-11 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
+                        className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
                       />
                       <button className="absolute right-3 top-3 text-gray-400">
                         <svg
@@ -151,10 +148,9 @@ function Page() {
                     </div>
                   </div>
                 </div>
-                <LoginGoogleButton />
                 <Button
                   onClick={handleLogin}
-                  className="h-11 w-full bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="h-9 w-full bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 transition-all"
                 >
                   Log In
                 </Button>

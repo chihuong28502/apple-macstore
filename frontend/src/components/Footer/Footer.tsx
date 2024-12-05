@@ -12,24 +12,22 @@ const Footer = () => {
             className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor "
             aria-label="Reddit"
           >
-            {" "}
-            Teams{" "}
+            Teams
           </a>
           <a
             href="#"
             className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor "
             aria-label="Reddit"
           >
-            {" "}
-            Privacy{" "}
+            Privacy
           </a>
           <a
             href="#"
             className="mx-2 text-sm text-fontColor transition-colors duration-300 hover:text-fontColor "
             aria-label="Reddit"
           >
-            {" "}
-            Cookies{" "}
+            
+            Cookies
           </a>
         </div>
       </div>
