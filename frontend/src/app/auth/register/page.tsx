@@ -1,14 +1,14 @@
 "use client";
 import { AuthActions } from "@/modules/auth/slice";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { Button, Input, message } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { RiErrorWarningLine } from "react-icons/ri";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import LoginGoogleButton from "../components/LoginGoogle";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import { RiErrorWarningLine } from "react-icons/ri";
 
 const registerSchema = Yup.object().shape({
   firstName: Yup.string().required('First Name is required'),
