@@ -153,6 +153,59 @@ function* changePassword({ payload }: PayloadAction<any>): Generator<any, void, 
   }
 }
 
+function* verifyEmail({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { email, onSuccess } = payload;
+  try {
+    const res: { success: boolean; data: any; message: string } =
+      yield AuthRequest.verifyEmail(email);
+    if (res.success) {
+      message.success(res.message);
+      onSuccess && onSuccess();
+    } else {
+      message.error(res.message);
+    }
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      message.error(error?.response?.data.message);
+    }
+  }
+}
+
+function* verifyOtp({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { onSuccess } = payload;
+  try {
+    const res: { success: boolean; data: any; message: string } =
+      yield AuthRequest.verifyOtp(payload);
+    if (res.success) {
+      message.success(res.message);
+      onSuccess && onSuccess(res.data);
+    } else {
+      message.error(res.message);
+    }
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      message.error(error?.response?.data.message);
+    }
+  }
+}
+function* verifyPassForget({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { newPassword, onSuccess } = payload;
+  try {
+    const res: { success: boolean; data: any; message: string } =
+      yield AuthRequest.verifyPassForget(payload);
+    if (res.success) {
+      message.success(res.message);
+      onSuccess && onSuccess();
+    } else {
+      message.error(res.message);
+    }
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      message.error(error?.response?.data.message);
+    }
+  }
+}
+
 // Root saga for authentication
 export function* AuthSaga() {
   yield takeLeading(AuthActions.refreshToken, refreshToken);
@@ -162,5 +215,8 @@ export function* AuthSaga() {
   yield takeLeading(AuthActions.logout, logout);
   yield takeLeading(AuthActions.googleSignIn, googleSignIn);
   yield takeLeading(AuthActions.changePassword, changePassword);
+  yield takeLeading(AuthActions.verifyEmail, verifyEmail);
+  yield takeLeading(AuthActions.verifyOtp, verifyOtp);
+  yield takeLeading(AuthActions.verifyPassForget, verifyPassForget);
 
 }
