@@ -19,6 +19,7 @@ import { AuthService } from './auth.service';
 import { CookiesService } from './cookies.service';
 import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
+import { Otp, OtpSchema } from './schema/otp.schema';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { CookieAge } from './utils/cookieAgeAuth.service';
       { name: RefreshToken.name, schema: RefreshTokenSchema },
       { name: Notify.name, schema: NotifySchema },
       { name: Cart.name, schema: CartSchema },
-      { name: Admin.name, schema: AdminSchema }
+      { name: Admin.name, schema: AdminSchema },
+      { name: Otp.name, schema: OtpSchema }
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

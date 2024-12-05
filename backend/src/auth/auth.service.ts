@@ -23,12 +23,14 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshToken, RefreshTokenDocument } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
 import { generatePassword } from './utils/genPassword';
+import { Otp, OtpDocument } from './schema/otp.schema';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly transporter: nodemailer.Transporter;
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Otp.name) private otpModel: Model<OtpDocument>,
     @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
     @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshTokenDocument>,
     private jwtService: JwtService,
@@ -145,40 +147,40 @@ export class AuthService {
     };
   }
 
- 
-async changePassword(changePassword: any): Promise<ResponseDto<User>> {
 
-  const user = await this.userModel.findOne({ email: changePassword.email });
-  if (!user) {
-    throw new BadRequestException('Email không tồn tại');
+  async changePassword(changePassword: any): Promise<ResponseDto<User>> {
+
+    const user = await this.userModel.findOne({ email: changePassword.email });
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+
+    // So sánh mật khẩu cũ với mật khẩu hiện tại trong cơ sở dữ liệu
+    const isOldPasswordValid = await bcrypt.compare(changePassword.oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Mật khẩu cũ không chính xác');
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await this.hashPassword(changePassword.newPassword);
+
+    // Cập nhật mật khẩu người dùng
+    const updatedUser = await this.userModel.findOneAndUpdate(
+      { email: changePassword.email },
+      { password: hashedPassword },
+      { new: true } // Trả về tài liệu đã được cập nhật
+    );
+
+    if (!updatedUser) {
+      throw new BadRequestException('Không thể cập nhật mật khẩu');
+    }
+
+    return {
+      message: 'Mật khẩu đã được cập nhật thành công',
+      success: true,
+      data: updatedUser,
+    };
   }
-
-  // So sánh mật khẩu cũ với mật khẩu hiện tại trong cơ sở dữ liệu
-  const isOldPasswordValid = await bcrypt.compare(changePassword.oldPassword, user.password);
-  if (!isOldPasswordValid) {
-    throw new BadRequestException('Mật khẩu cũ không chính xác');
-  }
-
-  // Hash mật khẩu mới
-  const hashedPassword = await this.hashPassword(changePassword.newPassword);
-
-  // Cập nhật mật khẩu người dùng
-  const updatedUser = await this.userModel.findOneAndUpdate(
-    { email: changePassword.email },
-    { password: hashedPassword },
-    { new: true } // Trả về tài liệu đã được cập nhật
-  );
-
-  if (!updatedUser) {
-    throw new BadRequestException('Không thể cập nhật mật khẩu');
-  }
-
-  return {
-    message: 'Mật khẩu đã được cập nhật thành công',
-    success: true,
-    data: updatedUser,
-  };
-}
 
   async login(loginDto: LoginDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<User>> {
     const { email, password } = loginDto;
@@ -386,4 +388,122 @@ async changePassword(changePassword: any): Promise<ResponseDto<User>> {
       throw new Error('Failed to send email');
     }
   }
+
+  // service forget password
+
+  async verifyEmail(email: string): Promise<ResponseDto<any>> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại trong hệ thống');
+    }
+
+    // Tạo OTP 6 số
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Tính thời gian hết hạn (5 phút)
+    const exp = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    // Xóa OTP cũ nếu có
+    await this.otpModel.deleteMany({ email });
+
+    // Lưu OTP mới
+    await this.otpModel.create({
+      email,
+      otp,
+      exp
+    });
+
+    // Gửi email chứa OTP
+    await this.sendEmail(
+      email,
+      `
+      Chào bạn,
+  
+      Mã OTP để đặt lại mật khẩu của bạn là: ${otp}
+      
+      Mã này sẽ hết hạn sau 5 phút.
+      
+      Trân trọng!
+      `,
+      'Mã OTP đặt lại mật khẩu'
+    );
+
+    return {
+      message: 'Mã OTP đã được gửi đến email của bạn',
+      success: true,
+      data: null
+    };
+  }
+
+  async verifyOtp(data: any): Promise<ResponseDto<any>> {
+    const { email, otp } = data
+    const emailRecord = await this.otpModel.findOne({ email: email });
+
+    if (!emailRecord) {
+      throw new BadRequestException('Mã OTP không hợp lệ');
+    }
+    const otpRecord: any = otp
+
+    // Kiểm tra hết hạn
+    if (new Date(otpRecord.exp) < new Date()) {
+      await this.otpModel.deleteOne({ _id: emailRecord._id });
+      throw new BadRequestException('Mã OTP đã hết hạn');
+    }
+    const otpSecret = 'mstOtpSecret';
+    const token = this.jwtService.sign(
+      { email, otp },
+      { secret: otpSecret, expiresIn: '5m' },
+    );
+    return {
+      message: 'Xác thực OTP thành công',
+      success: true,
+      data: { token }
+    };
+  }
+
+  async verifyPassForget(email: string, newPassword: string, token: string): Promise<ResponseDto<any>> {
+    const user = await this.userModel.findOne({ email });
+    const otpSecret = 'mstOtpSecret';
+
+    if (!user) {
+      throw new BadRequestException('Không tìm thấy người dùng');
+    }
+
+    // Verify token và lấy thông tin
+    let decodedToken;
+    try {
+      decodedToken = this.jwtService.verify(token, { secret: otpSecret });
+    } catch (error) {
+      throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
+    }
+
+    // Kiểm tra email trong token có khớp với email được gửi lên
+    if (decodedToken.email !== email) {
+      throw new UnauthorizedException('Token không hợp lệ cho email này');
+    }
+    // Tìm và xóa OTP record
+    const otpRecord = await this.otpModel.findOneAndDelete({
+      email: decodedToken.email,
+      otp: decodedToken.otp
+    });
+    if (!otpRecord) {
+      throw new UnauthorizedException('OTP không tồn tại hoặc đã được sử dụng');
+    }
+
+    // Kiểm tra thời gian hết hạn của OTP
+    if (new Date(otpRecord.exp) < new Date()) {
+      throw new UnauthorizedException('OTP đã hết hạn');
+    }
+
+    // Hash và cập nhật mật khẩu mới
+    const hashedPassword = await this.hashPassword(newPassword);
+    await this.userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+
+    return {
+      message: 'Đặt lại mật khẩu thành công',
+      success: true,
+      data: null
+    };
+  }
+
 }

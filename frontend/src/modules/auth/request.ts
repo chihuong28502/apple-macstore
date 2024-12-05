@@ -22,9 +22,18 @@ export const AuthRequest = {
     return MSTFetch.get(`/auth/user/${id}`);
   },
   refreshToken() {
-    return MSTFetch.post('/auth/refresh',);
+    return MSTFetch.post('/auth/refresh');
   },
   logout() {
-    return MSTFetch.post("/auth/logout",);
+    return MSTFetch.post("/auth/logout");
+  },
+  verifyEmail(email: any) {
+    return MSTFetch.post("/auth/forget-password/verify-email", {email});
+  },
+  verifyOtp(data: any) {
+    return MSTFetch.post("/auth/forget-password/verify-otp", { data });
+  },
+  verifyPassForget(data: any) {
+    return MSTFetch.post("/auth/forget-password/verify-password-forget", data);
   },
 };
