@@ -12,6 +12,9 @@ export const AuthRequest = {
     )
   },
 
+  changePassword(data: { email: string; password: string, newPassword: string }) {
+    return MSTFetch.post("/auth/change-password", data);
+  },
   register(data: { email: string; password: string }) {
     return MSTFetch.post("/auth/register", data);
   },

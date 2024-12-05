@@ -145,6 +145,41 @@ export class AuthService {
     };
   }
 
+ 
+async changePassword(changePassword: any): Promise<ResponseDto<User>> {
+
+  const user = await this.userModel.findOne({ email: changePassword.email });
+  if (!user) {
+    throw new BadRequestException('Email không tồn tại');
+  }
+
+  // So sánh mật khẩu cũ với mật khẩu hiện tại trong cơ sở dữ liệu
+  const isOldPasswordValid = await bcrypt.compare(changePassword.oldPassword, user.password);
+  if (!isOldPasswordValid) {
+    throw new BadRequestException('Mật khẩu cũ không chính xác');
+  }
+
+  // Hash mật khẩu mới
+  const hashedPassword = await this.hashPassword(changePassword.newPassword);
+
+  // Cập nhật mật khẩu người dùng
+  const updatedUser = await this.userModel.findOneAndUpdate(
+    { email: changePassword.email },
+    { password: hashedPassword },
+    { new: true } // Trả về tài liệu đã được cập nhật
+  );
+
+  if (!updatedUser) {
+    throw new BadRequestException('Không thể cập nhật mật khẩu');
+  }
+
+  return {
+    message: 'Mật khẩu đã được cập nhật thành công',
+    success: true,
+    data: updatedUser,
+  };
+}
+
   async login(loginDto: LoginDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<User>> {
     const { email, password } = loginDto;
     const user = await this.validateUser(email, password);

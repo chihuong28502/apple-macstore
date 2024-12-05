@@ -1,5 +1,5 @@
 "use client";
-import { ConfigProvider, Dropdown, MenuProps } from "antd";
+import { ConfigProvider, Dropdown, MenuProps, message } from "antd";
 import _ from "lodash";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -8,20 +8,29 @@ import { FiUser } from "react-icons/fi";
 import { TbLogout } from "react-icons/tb";
 import { useAppDispatch, useAppSelector } from "@/core/services/hook";
 import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
+import { AppAction, AppSelector } from "@/core/components/AppSlice";
+import { FaExchangeAlt } from "react-icons/fa";
 
 const User = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
+  const route = useRouter();
   const auth = useAppSelector(AuthSelectors.user);
   const dispatch = useAppDispatch();
   const { resolvedTheme } = useTheme();
   const handleLogout = () => {
     dispatch(
-      AuthActions.logout({})
+      AuthActions.logout({
+        onSuccess: () => {
+          message.success("Đăng xuất thành công");
+          route.push('/')
+        },
+      })
     );
     setIsOpen(false);
   };
-
+  const handleOpenModalChangePassword = () => {
+    dispatch(AppAction.showModalChangePassword());
+  }
   const getMenuItems = (): MenuProps["items"] => {
     if (_.isEmpty(auth)) {
       return [
@@ -39,6 +48,17 @@ const User = () => {
             </div>
           ),
           key: "0",
+        },
+        {
+          label: (
+            <div
+              className="flex items-center gap-1 text-fontColor cursor-pointer w-full"
+              onClick={handleOpenModalChangePassword}
+            >
+              <FaExchangeAlt /> <span>Đổi pass</span>
+            </div>
+          ),
+          key: "changePassword",
         },
         {
           label: (
