@@ -32,7 +32,12 @@ const AuthSlice = createSlice({
     logout: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
       state.user = null;
     },
-
+    verifyEmail: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
+    },
+    verifyOtp: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
+    },
+    verifyPassForget: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
+    },
   },
 });
 

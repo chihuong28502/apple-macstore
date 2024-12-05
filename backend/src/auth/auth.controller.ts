@@ -131,4 +131,35 @@ export class AuthController {
     this.cookiesService.clearAuthCookies(res);
     return result;
   }
+
+  // CHANGE PASSWORD
+
+
+  @Public()
+  @Post('forget-password/verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(
+    @Body('email') email: string
+  ): Promise<ResponseDto<any>> {
+    return this.authService.verifyEmail(email);
+  }
+
+  @Public()
+  @Post('forget-password/verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(
+    @Body('data') data: any
+  ): Promise<ResponseDto<any>> {
+    return this.authService.verifyOtp(data);
+  }
+
+  @Public()
+  @Post('forget-password/verify-password-forget')
+  @HttpCode(HttpStatus.OK)
+  async verifyPassForget(
+    @Body() body: { email: string; newPassword: string; token: string }
+  ): Promise<ResponseDto<any>> {
+    const { email, newPassword, token } = body;
+    return this.authService.verifyPassForget(email, newPassword, token);
+  }
 }

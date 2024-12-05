@@ -1,331 +1,279 @@
 "use client";
 import { AuthActions } from "@/modules/auth/slice";
-import { EyeInvisibleOutlined, EyeOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message } from "antd";
+import { EyeInvisibleOutlined, EyeOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Steps } from "antd";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
-import LoginGoogleButton from "../components/LoginGoogle";
 
-const registerSchema = Yup.object().shape({
-  firstName: Yup.string().required('First Name is required'),
-  lastName: Yup.string().required('Last Name is required'),
-  phone: Yup.string().required('Phone is required'),
+const ForgetPasswordSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
-  username: Yup.string().required('Username is required'),
-  password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('password')], 'Passwords must match')
-    .required('Confirm Password is required'),
+  otp: Yup.string().required('OTP is required'),
+  newPassword: Yup.string()
+    .min(6, 'Password must be at least 6 characters')
+    .required('New Password is required'),
 });
 
-function ChangePassword() {
-  const route = useRouter();
-  const dispatch = useDispatch();
+function ForgetPassword() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [token, setToken] = useState("");
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
     email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
+    otp: "",
+    newPassword: "",
   });
-
-  const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [isSubmitDisabled, setSubmitDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const validateForm = async () => {
-      try {
-        await registerSchema.validate(formData, { abortEarly: false });
-        setErrors({
-          firstName: "",
-          lastName: "",
-          phone: "",
-          email: "",
-          username: "",
-          password: "",
-          confirmPassword: "",
-        });
-        setSubmitDisabled(false);
-      } catch (validationError: any) {
-        if (validationError instanceof Yup.ValidationError) {
-          const newErrors: any = {};
-          validationError.inner.forEach((error: any) => {
-            newErrors[error.path] = error.message;
-          });
-          setErrors(newErrors);
-          setSubmitDisabled(true);
-        }
-      }
-    };
-
-    validateForm();
-  }, [formData]);
-
-  const handleRegister = () => {
-    if (!isSubmitDisabled) {
+  const handleNextStep = async () => {
+    try {
       setLoading(true);
-      dispatch(
-        AuthActions.register({
-          ...formData,
-          onSuccess: () => {
-            message.success("Registration successful");
-            route.push('/auth/login');
-          },
-          onFail: () => {
-            message.error("Registration failed");
-            setLoading(false);
-          },
-        })
-      );
+
+      // Validate only the current step's field
+      let validationSchema;
+      switch (step) {
+        case 1:
+          validationSchema = Yup.object().shape({
+            email: ForgetPasswordSchema.fields.email
+          });
+          break;
+        case 2:
+          validationSchema = Yup.object().shape({
+            otp: ForgetPasswordSchema.fields.otp
+          });
+          break;
+        case 3:
+          validationSchema = Yup.object().shape({
+            newPassword: ForgetPasswordSchema.fields.newPassword
+          });
+          break;
+      }
+      switch (step) {
+        case 1:
+          dispatch(AuthActions.verifyEmail({
+            email: formData.email,
+            onSuccess: () => {
+              setStep(2);
+            },
+          }));
+          break;
+
+        case 2:
+          dispatch(AuthActions.verifyOtp({
+            email: formData.email,
+            otp: formData.otp,
+            onSuccess: (data: any) => {
+              setToken(data.token);
+              setStep(3);
+            },
+          }));
+          break;
+        case 3:
+          dispatch(AuthActions.verifyPassForget({
+            email: formData.email,
+            newPassword: formData.newPassword,
+            token: token,
+            onSuccess: () => {
+              router.push('/auth/login');
+            },
+          }));
+          break;
+      }
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        error.inner.forEach((err) => {
+          form.setFields([
+            {
+              name: err.path!,
+              errors: [err.message],
+            },
+          ]);
+        });
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
+  const [form] = Form.useForm();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear validation error when user types
+    form.setFields([
+      {
+        name,
+        errors: [],
+      },
+    ]);
+  };
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: 'Please input your email!' },
+              { type: 'email', message: 'Please enter a valid email!' }
+            ]}
+          >
+            <Input
+              prefix={<MailOutlined className="text-gray-400" />}
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email"
+              className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            />
+          </Form.Item>
+        );
+
+      case 2:
+        return (
+          <Form.Item
+            name="otp"
+            rules={[{ required: true, message: 'Please input OTP!' }]}
+          >
+            <Input
+              prefix={<LockOutlined className="text-gray-400" />}
+              name="otp"
+              value={formData.otp}
+              onChange={handleChange}
+              placeholder="OTP"
+              className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            />
+          </Form.Item>
+        );
+
+      case 3:
+        return (
+          <Form.Item
+            name="newPassword"
+            rules={[
+              { required: true, message: 'Please input new password!' },
+              { min: 6, message: 'Password must be at least 6 characters!' }
+            ]}
+          >
+            <Input.Password
+              prefix={<LockOutlined className="text-gray-400" />}
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+              placeholder="New Password"
+              className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
+            />
+          </Form.Item>
+        );
+    }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-6"
-    >
-      <div className="flex h-[84vh] shadow-2xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
-        {/* Left Column */}
-        <div className="flex w-full flex-col lg:w-1/2 bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white">
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Progress Steps */}
+        <Steps
+          current={step - 1}
+          items={[
+            { title: 'Verify Email' },
+            { title: 'Enter OTP' },
+            { title: 'Reset Password' }
+          ]}
+          className="mb-12"
+        />
+
+        {/* Main Content */}
+        <div className="max-w-md mx-auto">
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex flex-1 flex-col justify-between p-8 sm:p-4 lg:p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            {/* Logo */}
-            <div className="flex items-center gap-2 text-gray-800 dark:text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <path d="M12 5v14" />
-                <path d="m19 12-7 7-7-7" />
-              </svg>
-              <span className="text-lg font-semibold">APPLE</span>
+            {/* Step Title and Description */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                {step === 1 && "Reset Your Password"}
+                {step === 2 && "Enter Verification Code"}
+                {step === 3 && "Create New Password"}
+              </h1>
+              <p className="text-gray-500">
+                {step === 1 && "Enter your email address to receive a verification code"}
+                {step === 2 && "We've sent a code to your email"}
+                {step === 3 && "Choose a strong password to protect your account"}
+              </p>
             </div>
 
             {/* Form */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mx-auto w-full max-w-sm space-y-6"
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleNextStep}
+              className="space-y-6"
             >
-              <div className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create an Account</h1>
-                <p className="text-gray-500 dark:text-gray-400">Sign up to get started with our service</p>
-              </div>
+              {renderStepContent()}
 
-              {/* Google Login */}
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <LoginGoogleButton />
-              </motion.div>
-
-              {/* Registration Form */}
-              <Form layout="vertical" onFinish={handleRegister}>
-                <div className="space-y-4 mb-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Form.Item
-                      name="firstName"
-                      validateStatus={errors.firstName ? "error" : ""}
-                      help={errors.firstName}
-                    >
-                      <Input
-                        prefix={<UserOutlined className="text-gray-400" />}
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        placeholder="First Name"
-                        className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      name="lastName"
-                      validateStatus={errors.lastName ? "error" : ""}
-                      help={errors.lastName}
-                    >
-                      <Input
-                        prefix={<UserOutlined className="text-gray-400" />}
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        placeholder="Last Name"
-                        className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                      />
-                    </Form.Item>
-                  </div>
-                  <Form.Item
-                    name="phone"
-                    validateStatus={errors.phone ? "error" : ""}
-                    help={errors.phone}
-                  >
-                    <Input
-                      prefix={<PhoneOutlined className="text-gray-400" />}
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Phone Number"
-                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="email"
-                    validateStatus={errors.email ? "error" : ""}
-                    help={errors.email}
-                  >
-                    <Input
-                      prefix={<MailOutlined className="text-gray-400" />}
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Email"
-                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="username"
-                    validateStatus={errors.username ? "error" : ""}
-                    help={errors.username}
-                  >
-                    <Input
-                      prefix={<UserOutlined className="text-gray-400" />}
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      placeholder="Username"
-                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="password"
-                    validateStatus={errors.password ? "error" : ""}
-                    help={errors.password}
-                  >
-                    <Input.Password
-                      prefix={<LockOutlined className="text-gray-400" />}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Password"
-                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                      iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="confirmPassword"
-                    validateStatus={errors.confirmPassword ? "error" : ""}
-                    help={errors.confirmPassword}
-                  >
-                    <Input.Password
-                      prefix={<LockOutlined className="text-gray-400" />}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      placeholder="Confirm Password"
-                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                      iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
-                    />
-                  </Form.Item>
-                </div>
-
-                {/* Register Button */}
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={isSubmitDisabled || loading}
-                    className="h-12 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg"
-                  >
-                    {loading ? 'Registering...' : 'Register'}
-                  </Button>
-                </motion.div>
-              </Form>
-
-              {/* Login Link */}
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-                Already have an account?
-                <Link 
-                  href="/auth/login"
-                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+              <div className="space-y-4">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-lg text-base font-medium"
                 >
-                  Log In
-                </Link>
-              </p>
-            </motion.div>
+                  {step === 3 ? 'Reset Password' : 'Continue'}
+                </Button>
+
+                {step > 1 && (
+                  <Button
+                    type="link"
+                    onClick={() => setStep(step - 1)}
+                    className="w-full text-blue-600"
+                  >
+                    Back
+                  </Button>
+                )}
+              </div>
+            </Form>
+
+            {/* Help Text */}
+            <div className="mt-8 text-center text-sm text-gray-500">
+              {step === 1 && (
+                <p>
+                  Remember your password?{' '}
+                  <a href="/auth/login" className="text-blue-600 hover:underline">
+                    Sign in
+                  </a>
+                </p>
+              )}
+              {step === 2 && (
+                <button 
+                  onClick={() => setStep(1)}
+                  className="text-blue-600 hover:underline"
+                >
+                  Resend OTP
+                </button>
+              )}
+              {step === 3 && (
+                <p>
+                  Already have an account?{' '}
+                  <a href="/auth/login" className="text-blue-600 hover:underline">
+                    Sign in
+                  </a>
+                </p>
+              )}
+            </div>
           </motion.div>
         </div>
-
-        {/* Right Column */}
-        <motion.div
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="hidden lg:block lg:w-1/2"
-        >
-          <div className="relative h-full">
-            <img
-              src="https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/white-building.jpg"
-              alt="Modern architecture"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="relative h-full bg-gradient-to-t from-gray-900/50 to-transparent p-12 flex items-end">
-              <div className="space-y-4">
-                <blockquote className="text-lg font-medium italic text-white">
-                  "Join our community and experience the future of technology today."
-                </blockquote>
-                <figcaption className="flex items-center gap-4">
-                  <img
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="John Doe"
-                    className="h-10 w-10 rounded-full border-2 border-white"
-                  />
-                  <div className="text-white">
-                    <div className="font-medium">John Doe</div>
-                    <div className="text-sm opacity-80">Chief Innovation Officer</div>
-                  </div>
-                </figcaption>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </motion.div>
+      </main>
+    </div>
   );
 }
 
-export default ChangePassword;
+export default ForgetPassword;
 
