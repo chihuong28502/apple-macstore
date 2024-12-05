@@ -27,9 +27,12 @@ const AuthSlice = createSlice({
     },
     getInfoUser: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
     },
+    changePassword: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
+    },
     logout: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
       state.user = null;
     },
+
   },
 });
 

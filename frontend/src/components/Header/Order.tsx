@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaReceipt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-
+import './Order.css'; // Import CSS Module
 const Order = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
@@ -127,52 +127,54 @@ const Order = () => {
     }
   };
   return (
-    <ConfigProvider
-      theme={{
-        components: {
-          Dropdown: {
-            colorBgElevated: resolvedTheme === "dark" ? "#f9f9f9" : "#fff",
+    <div>
+      <ConfigProvider
+        theme={{
+          components: {
+            Dropdown: {
+              colorBgElevated: resolvedTheme === "dark" ? "#f9f9f9" : "#fff",
+            },
           },
-        },
-      }}
-    >
-      <Dropdown
-        placement="bottom"
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        menu={{ items: getMenuItems()}}
-        dropdownRender={(menu) => (
-          <div
-            style={{
-              borderRadius: "8px",
-              maxHeight: "400px",
-              overflowY: "auto",
-            }}
-          >
-            {menu}
-          </div>
-        )}
-        trigger={["click"]}
+        }}
       >
-        <div className="cursor-pointer text-fontColor flex items-center">
-          <Badge
-            style={{
-              fontSize: '0.8rem',
-              fontWeight: 650,
-              width: '16px',
-              height: '16px',
-              lineHeight: '16px',
-              padding: '0',
-            }}
-            count={allOrder?.length}
-            overflowCount={99}
-            color="red"
-          >
-            <FaReceipt className="size-5 text-fontColor" />
-          </Badge>
-        </div>
-      </Dropdown>
-    </ConfigProvider>
+        <Dropdown
+          placement="bottom"
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          menu={{ items: getMenuItems() }}
+          dropdownRender={(menu) => (
+            <div  className="fix-scroll-ntdesign-order"
+              style={{
+                borderRadius: "8px",
+                maxHeight: "400px",
+                overflowY: "auto",
+              }}
+            >
+              {menu}
+            </div>
+          )}
+          trigger={["click"]}
+        >
+          <div className="cursor-pointer text-fontColor flex items-center">
+            <Badge
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 650,
+                width: '16px',
+                height: '16px',
+                lineHeight: '16px',
+                padding: '0',
+              }}
+              count={allOrder?.length}
+              overflowCount={99}
+              color="red"
+            >
+              <FaReceipt className="size-5 text-fontColor" />
+            </Badge>
+          </div>
+        </Dropdown>
+      </ConfigProvider>
+    </div>
   );
 };
 
