@@ -25,6 +25,8 @@ const AuthSlice = createSlice({
     },
     refreshToken: () => {
     },
+    acceptEmail: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
+    },
     getInfoUser: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
     },
     changePassword: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
