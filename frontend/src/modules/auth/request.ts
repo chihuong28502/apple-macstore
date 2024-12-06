@@ -28,7 +28,7 @@ export const AuthRequest = {
     return MSTFetch.post("/auth/logout");
   },
   verifyEmail(email: any) {
-    return MSTFetch.post("/auth/forget-password/verify-email", {email});
+    return MSTFetch.post("/auth/forget-password/verify-email", { email });
   },
   verifyOtp(data: any) {
     return MSTFetch.post("/auth/forget-password/verify-otp", { data });
@@ -36,4 +36,7 @@ export const AuthRequest = {
   verifyPassForget(data: any) {
     return MSTFetch.post("/auth/forget-password/verify-password-forget", data);
   },
+  acceptEmail(token: string) {
+    return MSTFetch.get(`auth/verify-email?token=${token}`);
+  }
 };
