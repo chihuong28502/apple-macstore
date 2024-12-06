@@ -24,6 +24,7 @@ import { RefreshToken, RefreshTokenDocument } from './schema/refreshToken.schema
 import { CookieAge } from './utils/cookieAgeAuth.service';
 import { generatePassword } from './utils/genPassword';
 import { Otp, OtpDocument } from './schema/otp.schema';
+import { EmailService } from './email.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -34,6 +35,7 @@ export class AuthService {
     @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
     @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshTokenDocument>,
     private jwtService: JwtService,
+    private readonly emailService: EmailService,
     private cookieAge: CookieAge,
     private configService: ConfigService,
     private notifyService: NotifyService,
@@ -131,17 +133,25 @@ export class AuthService {
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
     }
+
     const code = await this.generateUniqueCode()
     const hashedPassword = await this.hashPassword(createUserDto.password);
     const createdUser = new this.userModel({
       ...createUserDto,
+      isVerify: false,
+      role: 'customer',
       password: hashedPassword,
       code: code
     });
     await createdUser.save();
     await this.cartService.createCartForUser(createdUser.id);
+    const token = this.generateVerificationToken(createUserDto.email);
+    const hostClient = this.configService.get('HOST_CLIENT') || "http://localhost:4000";
+    const verificationUrl = `${hostClient}/verify-email?token=${token}`;
+
+    this.emailService.sendVerificationEmail(createUserDto.email, verificationUrl);
     return {
-      message: 'Register success',
+      message: 'Kiểm tra email để xác minh tài khoản',
       success: true,
       data: createdUser,
     };
@@ -184,13 +194,34 @@ export class AuthService {
 
   async login(loginDto: LoginDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<User>> {
     const { email, password } = loginDto;
+    const checkEmail = await this.userModel.findOne({ email });
+
+    if (!checkEmail) {
+      throw new Error('Email not found');
+    }
+
+    // Nếu email chưa được xác minh, gửi email xác minh và return luôn
+    if (!checkEmail.isVerify) {
+      const token = this.generateVerificationToken(email);
+      const hostClient = this.configService.get('HOST_CLIENT') || "http://localhost:4000";
+      const verificationUrl = `${hostClient}/verify-email?token=${token}`;
+      await this.emailService.sendVerificationEmail(email, verificationUrl);
+      return {
+        message: 'Email chưa được xác minh. Vui lòng kiểm tra hộp thư để xác minh email.',
+        success: false,
+        data: null,
+      };
+    }
+
+    // Xác thực người dùng và xử lý đăng nhập
     const user = await this.validateUser(email, password);
     await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
+
     return {
-      message: 'Login success',
+      message: 'Đăng nhập thành công',
       success: true,
       data: {
         user: {
@@ -202,6 +233,7 @@ export class AuthService {
       },
     };
   }
+
 
   async loginAdmin(loginAdminDto: LoginAdminDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<Admin>> {
     const { username, password } = loginAdminDto;
@@ -505,5 +537,22 @@ export class AuthService {
       data: null
     };
   }
-
+  generateVerificationToken(email: string): string {
+    return this.jwtService.sign({ email });
+  }
+  verifyToken(token: string) {
+    try {
+      return this.jwtService.verify(token);
+    } catch (err) {
+      throw new UnauthorizedException('Hãy thử yêu cầu lại');
+    }
+  }
+  async activateAccount(email: string) {
+    await this.userModel.findOneAndUpdate({ email }, { isVerify: true });
+    return {
+      message: 'Khởi động tài khoản thành công',
+      success: true,
+      data: null
+    };
+  }
 }

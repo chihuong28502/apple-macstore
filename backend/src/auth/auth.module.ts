@@ -20,6 +20,7 @@ import { CookiesService } from './cookies.service';
 import { RefreshToken, RefreshTokenSchema, } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
 import { Otp, OtpSchema } from './schema/otp.schema';
+import { EmailService } from './email.service';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { Otp, OtpSchema } from './schema/otp.schema';
   providers: [AuthService, JwtStrategy,
     CookiesService, CookieAge,
     NotifyService, NotificationsGateway, CartsGateway,
+    EmailService,
     CartService],
   controllers: [AuthController],
   exports: [AuthService],
