@@ -5,12 +5,15 @@ import { RootState } from "@/core/services/store";
 type AuthState = {
   user?: any;
   refreshToken?: any;
-
+  verifyEmailStatus: 'idle' | 'loading' | 'success' | 'error';
+  verifyEmailError: string | null;
 };
 
 const initialState: AuthState = {
   user: null,
-  refreshToken: ""
+  refreshToken: "",
+  verifyEmailStatus: 'idle',
+  verifyEmailError: null,
 };
 
 const AuthSlice = createSlice({
@@ -26,6 +29,15 @@ const AuthSlice = createSlice({
     refreshToken: () => {
     },
     acceptEmail: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
+      state.verifyEmailStatus = 'loading';
+      state.verifyEmailError = null;
+    },
+    acceptEmailSuccess: (state) => {
+      state.verifyEmailStatus = 'success';
+    },
+    acceptEmailError: (state, action) => {
+      state.verifyEmailStatus = 'error';
+      state.verifyEmailError = action.payload;
     },
     getInfoUser: (state: AuthState, { payload }: PayloadAction<Partial<any>>) => {
     },
