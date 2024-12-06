@@ -42,7 +42,7 @@ function Page() {
           message.success("Đăng nhập thành công.");
           route.push("/");
         },
-        onError: () => {
+        onFail: () => {
           setLoading(false);
         }
       })

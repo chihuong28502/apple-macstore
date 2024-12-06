@@ -20,7 +20,7 @@ const getUserIdFromToken = () => {
 
 // Saga for login
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { email, password, onSuccess = () => { }, } = payload;
+  const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
   try {
     yield delay(500);
     const { success, data, message: messages } = yield call(AuthRequest.login, { email, password });
@@ -32,10 +32,12 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
         yield put(AuthActions.setUser(response.data));
         onSuccess(data?.user);
       } else {
+        onFail(data)
         yield put(AuthActions.getInfoUser({}));
         message.error(messages);
       }
     } else {
+      onFail(data)
       message.error(messages);
     }
   } catch (error: any) {
@@ -190,30 +192,13 @@ function* verifyOtp({ payload }: PayloadAction<any>): Generator<any, void, any> 
     }
   }
 }
-function* verifyPassForget({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { newPassword, onSuccess } = payload;
-  try {
-    const res: { success: boolean; data: any; message: string } =
-      yield AuthRequest.verifyPassForget(payload);
-    if (res.success) {
-      message.success(res.message);
-      onSuccess && onSuccess();
-    } else {
-      message.error(res.message);
-    }
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      message.error(error?.response?.data.message);
-    }
-  }
-}
+
 function* acceptEmail({ payload }: PayloadAction<any>): Generator<any, void, any> {
   const { token, onSuccess } = payload;
   try {
     const res: { success: boolean; data: any; message: string } =
       yield AuthRequest.acceptEmail(token);
     if (res.success) {
-      console.log("🚀 ~ res:", res)
       message.success(res.message);
       onSuccess && onSuccess();
     } else {
@@ -237,6 +222,5 @@ export function* AuthSaga() {
   yield takeLeading(AuthActions.changePassword, changePassword);
   yield takeLeading(AuthActions.verifyEmail, verifyEmail);
   yield takeLeading(AuthActions.verifyOtp, verifyOtp);
-  yield takeLeading(AuthActions.verifyPassForget, verifyPassForget);
   yield takeLeading(AuthActions.acceptEmail, acceptEmail);
 }
