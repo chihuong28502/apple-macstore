@@ -1,8 +1,7 @@
 "use client";
 import { AuthActions } from "@/modules/auth/slice";
-import { EyeInvisibleOutlined, EyeOutlined, LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Steps } from "antd";
-import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -18,39 +17,20 @@ const ForgetPasswordSchema = Yup.object().shape({
 
 function ForgetPassword() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
   const [token, setToken] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     otp: "",
     newPassword: "",
   });
-  const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch();
 
   const handleNextStep = async () => {
     try {
       setLoading(true);
-
-      // Validate only the current step's field
-      let validationSchema;
-      switch (step) {
-        case 1:
-          validationSchema = Yup.object().shape({
-            email: ForgetPasswordSchema.fields.email
-          });
-          break;
-        case 2:
-          validationSchema = Yup.object().shape({
-            otp: ForgetPasswordSchema.fields.otp
-          });
-          break;
-        case 3:
-          validationSchema = Yup.object().shape({
-            newPassword: ForgetPasswordSchema.fields.newPassword
-          });
-          break;
-      }
       switch (step) {
         case 1:
           dispatch(AuthActions.verifyEmail({
@@ -60,7 +40,6 @@ function ForgetPassword() {
             },
           }));
           break;
-
         case 2:
           dispatch(AuthActions.verifyOtp({
             email: formData.email,
@@ -83,27 +62,15 @@ function ForgetPassword() {
           break;
       }
     } catch (error) {
-      if (error instanceof Yup.ValidationError) {
-        error.inner.forEach((err) => {
-          form.setFields([
-            {
-              name: err.path!,
-              errors: [err.message],
-            },
-          ]);
-        });
-      }
+      // Error handling logic
     } finally {
       setLoading(false);
     }
   };
 
-  const [form] = Form.useForm();
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear validation error when user types
     form.setFields([
       {
         name,
@@ -124,17 +91,14 @@ function ForgetPassword() {
             ]}
           >
             <Input
-              prefix={<MailOutlined className="text-gray-400" />}
+              placeholder="Email"
+              className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600"
               name="email"
-              type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Email"
-              className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
           </Form.Item>
         );
-
       case 2:
         return (
           <Form.Item
@@ -142,16 +106,14 @@ function ForgetPassword() {
             rules={[{ required: true, message: 'Please input OTP!' }]}
           >
             <Input
-              prefix={<LockOutlined className="text-gray-400" />}
+              placeholder="Enter OTP"
+              className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600"
               name="otp"
               value={formData.otp}
               onChange={handleChange}
-              placeholder="OTP"
-              className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
           </Form.Item>
         );
-
       case 3:
         return (
           <Form.Item
@@ -162,13 +124,11 @@ function ForgetPassword() {
             ]}
           >
             <Input.Password
-              prefix={<LockOutlined className="text-gray-400" />}
+              placeholder="New Password"
+              className="h-9 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600"
               name="newPassword"
               value={formData.newPassword}
               onChange={handleChange}
-              placeholder="New Password"
-              className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-              iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
             />
           </Form.Item>
         );
@@ -176,101 +136,102 @@ function ForgetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Progress Steps */}
-        <Steps
-          current={step - 1}
-          items={[
-            { title: 'Verify Email' },
-            { title: 'Enter OTP' },
-            { title: 'Reset Password' }
-          ]}
-          className="mb-12"
-        />
+    <div className="flex min-h-screen">
+      <div className="flex w-full flex-col bg-background lg:w-1/2">
+        <div className="flex flex-1 flex-col justify-between p-8 sm:p-12 lg:p-16">
+          <div className="flex items-center gap-2 text-fontColor">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+              <path d="M12 5v14" />
+              <path d="m19 12-7 7-7-7" />
+            </svg>
+            <Link href={'/'} className="text-lg font-semibold">APPLE</Link>
+          </div>
 
-        {/* Main Content */}
-        <div className="max-w-md mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Step Title and Description */}
-            <div className="text-center mb-8">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+          <Steps
+            current={step - 1}
+            items={[
+              {
+                title: <span className='text-fontColor'>Verify Email</span>
+              },
+              {
+                title: <span className='text-fontColor'>Enter OTP</span>,
+              },
+              {
+                title: <span className='text-fontColor'>Reset Password</span>,
+              }
+            ]}
+            className="mb-12"
+          />
+
+          <div className="mx-auto w-full max-w-sm space-y-8">
+            <div className="space-y-2 text-center">
+              <h1 className="text-3xl font-bold text-fontColor">
                 {step === 1 && "Reset Your Password"}
                 {step === 2 && "Enter Verification Code"}
                 {step === 3 && "Create New Password"}
               </h1>
-              <p className="text-gray-500">
+              <p className="text-sm text-gray-400">
                 {step === 1 && "Enter your email address to receive a verification code"}
                 {step === 2 && "We've sent a code to your email"}
                 {step === 3 && "Choose a strong password to protect your account"}
               </p>
             </div>
 
-            {/* Form */}
             <Form
               form={form}
-              layout="vertical"
               onFinish={handleNextStep}
-              className="space-y-6"
+              layout="vertical"
+              className="space-y-4"
             >
               {renderStepContent()}
 
-              <div className="space-y-4">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 rounded-lg text-base font-medium"
-                >
-                  {step === 3 ? 'Reset Password' : 'Continue'}
-                </Button>
-
-                {step > 1 && (
-                  <Button
-                    type="link"
-                    onClick={() => setStep(step - 1)}
-                    className="w-full text-blue-600"
-                  >
-                    Back
-                  </Button>
-                )}
-              </div>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                className="w-full h-9 bg-blue-500 hover:bg-blue-600"
+              >
+                {step === 3 ? 'Reset Password' : 'Continue'}
+              </Button>
             </Form>
 
-            {/* Help Text */}
-            <div className="mt-8 text-center text-sm text-gray-500">
-              {step === 1 && (
-                <p>
-                  Remember your password?{' '}
-                  <a href="/auth/login" className="text-blue-600 hover:underline">
-                    Sign in
-                  </a>
-                </p>
-              )}
-              {step === 2 && (
-                <button 
-                  onClick={() => setStep(1)}
-                  className="text-blue-600 hover:underline"
-                >
-                  Resend OTP
-                </button>
-              )}
-              {step === 3 && (
-                <p>
-                  Already have an account?{' '}
-                  <a href="/auth/login" className="text-blue-600 hover:underline">
-                    Sign in
-                  </a>
-                </p>
-              )}
+            <div className="text-center text-sm text-gray-400">
+              Remember your password?{' '}
+              <Link href="/login" className="text-blue-500 hover:text-blue-400">
+                Sign in
+              </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
-      </main>
+      </div>
+
+      <div className="hidden lg:block lg:w-1/2">
+        <div className="relative flex h-full items-end bg-white">
+          <img
+            src="https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/white-building.jpg"
+            alt="Modern architecture"
+            width={"1080"}
+            height={"1080"}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="relative space-y-4 p-16">
+            <blockquote className="text-lg font-medium italic text-gray-900">
+              The Keyword Tool project focuses on analyzing trends, YouTube data,
+              competitor analysis, and user habits to provide YouTubers with the
+              latest insights for content development.
+            </blockquote>
+            <figcaption className="flex items-center gap-4">
+              <img
+                src="https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/white-building.jpg"
+                alt="Bruno Reichert"
+                width={"40"}
+                height={"40"}
+                className="rounded-full"
+              />
+            </figcaption>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -14,17 +14,16 @@ const getUserIdFromToken = () => {
     const decoded: any = jwt.decode(accessToken); // Giải mã token
     return decoded?._id || null; // Trả về userId hoặc null
   }
-
   return null; // Trả về null nếu không có accessToken
 };
 
 
 // Saga for login
 function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { email, password, onSuccess = () => { }, } = payload;
+  const { email, password, onSuccess = () => { }, onFail = () => { } } = payload;
   try {
     yield delay(500);
-    const { success, data } = yield call(AuthRequest.login, { email, password });
+    const { success, data, message: messages } = yield call(AuthRequest.login, { email, password });
     if (success) {
       const decoded: any = jwt.decode(data.accessToken);
       localStorage.setItem('accessToken', data.accessToken);
@@ -33,15 +32,16 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
         yield put(AuthActions.setUser(response.data));
         onSuccess(data?.user);
       } else {
+        onFail(data)
         yield put(AuthActions.getInfoUser({}));
-        message.error("Đăng nhập không thành công."); // Hiển thị thông báo lỗi
+        message.error(messages);
       }
     } else {
-      message.error("Đăng nhập không thành công."); // Hiển thị thông báo lỗi
+      onFail(data)
+      message.error(messages);
     }
-  } catch (error) {
-    message.error("Đăng nhập không thành công."); // Hiển thị thông báo lỗi
-    console.error("Error during login process:", error);
+  } catch (error: any) {
+    message.error(error.response.data.message)
   }
 }
 
@@ -62,9 +62,9 @@ function* googleSignIn({ payload }: any): Generator<any, void, any> {
     } else {
       message.error("Đăng nhập không thành công.");
     }
-  } catch (e) {
-    console.log("🚀 ~ e:", e)
-    message.error("Đăng nhập không thành công.");
+  } catch (error: any) {
+    console.log("🚀 ~ e:", error)
+    message.error(error.response.data.message)
   }
 }
 // Saga for registration
@@ -112,7 +112,9 @@ function* logout({ payload }: PayloadAction<any>): Generator<any, void, any> {
     if (success) {
       yield put(AuthActions.logout({}));
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.log("🚀 ~ e:", error)
+    message.error(error.response.data.message)
   }
 }
 
@@ -131,7 +133,9 @@ function* refreshToken(): Generator<any, void, any> {
     } else {
       message.error("Hãy đăng nhập");
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.log("🚀 ~ e:", error)
+    message.error(error.response.data.message)
   }
 }
 
@@ -188,11 +192,12 @@ function* verifyOtp({ payload }: PayloadAction<any>): Generator<any, void, any> 
     }
   }
 }
-function* verifyPassForget({ payload }: PayloadAction<any>): Generator<any, void, any> {
-  const { newPassword, onSuccess } = payload;
+
+function* acceptEmail({ payload }: PayloadAction<any>): Generator<any, void, any> {
+  const { token, onSuccess } = payload;
   try {
     const res: { success: boolean; data: any; message: string } =
-      yield AuthRequest.verifyPassForget(payload);
+      yield AuthRequest.acceptEmail(token);
     if (res.success) {
       message.success(res.message);
       onSuccess && onSuccess();
@@ -217,6 +222,5 @@ export function* AuthSaga() {
   yield takeLeading(AuthActions.changePassword, changePassword);
   yield takeLeading(AuthActions.verifyEmail, verifyEmail);
   yield takeLeading(AuthActions.verifyOtp, verifyOtp);
-  yield takeLeading(AuthActions.verifyPassForget, verifyPassForget);
-
+  yield takeLeading(AuthActions.acceptEmail, acceptEmail);
 }
