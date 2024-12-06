@@ -13,14 +13,10 @@ export async function Providers({ children }: { children: ReactNode }) {
     <ReduxProvider>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <RootStyleRegistry>
-          <GoogleOAuthProvider
-            clientId={
-              process.env.NEXT_PUBLIC_ID_GOOGLE_CLOUND || ""}
-          >
-            <AuthProvider>
-              <LayoutHome>{children}</LayoutHome>
-            </AuthProvider>
-          </GoogleOAuthProvider>
+
+          <AuthProvider>
+            <LayoutHome>{children}</LayoutHome>
+          </AuthProvider>
         </RootStyleRegistry>
       </ThemeProvider>
     </ReduxProvider>
