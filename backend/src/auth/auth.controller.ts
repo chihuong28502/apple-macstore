@@ -70,7 +70,7 @@ export class AuthController {
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || 'Unknown IP';
     const result = await this.authService.login(loginDto, deviceInfo, ipAddress);
-    if (result.data === true) {
+    if (result.success === true) {
       this.cookiesService.setAuthCookies(res, result.data.accessToken, result.data.refreshToken);
     }
     return result;
