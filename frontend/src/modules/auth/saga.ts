@@ -128,14 +128,14 @@ function* refreshToken(): Generator<any, void, any> {
         const userResponse = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(userResponse.data));
       } else {
-        throw new Error("Unable to decode user ID from access token.");
+        // throw new Error("Unable to decode user ID from access token.");
       }
     } else {
-      message.error("Hãy đăng nhập");
+      // message.error("Hãy đăng nhập");
     }
   } catch (error: any) {
     console.log("🚀 ~ e:", error)
-    message.error(error.response.data.message)
+    // message.error(error.response.data.message)
   }
 }
 
