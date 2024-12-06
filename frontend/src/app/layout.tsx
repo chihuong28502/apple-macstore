@@ -7,7 +7,6 @@ import { ToastContainer } from "react-toastify";
 
 import LoadingFixed from "@/components/Loading/LoadingFixed";
 import { Providers } from "@/providers/providers";
-import ChangePassword from "@/components/changePassword/ChangePassword";
 
 // const geistSans = localFont({
 //   src: "@/app/fonts/GeistVF.woff",
