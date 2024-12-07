@@ -50,14 +50,14 @@ export class IntroductionService {
       await this.clearAllRelatedCache();
       return {
         success: true,
-        message: 'Introduction created successfully',
+        message: 'Tạo giới thiệu thành công',
         data: createdIntroduction,
       };
     } catch (error) {
       console.log("🚀 ~ IntroductionService ~ error:", error)
       return {
         success: false,
-        message: 'Failed to create introduction',
+        message: 'Tạo giới thiệu thất bại',
         data: null,
       };
     }
@@ -82,7 +82,7 @@ export class IntroductionService {
       if (cachedIntroductions) {
         return {
           success: true,
-          message: 'Introductions retrieved from cache',
+          message: 'Lấy danh sách giới thiệu từ cache thành công',
           data: cachedIntroductions,
         };
       }
@@ -90,13 +90,13 @@ export class IntroductionService {
       await this.redisService.setCache<Introduction[]>(cacheKey, introductions, this.CACHE_TTL);
       return {
         success: true,
-        message: 'Fetched introductions successfully',
+        message: 'Lấy danh sách giới thiệu thành công',
         data: introductions,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to fetch introductions',
+        message: 'Lấy danh sách giới thiệu thất bại',
         data: null,
       };
     }
@@ -108,19 +108,19 @@ export class IntroductionService {
       if (!introduction) {
         return {
           success: false,
-          message: 'Introduction not found',
+          message: 'Không tìm thấy giới thiệu',
           data: null,
         };
       }
       return {
         success: true,
-        message: 'Fetched introduction successfully',
+        message: 'Lấy thông tin giới thiệu thành công',
         data: introduction,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to fetch introduction',
+        message: 'Lấy thông tin giới thiệu thất bại',
         data: null,
       };
     }
@@ -209,13 +209,13 @@ export class IntroductionService {
 
       return {
         success: true,
-        message: 'Introduction deleted successfully',
+        message: 'Xóa giới thiệu thành công',
         data: null,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to delete introduction',
+        message: 'Xóa giới thiệu thất bại',
         data: null,
       };
     }
