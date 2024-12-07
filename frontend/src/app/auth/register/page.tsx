@@ -114,7 +114,7 @@ function ChangePassword() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-1 flex-col justify-center p-8 sm:p-4 lg:p-2"
+            className="flex flex-1 flex-col p-8 sm:p-4 lg:p-8"
           >
             <div className="flex items-center gap-2 text-gray-800 dark:text-white">
               <svg
@@ -278,7 +278,7 @@ function ChangePassword() {
               {/* Login Link */}
               <p className="text-center text-sm text-gray-500 dark:text-gray-400">
                 Already have an account?
-                <Link
+                <Link 
                   href="/auth/login"
                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
