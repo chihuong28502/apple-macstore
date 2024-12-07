@@ -183,23 +183,19 @@ export class OrderService {
   }
 
   async updateStatus(id: string, updateOrderDto: UpdateOrderDto): Promise<ResponseDto<Order>> {
+    // const cacheKeyUpdate = `variants_${updatedVariant.productId || 'all'}`;
     const keyCache = `order_by_user_${updateOrderDto.userId}`;
     const keyCacheAllOrder = `order_all`;
 
     try {
       // Cập nhật trạng thái đơn hàng
       const updatedOrder = await this.orderModel
-        .findByIdAndUpdate(
-          id,
-          { status: updateOrderDto.status },
-          { new: true }
-        )
-        .exec();
+        .findByIdAndUpdate(id, { status: updateOrderDto.status }, { new: true }).exec();
 
       if (!updatedOrder) {
         throw new NotFoundException(`Order with ID "${id}" not found`);
       }
-
+      const productIds = updatedOrder.items.map(item => item.productId);
       if (updateOrderDto.status === 'cancelled') {
         // Hoàn lại stock khi hủy đơn hàng
         const updateStockTasks = updatedOrder.items.map(async (item) => {
@@ -244,6 +240,10 @@ export class OrderService {
       }
 
       // Xóa cache
+      productIds.forEach(productId => {
+        const productCacheKey = `${productId}`;
+        this.redisService.clearCache(productCacheKey);
+      });
       this.redisService.clearCache(keyCache);
       this.redisService.clearCache(keyCacheAllOrder);
 

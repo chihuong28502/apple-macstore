@@ -1,6 +1,6 @@
 "use client";
 import { DownOutlined } from "@ant-design/icons";
-import { Button, Dropdown, Menu, Space } from "antd";
+import { Button, Dropdown, Menu, Space, Spin } from "antd";
 import Link from "next/link";
 import React from "react";
 import type { MenuProps } from "antd"; // Import MenuProps để sử dụng kiểu ItemType
@@ -16,7 +16,7 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
   if (loading) {
     return (
       <Button loading className="mb-8">
-        Loading...
+        <Spin />
       </Button>
     );
   }
@@ -45,11 +45,10 @@ export const CategoryFilter: React.FC<ProductPage.CategoryFilterProps> = ({
         label: (
           <button
             onClick={() => onCategoryChange(category._id)}
-            className={`block w-full text-left px-2 py-1 transition-all duration-200 ${
-              selectedCategory === category._id
+            className={`block w-full text-left px-2 py-1 transition-all duration-200 ${selectedCategory === category._id
                 ? "bg-green-500 text-white"
                 : "text-gray-700"
-            }`}
+              }`}
             type="button"
           >
             <Link href={`/product?categoryId=${category._id}`}>
