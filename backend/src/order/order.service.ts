@@ -306,7 +306,7 @@ export class OrderService {
       await this.ordersGateway.sendOrder(order);
       this.redisService.clearCache(keyCache)
       const notifyDto: CreateNotifyDto = {
-        title: `Thanh toán: ${new Date(new Date)}`,
+        title: `Thanh toán: ${sepayDto.content}`,
         content: `Thanh toán thành công`,
         isRead: false,
         customer: order.userId,

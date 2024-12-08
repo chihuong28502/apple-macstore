@@ -1,9 +1,6 @@
 'use client';
-import FullScreenLoading from '@/components/loadingCheck/LoadingCheck';
 import { useAppSelector } from '@/core/services/hook';
 import { formatDateTimeByDb } from '@/lib/formatTimeInDate';
-import { cleanupSocketEvent, listenToSocketEvent } from '@/lib/socket/emit.socket';
-import { getSocket } from '@/lib/socket/socket';
 import { formatTimeDifference } from '@/lib/timeCurrentDesInput';
 import { AuthSelectors } from '@/modules/auth/slice';
 import { OrderActions, OrderSelectors } from '@/modules/order/slice';
@@ -19,8 +16,7 @@ import {
 import { Avatar, Button, Card, List, message, Modal, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Socket } from 'socket.io-client';
-import PaymentModal from './components/QRPaymentModal';
+import ModalPayment from './components/QRPaymentModal';
 
 type OrderItem = {
   productImages: { image: string }[];
@@ -44,17 +40,14 @@ function Orders() {
   const allOrder: Order[] = useAppSelector(OrderSelectors.allOrder);
   const isLoadingOrder = useSelector(OrderSelectors.isLoading)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [orderSelected, setOrderSelected] = useState("")
   const order = useSelector(OrderSelectors.order)
   const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
-  const socket = getSocket();
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   useEffect(() => {
     if (order?.status === "shipping") {
       setShowFullScreen(true);
-      const timer = setTimeout(() => {
-        setIsCompleted(true);
-      }, 1000);
-      return () => clearTimeout(timer);
+      setIsCompleted(true);
     }
   }, [order?.status]);
   useEffect(() => {
@@ -63,23 +56,6 @@ function Orders() {
     }
   }, [auth?._id, dispatch]);
 
-  useEffect(() => {
-    const handleOrderCheck = (orderSocket: any) => {
-      if (
-        orderSocket.code === order.code &&
-        auth._id === orderSocket.userId &&
-        auth._id === order.userId
-      ) {
-        dispatch(OrderActions.setOrder(orderSocket));
-      }
-    };
-
-    listenToSocketEvent(socket, "check-order", handleOrderCheck);
-
-    return () => {
-      cleanupSocketEvent(socket, "check-order");
-    };
-  }, [socket, dispatch, order, auth]);
 
   const getStatusTag = (status: string) => {
     switch (status) {
@@ -185,7 +161,15 @@ function Orders() {
       </section>
     );
   }
-
+  const handleCloseModal = () => {
+    setOrderSelected(""); // Xóa order đã chọn
+    setIsModalOpen(false); // Đóng modal
+  };
+  const handleOpenModalPayment = (order: any) => {
+    dispatch(OrderActions.setOrder(order))
+    setIsModalOpen(true)
+    setOrderSelected(order)
+  }
 
   return (
     <div className="container mx-auto p-4 ">
@@ -251,7 +235,7 @@ function Orders() {
                     <Button
                       type="primary"
                       size="large"
-                      onClick={() => setIsModalOpen(true)}
+                      onClick={() => handleOpenModalPayment(order)}
                       className="bg-blue-600"
                     >
                       Open Payment QR
@@ -259,11 +243,7 @@ function Orders() {
                   )}
                 </div>
               </Card>
-              <PaymentModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                qrLink={order.qr}
-              />
+
             </div>
           ))}
 
@@ -271,21 +251,11 @@ function Orders() {
       ) : (
         <p className="text-center text-gray-500">No orders found.</p>
       )}
-
-      {showFullScreen && (
-        <FullScreenLoading
-          isLoading={true}
-          isCompleted={isCompleted}
-          loadingText="Đang xử lý thanh toán..."
-          completedText="Thanh toán thành công!"
-          completedFailText="Thanh toán thất bại"
-          paymentStatus={true}
-          onComplete={() => {
-            setShowFullScreen(false);
-            setIsCompleted(false);
-          }}
-        />
-      )}
+       <ModalPayment
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        order={orderSelected}
+      />
     </div>
   );
 }

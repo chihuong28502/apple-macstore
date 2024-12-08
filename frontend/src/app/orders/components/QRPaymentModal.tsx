@@ -1,110 +1,97 @@
-'use client'
+'use client';
 
-import { Modal } from 'antd'
-import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import FullScreenLoading from '@/components/loadingCheck/LoadingCheck';
+import { cleanupSocketEvent, listenToSocketEvent } from '@/lib/socket/emit.socket';
+import { getSocket } from '@/lib/socket/socket';
+import { AuthSelectors } from '@/modules/auth/slice';
+import { OrderActions, OrderSelectors } from '@/modules/order/slice';
+import { Modal, Spin } from 'antd';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-interface PaymentModalProps {
-  isOpen: boolean
-  onClose: () => void
-  qrLink: string
-}
+type ModalPaymentProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  order: any; // Cập nhật kiểu nếu có
+};
 
-interface BankInfo {
-  accountNumber: string
-  bankName: string
-  amount: number
-  description: string
-}
-
-export default function PaymentModal({ isOpen, onClose, qrLink }: PaymentModalProps) {
-  const [copied, setCopied] = useState(false)
-  const [bankInfo, setBankInfo] = useState<BankInfo | null>(null)
+function ModalPayment({ isOpen, onClose }: ModalPaymentProps) {
+  const dispatch = useDispatch()
+  const auth = useSelector(AuthSelectors.user)
+  const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  const order = useSelector(OrderSelectors.order)
+  const socket = getSocket()
 
   useEffect(() => {
-    if (qrLink) {
-      const url = new URL(qrLink)
-      const params = new URLSearchParams(url.search)
-      setBankInfo({
-        accountNumber: params.get('acc') || '',
-        bankName: params.get('bank') || '',
-        amount: parseFloat(params.get('amount') || '0'),
-        description: decodeURIComponent(params.get('des') || '')
-      })
+    if (order?.status === 'shipping') {
+      setShowFullScreen(true);
+      setIsCompleted(true);
     }
-  }, [qrLink])
+  }, [order]);
 
-  const handleCopyText = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy text:', err)
+  useEffect(() => {
+    const handleOrderCheck = (orderSocket :any) => {
+      if (
+        orderSocket.code === order.code &&
+        auth._id === orderSocket.userId &&
+        auth._id === order.userId
+      ) {
+        dispatch(OrderActions.setOrder(orderSocket));
+      }
+    };
+
+    listenToSocketEvent(socket, "check-order", handleOrderCheck);
+
+    return () => {
+      cleanupSocketEvent(socket, "check-order");
+    };
+  }, [socket, dispatch, order, auth]);
+
+  useEffect(() => {
+    if (order?.status === "shipping") {
+      setShowFullScreen(true)
+      setIsCompleted(true);
     }
-  }
-
-  if (!bankInfo) return null
-
+  }, [order])
   return (
     <Modal
+      title="Thanh toán"
       open={isOpen}
       onCancel={onClose}
       footer={null}
-      width={480}
-      className="rounded-2xl overflow-hidden"
+      centered
     >
-      <div className="p-4">
-        <div className="text-center mb-4">
-          <h3 className="text-2xl font-bold text-gray-800">Scan QR to Pay</h3>
-          <p className="text-gray-500 mt-2">Please scan this QR code with your banking app</p>
+      {order?.qr ? (
+        <div className="flex flex-col items-center">
+          <img
+            src={order.qr}
+            alt="QR Code"
+            className="w-32 h-32 mb-4"
+          />
+          <p className="text-center text-gray-700">Quét mã QR để thanh toán</p>
         </div>
-
-        <div className="bg-black p-8 rounded-xl flex justify-center items-center mb-6">
-          <div className="relative w-64 h-64">
-            <img
-              src={qrLink}
-              alt="Payment QR Code"
-              className="object-contain"
-            />
-          </div>
+      ) : (
+        <div className="flex justify-center">
+          <Spin tip="Đang tải thông tin thanh toán..." />
         </div>
-
-        <div className="space-y-2">
-          <div className="bg-gray-50 p-2 rounded-lg">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-600">Bank Account</span>
-              <button
-                onClick={() => handleCopyText(bankInfo.accountNumber)}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-              >
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
-            <p className="text-gray-800 font-medium">{bankInfo.accountNumber}</p>
-            <p className="text-gray-500 text-sm mt-1">{bankInfo.bankName}</p>
-          </div>
-
-          <div className="bg-gray-50 p-2 rounded-lg">
-            <span className="text-gray-600">Amount</span>
-            <p className="text-gray-800 font-medium mt-1">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(bankInfo.amount)}
-            </p>
-          </div>
-
-          <div className="bg-gray-50 p-2 rounded-lg">
-            <span className="text-gray-600">Payment Reference</span>
-            <p className="text-gray-800 font-medium mt-1">{bankInfo.description}</p>
-          </div>
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            Please ensure to include the payment reference when making the transfer
-          </p>
-        </div>
-      </div>
+      )}
+      {showFullScreen && (
+        <FullScreenLoading
+          isLoading={true}
+          isCompleted={isCompleted}
+          loadingText="Đang xử lý thanh toán..."
+          completedText="Thanh toán thành công!"
+          completedFailText="Thanh toán thất bại"
+          paymentStatus={true}
+          onComplete={() => {
+            setShowFullScreen(false);
+            setIsCompleted(false);
+          }}
+        />
+      )}
     </Modal>
-  )
+  );
 }
 
+export default ModalPayment;
