@@ -95,7 +95,7 @@ export class AuthService {
     await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
     return {
-      message: 'Login success',
+      message: 'Đăng nhập thành công',
       success: true,
       data: {
         user: {
@@ -119,9 +119,9 @@ export class AuthService {
         role: 'admin',
       };
       await this.adminModel.create(adminUser);
-      this.logger.log('Admin account created');
+      this.logger.log('Tài khoản admin đã được tạo');
     } else {
-      this.logger.log('Admin account already exists');
+      this.logger.log('Tài khoản admin đã tồn tại');
     }
   }
 
@@ -243,7 +243,7 @@ export class AuthService {
     const refreshToken = await this.generateRefreshToken(user);
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
     return {
-      message: 'Login success',
+      message: 'Đăng nhập thành công',
       success: true,
       data: {
         user: {
@@ -304,46 +304,48 @@ export class AuthService {
   async logout(): Promise<ResponseDto<User>> {
     return {
       success: true,
-      message: 'Logout success',
+      message: 'Đăng xuất thành công',
       data: null,
     };
   }
 
   private async validateUser(email: string, password: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email });
+    console.log(":", user)
     if (!user || user.role !== 'customer') {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     return user;
   }
+
 
   private async validateAdmin(username: string, password: string): Promise<AdminDocument> {
     const user = await this.adminModel.findOne({ username });
     if (!user || user.role !== 'admin') {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     return user;
   }
 
-  private async validateRefreshToken(userId: string, refreshToken: string): Promise<RefreshTokenDocument> {
+  private async validateRefreshToken(userId: string, refreshToken: string) {
     const storedToken = await this.refreshTokenModel.findOne({ userId }).exec();
     if (!storedToken) {
-      throw new UnauthorizedException('Refresh token not found');
+      throw new UnauthorizedException('Không tìm thấy refresh token');
     }
     const isTokenValid = await bcrypt.compare(refreshToken, storedToken.token);
     if (!isTokenValid) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Refresh token không hợp lệ');
     }
     if (storedToken.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token has expired');
+      throw new UnauthorizedException('Refresh token đã hết hạn');
     }
     return storedToken;
   }

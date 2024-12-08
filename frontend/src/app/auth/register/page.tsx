@@ -106,16 +106,15 @@ function ChangePassword() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-2"
+      className="bg-gradient-to-br h-[88vh] dark:from-gray-900 dark:to-gray-800 from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-2"
     >
-      <div className="flex shadow-2xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
-        {/* Left Column */}
+      <div className="flex shadow-2xl h-full rounded-xl overflow-hidden backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
         <div className="flex w-full flex-col lg:w-1/2 bg-white dark:bg-gray-900">
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-1 flex-col justify-between p-8 sm:p-4 lg:p-2"
+            className="flex flex-1 flex-col p-8 sm:p-4 lg:p-8"
           >
             <div className="flex items-center gap-2 text-gray-800 dark:text-white">
               <svg

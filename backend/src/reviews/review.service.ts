@@ -47,13 +47,13 @@ export class ReviewsService {
 
       return {
         success: true,
-        message: 'Review created successfully',
+        message: 'Tạo đánh giá thành công',
         data: savedReview,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create review: ' + error.message,
+        message: 'Tạo đánh giá thất bại: ' + error.message,
         data: null,
       };
     }
@@ -67,7 +67,7 @@ export class ReviewsService {
     if (cachedReviews) {
       return {
         success: true,
-        message: 'Reviews retrieved from cache',
+        message: 'Lấy danh sách đánh giá từ cache thành công',
         data: cachedReviews,
       };
     }
@@ -80,13 +80,13 @@ export class ReviewsService {
 
       return {
         success: true,
-        message: 'Reviews retrieved successfully',
+        message: 'Lấy danh sách đánh giá thành công',
         data: reviews,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve reviews: ' + error.message,
+        message: 'Lấy danh sách đánh giá thất bại: ' + error.message,
         data: null,
       };
     }
@@ -208,7 +208,7 @@ export class ReviewsService {
     if (cachedReviews) {
       return {
         success: true,
-        message: 'Product reviews retrieved from cache',
+        message: 'Lấy đánh giá sản phẩm thành công',
         data: cachedReviews,
       };
     }
@@ -235,7 +235,7 @@ export class ReviewsService {
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve product reviews: ' + error.message,
+        message: 'Lấy đánh giá sản phẩm thất bại: ' + error.message,
         data: null,
       };
     }

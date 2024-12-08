@@ -19,8 +19,9 @@ function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>)
       yield put(OrderActions.setAllOrder(res.data));
     } else {
     }
-  } catch (e) {
-    message.error("Thao tác thất bại!");
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -48,8 +49,9 @@ function* addOrder({ payload }: PayloadAction<{
       message.error("Thêm order thất bại");
       onFail(res.data)
     }
-  } catch (e) {
-    message.error("Thao tác thất bại!");
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -67,10 +69,10 @@ function* updateStatus({ payload }: PayloadAction<{ id: string; data: any, userI
       const res = yield OrderRequest.getOrderById(userId);
       yield put(OrderActions.setAllOrder(res.data));
     } else {
-      message.error("Thao tác thất bại!");
     }
   } catch (error: any) {
-    message.error("Thao tác thất bại!");
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -87,7 +89,8 @@ function* updateOrder({ payload }: PayloadAction<{ id: string; data: any }>): Ge
       message.error("Sửa thông tin người dùng thất bại");
     }
   } catch (error: any) {
-    message.error("Thao tác thất bại!");
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -104,7 +107,8 @@ function* deleteOrder({ payload }: any): Generator<any, void, any> {
       message.error("Xóa danh mục thất bại");
     }
   } catch (error: any) {
-    message.error("Xóa danh mục thất bại Catch");
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 

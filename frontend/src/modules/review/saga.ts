@@ -19,8 +19,9 @@ function* addReview({ payload }: PayloadAction<any>) {
     } else {
       onFail(response);
     }
-  } catch (e) {
-    onFail(e);
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -36,8 +37,9 @@ function* fetchdReviewByProductId({ payload }: PayloadAction<any>) {
     } else {
       onFail(response);
     }
-  } catch (e) {
-    onFail(e);
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -60,8 +62,9 @@ function* editReview({ payload }: PayloadAction<any>) {
     } else {
       message.error("Sửa nhận xét thất bại!")
     }
-  } catch (error) {
-    console.error('Error editing review:', error);
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -82,9 +85,10 @@ function* deleteReview({ payload }: PayloadAction<{ productId: string, reviewId:
     } else {
       message.error("Xóa nhận xét thất bại!");
     }
-  } catch (error) {
-    console.error('Error deleting review:', error);
-    message.error("Đã có lỗi xảy ra khi xóa nhận xét.");
+  } catch (error: any) {
+    console.log(error)
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 

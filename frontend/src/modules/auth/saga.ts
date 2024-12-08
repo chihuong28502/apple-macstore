@@ -41,7 +41,9 @@ function* login({ payload }: PayloadAction<any>): Generator<any, void, any> {
       message.error(messages);
     }
   } catch (error: any) {
+    onFail()
     message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -63,8 +65,9 @@ function* googleSignIn({ payload }: any): Generator<any, void, any> {
       message.error("Đăng nhập không thành công.");
     }
   } catch (error: any) {
-    console.log("🚀 ~ e:", error)
+    console.log("🚀 ~ error:", error)
     message.error(error.response.data.message)
+
   }
 }
 // Saga for registration
@@ -80,6 +83,7 @@ function* register({ payload }: PayloadAction<any>): Generator<any, void, any> {
     }
   } catch (error: any) {
     message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
     yield put(AppAction.hideLoading());
   }
 }
@@ -113,8 +117,8 @@ function* logout({ payload }: PayloadAction<any>): Generator<any, void, any> {
       yield put(AuthActions.logout({}));
     }
   } catch (error: any) {
-    console.log("🚀 ~ e:", error)
-    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
+
   }
 }
 
@@ -128,14 +132,14 @@ function* refreshToken(): Generator<any, void, any> {
         const userResponse = yield call(AuthRequest.getUserInfo, decoded._id);
         yield put(AuthActions.setUser(userResponse.data));
       } else {
-        throw new Error("Unable to decode user ID from access token.");
+        // throw new Error("Unable to decode user ID from access token.");
       }
     } else {
-      message.error("Hãy đăng nhập");
+      // message.error("Hãy đăng nhập");
     }
   } catch (error: any) {
-    console.log("🚀 ~ e:", error)
-    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
+
   }
 }
 

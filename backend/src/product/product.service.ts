@@ -45,13 +45,13 @@ export class ProductService {
       this.redisService.clearProductsPageCache()
       return {
         success: true,
-        message: 'Product created successfully',
+        message: 'Tạo sản phẩm thành công',
         data: createdProduct,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create product: ' + error.message,
+        message: 'Tạo sản phẩm thất bại: ' + error.message,
         data: null,
       };
     }
@@ -62,13 +62,13 @@ export class ProductService {
       const createdProducts = await this.productModel.insertMany(createMultipleProductsDto.products);
       return {
         success: true,
-        message: 'Products created successfully',
+        message: 'Tạo nhiều sản phẩm thành công',
         data: createdProducts,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create products',
+        message: 'Tạo nhiều sản phẩm thất bại',
         data: null,
       };
     }
@@ -111,7 +111,7 @@ export class ProductService {
         // Lưu vào Redis cache (TTL = 300 giây)
         const response = {
           success: true,
-          message: 'Products retrieved successfully',
+          message: 'Lấy danh sách sản phẩm thành công',
           data: { products, total },
         };
 
@@ -183,7 +183,7 @@ export class ProductService {
 
       const response = {
         success: true,
-        message: 'Products retrieved successfully',
+        message: 'Lấy danh sách sản phẩm thành công',
         data: { products, total },
       };
 
@@ -393,13 +393,13 @@ export class ProductService {
       await this.redisService.clearProductsPageCache()
       return {
         success: true,
-        message: 'variantData created successfully',
+        message: 'Tạo biến thể sản phẩm thành công',
         data: variantData,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create product: ' + error.message,
+        message: 'Tạo biến thể sản phẩm thất bại: ' + error.message,
         data: null,
       };
     }
@@ -421,13 +421,13 @@ export class ProductService {
       await this.redisService.clearProductsPageCache()
       return {
         success: true,
-        message: 'Cập nhật variant thành công',
+        message: 'Cập nhật biến thể thành công',
         data: updatedVariant,
       };
     } catch (error) {
       return {
         success: false,
-        message: `Cập nhật variant thất bại: ${error.message}`,
+        message: 'Cập nhật biến thể thất bại: ' + error.message,
         data: null,
       };
     }
@@ -439,7 +439,7 @@ export class ProductService {
       if (!variantToDelete) {
         return {
           success: false,
-          message: 'Variant not found',
+          message: 'Không tìm thấy biến thể',
           data: null,
         };
       }
@@ -451,12 +451,12 @@ export class ProductService {
       await this.redisService.clearProductsPageCache()
       return {
         success: true,
-        message: 'Xóa variant thành công',
+        message: 'Xóa biến thể thành công',
       };
     } catch (error) {
       return {
         success: false,
-        message: `Xóa variant thất bại: ${error.message}`,
+        message: 'Xóa biến thể thất bại: ' + error.message,
       };
     }
   }
