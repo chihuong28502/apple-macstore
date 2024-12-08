@@ -1,6 +1,9 @@
 'use client';
+import FullScreenLoading from '@/components/loadingCheck/LoadingCheck';
 import { useAppSelector } from '@/core/services/hook';
 import { formatDateTimeByDb } from '@/lib/formatTimeInDate';
+import { cleanupSocketEvent, listenToSocketEvent } from '@/lib/socket/emit.socket';
+import { getSocket } from '@/lib/socket/socket';
 import { formatTimeDifference } from '@/lib/timeCurrentDesInput';
 import { AuthSelectors } from '@/modules/auth/slice';
 import { OrderActions, OrderSelectors } from '@/modules/order/slice';
@@ -14,8 +17,10 @@ import {
   SyncOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Card, List, message, Modal, Tag } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Socket } from 'socket.io-client';
+import PaymentModal from './components/QRPaymentModal';
 
 type OrderItem = {
   productImages: { image: string }[];
@@ -38,11 +43,43 @@ function Orders() {
   const auth = useAppSelector(AuthSelectors.user);
   const allOrder: Order[] = useAppSelector(OrderSelectors.allOrder);
   const isLoadingOrder = useSelector(OrderSelectors.isLoading)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const order = useSelector(OrderSelectors.order)
+  const [showFullScreen, setShowFullScreen] = useState<boolean>(false);
+  const socket = getSocket();
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  useEffect(() => {
+    if (order?.status === "shipping") {
+      setShowFullScreen(true);
+      const timer = setTimeout(() => {
+        setIsCompleted(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [order?.status]);
   useEffect(() => {
     if (auth?._id) {
       dispatch(OrderActions.getAllOrderById(auth._id));
     }
   }, [auth?._id, dispatch]);
+
+  useEffect(() => {
+    const handleOrderCheck = (orderSocket: any) => {
+      if (
+        orderSocket.code === order.code &&
+        auth._id === orderSocket.userId &&
+        auth._id === order.userId
+      ) {
+        dispatch(OrderActions.setOrder(orderSocket));
+      }
+    };
+
+    listenToSocketEvent(socket, "check-order", handleOrderCheck);
+
+    return () => {
+      cleanupSocketEvent(socket, "check-order");
+    };
+  }, [socket, dispatch, order, auth]);
 
   const getStatusTag = (status: string) => {
     switch (status) {
@@ -149,69 +186,105 @@ function Orders() {
     );
   }
 
+
   return (
     <div className="container mx-auto p-4 ">
       <h1 className="text-2xl font-bold mb-6 text-center text-fontColor">My Orders</h1>
       {allOrder?.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {allOrder.map((order) => (
-            <Card
-              key={order._id}
-              title={`Order: ${order.code}`}
-              extra={getStatusTag(order.status)}
-              className="shadow-lg rounded-lg border border-gray-200 flex flex-col h-full"
-            >
-              <p className="mb-2">
-                <FieldTimeOutlined className="mr-2 text-green-500" />
-                Time: <span className="font-semibold text-gray-800">{formatTimeDifference(order.createdAt)} ({formatDateTimeByDb(order.createdAt)})</span>
-              </p>
-              <p className="mb-2">
-                <DollarCircleOutlined className="mr-2 text-green-500" />
-                Total Price: <span className="font-semibold text-gray-800">${order.totalPrice.toFixed(2)}</span>
-              </p>
-              <p className="mb-2">
-                <ShoppingCartOutlined className="mr-2 text-blue-500" />
-                Items: <span className="font-semibold text-gray-800">{order.items.length}</span>
-              </p>
-              <List
-                className="mt-4"
-                dataSource={order.items}
-                renderItem={(item) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      avatar={
-                        <Avatar src={item.productImages?.[0]?.image || 'https://via.placeholder.com/50'} />
-                      }
-                      title={item.productName}
-                      description={`Quantity: ${item.quantity} | Price: $${item.price}`}
-                    />
-                  </List.Item>
-                )}
+          {allOrder.map((order: any) => (
+            <div className="">
+              <Card
+                key={order._id}
+                title={`Order: ${order.code}`}
+                extra={getStatusTag(order.status)}
+                className="shadow-lg rounded-lg border border-gray-200 flex flex-col h-full"
+              >
+                <p className="mb-2">
+                  <FieldTimeOutlined className="mr-2 text-green-500" />
+                  Time: <span className="font-semibold text-gray-800">{formatTimeDifference(order.createdAt)} ({formatDateTimeByDb(order.createdAt)})</span>
+                </p>
+                <p className="mb-2">
+                  <DollarCircleOutlined className="mr-2 text-green-500" />
+                  Total Price: <span className="font-semibold text-gray-800">${order.totalPrice.toFixed(2)}</span>
+                </p>
+                <p className="mb-2">
+                  <ShoppingCartOutlined className="mr-2 text-blue-500" />
+                  Items: <span className="font-semibold text-gray-800">{order.items.length}</span>
+                </p>
+                <List
+                  className="mt-4"
+                  dataSource={order.items}
+                  renderItem={(item: any) => (
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar src={item.productImages?.[0]?.image || 'https://via.placeholder.com/50'} />
+                        }
+                        title={item.productName}
+                        description={`Quantity: ${item.quantity} | Price: $${item.price}`}
+                      />
+                    </List.Item>
+                  )}
+                />
+                <div className="mt-4 flex flex-col gap-2">
+                  {(order.status === 'pending' || order.status === 'shipping') && (
+                    <Button
+                      aria-label="Cancel Order"
+                      role="button"
+                      type="primary"
+                      danger
+                      onClick={() => handleCancelOrder(order._id)}
+                    >
+                      Cancel Order
+                    </Button>
+                  )}
+                  {order.status === 'shipping' && (
+                    <Button
+                      type="primary"
+                      onClick={() => handleMarkAsReceived(order._id)}
+                    >
+                      Mark as Received
+                    </Button>
+                  )}
+                  {order.status === 'pending' && (
+                    <Button
+                      type="primary"
+                      size="large"
+                      onClick={() => setIsModalOpen(true)}
+                      className="bg-blue-600"
+                    >
+                      Open Payment QR
+                    </Button>
+                  )}
+                </div>
+              </Card>
+              <PaymentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                qrLink={order.qr}
               />
-              <div className="mt-4 flex flex-col gap-2">
-                {(order.status === 'pending' || order.status === 'shipping') && (
-                  <Button
-                    type="primary"
-                    danger
-                    onClick={() => handleCancelOrder(order._id)}
-                  >
-                    Cancel Order
-                  </Button>
-                )}
-                {order.status === 'shipping' && (
-                  <Button
-                    type="primary"
-                    onClick={() => handleMarkAsReceived(order._id)}
-                  >
-                    Mark as Received
-                  </Button>
-                )}
-              </div>
-            </Card>
+            </div>
           ))}
+
         </div>
       ) : (
         <p className="text-center text-gray-500">No orders found.</p>
+      )}
+
+      {showFullScreen && (
+        <FullScreenLoading
+          isLoading={true}
+          isCompleted={isCompleted}
+          loadingText="Đang xử lý thanh toán..."
+          completedText="Thanh toán thành công!"
+          completedFailText="Thanh toán thất bại"
+          paymentStatus={true}
+          onComplete={() => {
+            setShowFullScreen(false);
+            setIsCompleted(false);
+          }}
+        />
       )}
     </div>
   );
