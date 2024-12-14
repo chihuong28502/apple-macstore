@@ -54,6 +54,11 @@ export class OrderController {
     const result = await this.orderService.checkPayment(sePayDto);
     return res.status(result.success ? 201 : 400).json(result);
   }
+  @Get('/:orderId')
+  async findOrderById(@Param('orderId') orderId: string, @Res() res: Response): Promise<Response> {
+    const result = await this.orderService.findOrderById(orderId);
+    return res.status(result.success ? 200 : 400).json(result);
+  }
 
   @Post('payment/stripe/:orderId')
   async createStripePayment(
@@ -69,7 +74,6 @@ export class OrderController {
     @Param('sessionId') sessionId: string,
     @Res() res: Response
   ): Promise<Response> {
-    console.log("🚀 ~ OrderController ~ sessionId:", sessionId)
     const result = await this.orderService.checkPaymentStatusStriper(sessionId);
     return res.status(result.success ? 200 : 400).json(result);
   }

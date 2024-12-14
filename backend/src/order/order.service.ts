@@ -35,7 +35,7 @@ export class OrderService {
     private notifyService: NotifyService,
     private readonly ordersGateway: OrdersGateway,
     private readonly cartsGateway: CartsGateway
-  ) { 
+  ) {
     this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {
       apiVersion: '2024-11-20.acacia',
     });
@@ -117,6 +117,22 @@ export class OrderService {
         success: true,
         message: 'Orders retrieved successfully',
         data: orders,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to retrieve orders: ' + error.message,
+        data: [],
+      };
+    }
+  }
+  async findOrderById(orderId: string): Promise<ResponseDto<Order[]>> {
+    try {
+      const order = await this.orderModel.findById(orderId).exec();
+      return {
+        success: true,
+        message: 'Orders retrieved successfully',
+        data: order,
       };
     } catch (error) {
       return {
@@ -334,7 +350,6 @@ export class OrderService {
 
   // 
   async createStripePayment(orderId: string): Promise<ResponseDto<any>> {
-    console.log("🚀 ~ OrderService ~ orderId:", orderId)
     try {
       const order = await this.orderModel.findById(orderId);
       if (!order) {
@@ -359,17 +374,18 @@ export class OrderService {
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
-        success_url: `${this.configService.get('FRONTEND_URL')}/payment/success?orderId=${order._id}`,
-        cancel_url: `${this.configService.get('FRONTEND_URL')}/payment/cancel?orderId=${order._id}`,
+        client_reference_id: order._id.toString(),
+        ui_mode: 'embedded',
         metadata: {
           orderId: order._id.toString(),
         },
+        return_url: `${this.configService.get('FRONTEND_URL')}/checkout-stripe?sessionId={CHECKOUT_SESSION_ID}`
       });
 
       return {
         success: true,
         message: 'Stripe payment session created successfully',
-        data: { sessionId: session.id, url: session.url }
+        data: session.client_secret
       };
     } catch (error) {
       return {
@@ -383,16 +399,16 @@ export class OrderService {
   async checkPaymentStatusStriper(sessionId: string): Promise<ResponseDto<any>> {
     try {
       const session = await this.stripe.checkout.sessions.retrieve(sessionId);
-      
+
       if (session.payment_status === 'paid') {
         // Cập nhật trạng thái đơn hàng
         const orderId = session.metadata.orderId;
         const order = await this.orderModel.findById(orderId);
-        
+
         if (order) {
           order.status = 'shipping';
           await order.save();
-          
+
           // Tạo thông báo
           const notifyDto: CreateNotifyDto = {
             title: `Thanh toán đơn hàng #${order.code}`,
@@ -405,7 +421,10 @@ export class OrderService {
           return {
             success: true,
             message: 'Payment completed successfully',
-            data: order
+            data: {
+              status: session.status,
+              orderId: order._id
+            }
           };
         }
       }

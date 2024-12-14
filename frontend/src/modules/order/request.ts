@@ -19,4 +19,11 @@ export const OrderRequest = {
   deleteOrder(id: string) {
     return MSTFetch.delete(`/order/delete/${id}`);
   },
+  creditCardPayment(idOrder: any) {
+    return MSTFetch.post( `/order/payment/stripe/${idOrder}`);
+  },
+
+  checkCreditCardPayment(sessionId: any){
+    return MSTFetch.get(`/order/payment/check/${sessionId}`)
+  }
 };
