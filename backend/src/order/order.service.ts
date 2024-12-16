@@ -5,23 +5,25 @@ import { Model, Types } from 'mongoose';
 import * as crypto from 'node:crypto';
 import { CartsGateway } from 'src/cart/cart.gateway';
 import { Cart, CartDocument } from 'src/cart/schema/cart.schema';
+import { CreateNotifyDto } from 'src/notify/dto/create-notify.dto';
+import { NotifyService } from 'src/notify/notify.service';
 import { Product, ProductDocument } from 'src/product/schema/product.schema';
 import { Variant, VariantDocument } from 'src/product/schema/variants.schema';
 import { RedisService } from 'src/redis/redis.service';
 import { User, UserDocument } from 'src/user/schema/user.schema';
 import { ResponseDto } from 'src/utils/dto/response.dto';
+import Stripe from 'stripe';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { SepayDto } from './dto/sepay.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersGateway } from './order.gateway';
 import { Order, OrderDocument } from './schema/order.schema';
-import { CreateNotifyDto } from 'src/notify/dto/create-notify.dto';
-import { NotifyService } from 'src/notify/notify.service';
 
 
 @Injectable()
 export class OrderService {
   private readonly CACHE_TTL = 3600;
+  private stripe: Stripe;
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -33,7 +35,11 @@ export class OrderService {
     private notifyService: NotifyService,
     private readonly ordersGateway: OrdersGateway,
     private readonly cartsGateway: CartsGateway
-  ) { }
+  ) {
+    this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {
+      apiVersion: '2024-11-20.acacia',
+    });
+  }
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
     const cacheKeyById = `cart_by_${createOrderDto.userId}`;
@@ -111,6 +117,22 @@ export class OrderService {
         success: true,
         message: 'Orders retrieved successfully',
         data: orders,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to retrieve orders: ' + error.message,
+        data: [],
+      };
+    }
+  }
+  async findOrderById(orderId: string): Promise<ResponseDto<Order[]>> {
+    try {
+      const order = await this.orderModel.findById(orderId).exec();
+      return {
+        success: true,
+        message: 'Orders retrieved successfully',
+        data: order,
       };
     } catch (error) {
       return {
@@ -325,4 +347,100 @@ export class OrderService {
       };
     }
   }
+
+  // 
+  async createStripePayment(orderId: string): Promise<ResponseDto<any>> {
+    try {
+      const order = await this.orderModel.findById(orderId);
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      // Create line items for Stripe
+      const lineItems = order.items.map(item => ({
+        price_data: {
+          currency: 'vnd',
+          product_data: {
+            name: item.productName,
+            description: `Variant: ${item.variantName}`,
+          },
+          unit_amount: Math.round(item.price * 100), // Stripe uses cents
+        },
+        quantity: item.quantity,
+      }));
+
+      // Create Stripe checkout session
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: lineItems,
+        mode: 'payment',
+        client_reference_id: order._id.toString(),
+        ui_mode: 'embedded',
+        metadata: {
+          orderId: order._id.toString(),
+        },
+        return_url: `${this.configService.get('FRONTEND_URL')}/checkout-stripe?sessionId={CHECKOUT_SESSION_ID}`
+      });
+
+      return {
+        success: true,
+        message: 'Stripe payment session created successfully',
+        data: session.client_secret
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to create Stripe payment: ' + error.message,
+        data: null
+      };
+    }
+  }
+
+  async checkPaymentStatusStriper(sessionId: string): Promise<ResponseDto<any>> {
+    try {
+      const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+
+      if (session.payment_status === 'paid') {
+        // Cập nhật trạng thái đơn hàng
+        const orderId = session.metadata.orderId;
+        const order = await this.orderModel.findById(orderId);
+
+        if (order) {
+          order.status = 'shipping';
+          await order.save();
+
+          // Tạo thông báo
+          const notifyDto: CreateNotifyDto = {
+            title: `Thanh toán đơn hàng #${order.code}`,
+            content: `Thanh toán thành công`,
+            isRead: false,
+            customer: order.userId,
+          };
+          await this.notifyService.createNotify(notifyDto);
+
+          return {
+            success: true,
+            message: 'Payment completed successfully',
+            data: {
+              status: session.status,
+              orderId: order._id
+            }
+          };
+        }
+      }
+
+      return {
+        success: false,
+        message: 'Payment not completed',
+        data: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to check payment status: ' + error.message,
+        data: null
+      };
+    }
+  }
+
 }

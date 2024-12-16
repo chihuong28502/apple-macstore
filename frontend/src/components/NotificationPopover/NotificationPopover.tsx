@@ -44,13 +44,13 @@ const NotificationPopover = () => {
       setNotifications(notificationss);
     }
   }, [notificationss, dispatch, user]);
-  useEffect(() => {
-    // Lắng nghe sự kiện thông báo
-    listenToSocketEvent(socket, "notification", (notification) => {
-      setNotifications((prev: any) => [...prev, notification]);
-    });
-    return () => cleanupSocketEvent(socket, "notification");
-  }, [socket]);
+  // useEffect(() => {
+  //   // Lắng nghe sự kiện thông báo
+  //   listenToSocketEvent(socket, "notification", (notification) => {
+  //     setNotifications((prev: any) => [...prev, notification]);
+  //   });
+  //   return () => cleanupSocketEvent(socket, "notification");
+  // }, [socket]);
   const { resolvedTheme } = useTheme();
   const content = (
     <div className="w-80 bg-inputBackground rounded-lg shadow-xl shadow-gray-300/50 overflow-hidden cursor-pointer">
