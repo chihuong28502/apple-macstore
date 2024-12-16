@@ -352,6 +352,7 @@ export class OrderService {
   async createStripePayment(orderId: string): Promise<ResponseDto<any>> {
     try {
       const order = await this.orderModel.findById(orderId);
+      console.log("🚀 ~ OrderService ~ order:", order)
       if (!order) {
         throw new Error('Order not found');
       }
@@ -362,9 +363,14 @@ export class OrderService {
           currency: 'vnd',
           product_data: {
             name: item.productName,
-            description: `Variant: ${item.variantName}`,
+            description: `Variant: 
+            - COLOR: ${item.color} 
+            - RAM:${item.ram}GB 
+            - SSD: ${item.ssd}GB 
+            - PRICE:${item.price} 
+            - QUANTITY:${item.quantity}`,
           },
-          unit_amount: Math.round(item.price * 100), // Stripe uses cents
+          unit_amount: Math.round(item.price * 100)
         },
         quantity: item.quantity,
       }));
