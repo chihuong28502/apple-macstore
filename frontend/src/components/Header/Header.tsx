@@ -174,14 +174,14 @@ const Header = () => {
             <span>Introduction</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
           </Link>
-          <Link href="/shipping" className="group relative">
+          {/* <Link href="/shipping" className="group relative">
             <span>Shipping</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
           </Link>
           <Link href="/contacts" className="group relative">
             <span>Contacts</span>
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gray-900 transition-all duration-300 group-hover:w-full"></span>
-          </Link>
+          </Link> */}
         </div>
 
         <div className="flex items-center">
@@ -249,7 +249,7 @@ const Header = () => {
                 <span className="absolute left-0 bottom-0 h-[2px] w-full bg-blue-600 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-300"></span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/shipping" className="block text-gray-800 text-base font-medium group relative">
                 <span>Shipping</span>
                 <span className="absolute left-0 bottom-0 h-[2px] w-full bg-blue-600 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-300"></span>
@@ -260,7 +260,7 @@ const Header = () => {
                 <span>Contacts</span>
                 <span className="absolute left-0 bottom-0 h-[2px] w-full bg-blue-600 scale-x-0 group-hover:scale-x-100 transform origin-left transition-transform duration-300"></span>
               </Link>
-            </li>
+            </li> */}
             {!auth && (
               <li>
                 <BtnAuth title={"Đăng nhập"} icon={FaRegUserCircle} />
