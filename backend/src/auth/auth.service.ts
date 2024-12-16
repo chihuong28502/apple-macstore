@@ -311,7 +311,6 @@ export class AuthService {
 
   private async validateUser(email: string, password: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email });
-    console.log(":", user)
     if (!user || user.role !== 'customer') {
       throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }

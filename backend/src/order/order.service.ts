@@ -381,7 +381,6 @@ export class OrderService {
         },
         return_url: `${this.configService.get('FRONTEND_URL')}/checkout-stripe?sessionId={CHECKOUT_SESSION_ID}`
       });
-
       return {
         success: true,
         message: 'Stripe payment session created successfully',
@@ -399,11 +398,11 @@ export class OrderService {
   async checkPaymentStatusStriper(sessionId: string): Promise<ResponseDto<any>> {
     try {
       const session = await this.stripe.checkout.sessions.retrieve(sessionId);
-
       if (session.payment_status === 'paid') {
         // Cập nhật trạng thái đơn hàng
         const orderId = session.metadata.orderId;
         const order = await this.orderModel.findById(orderId);
+        const keyCache = `order_by_user_${order.userId}`;
 
         if (order) {
           order.status = 'shipping';
@@ -417,7 +416,7 @@ export class OrderService {
             customer: order.userId,
           };
           await this.notifyService.createNotify(notifyDto);
-
+          this.redisService.clearCache(keyCache)
           return {
             success: true,
             message: 'Payment completed successfully',

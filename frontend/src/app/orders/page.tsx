@@ -17,6 +17,7 @@ import { Avatar, Button, Card, List, message, Modal, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalPayment from './components/QRPaymentModal';
+import { useRouter } from 'next/navigation';
 
 type OrderItem = {
   productImages: { image: string }[];
@@ -36,6 +37,7 @@ type Order = {
 
 function Orders() {
   const dispatch = useDispatch();
+  const route = useRouter()
   const auth = useAppSelector(AuthSelectors.user);
   const allOrder: Order[] = useAppSelector(OrderSelectors.allOrder);
   const isLoadingOrder = useSelector(OrderSelectors.isLoading)
@@ -232,14 +234,24 @@ function Orders() {
                     </Button>
                   )}
                   {order.status === 'pending' && (
-                    <Button
-                      type="primary"
-                      size="large"
-                      onClick={() => handleOpenModalPayment(order)}
-                      className="bg-blue-600"
-                    >
-                      Open Payment QR
-                    </Button>
+                    <>
+                      <Button
+                        type="primary"
+                        size="large"
+                        onClick={() => handleOpenModalPayment(order)}
+                        className="bg-blue-600"
+                      >
+                        Open Payment QR
+                      </Button>
+                      <Button
+                        type="primary"
+                        size="large"
+                        onClick={() => route.push(`/checkout-payment?id=${order._id}`)}
+                        className="bg-blue-600"
+                      >
+                        Open Payment Credit Card
+                      </Button>
+                    </>
                   )}
                 </div>
               </Card>
@@ -251,7 +263,7 @@ function Orders() {
       ) : (
         <p className="text-center text-gray-500">No orders found.</p>
       )}
-       <ModalPayment
+      <ModalPayment
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         order={orderSelected}
