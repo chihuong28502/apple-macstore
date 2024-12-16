@@ -352,6 +352,7 @@ export class OrderService {
   async createStripePayment(orderId: string): Promise<ResponseDto<any>> {
     try {
       const order = await this.orderModel.findById(orderId);
+      console.log("🚀 ~ OrderService ~ order:", order)
       if (!order) {
         throw new Error('Order not found');
       }
@@ -362,9 +363,14 @@ export class OrderService {
           currency: 'vnd',
           product_data: {
             name: item.productName,
-            description: `Variant: ${item.variantName}`,
+            description: `Variant: 
+            - COLOR: ${item.color} 
+            - RAM:${item.ram}GB 
+            - SSD: ${item.ssd}GB 
+            - PRICE:${item.price} 
+            - QUANTITY:${item.quantity}`,
           },
-          unit_amount: Math.round(item.price * 100), // Stripe uses cents
+          unit_amount: Math.round(item.price * 100)
         },
         quantity: item.quantity,
       }));
@@ -381,7 +387,6 @@ export class OrderService {
         },
         return_url: `${this.configService.get('FRONTEND_URL')}/checkout-stripe?sessionId={CHECKOUT_SESSION_ID}`
       });
-
       return {
         success: true,
         message: 'Stripe payment session created successfully',
@@ -399,11 +404,11 @@ export class OrderService {
   async checkPaymentStatusStriper(sessionId: string): Promise<ResponseDto<any>> {
     try {
       const session = await this.stripe.checkout.sessions.retrieve(sessionId);
-
       if (session.payment_status === 'paid') {
         // Cập nhật trạng thái đơn hàng
         const orderId = session.metadata.orderId;
         const order = await this.orderModel.findById(orderId);
+        const keyCache = `order_by_user_${order.userId}`;
 
         if (order) {
           order.status = 'shipping';
@@ -417,7 +422,7 @@ export class OrderService {
             customer: order.userId,
           };
           await this.notifyService.createNotify(notifyDto);
-
+          this.redisService.clearCache(keyCache)
           return {
             success: true,
             message: 'Payment completed successfully',
