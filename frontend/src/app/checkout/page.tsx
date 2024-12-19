@@ -22,7 +22,6 @@ function Page() {
   const order = useSelector(OrderSelectors.order);
   const selectedShipping = useSelector(CartSelectors.shippingSelectedId);
 
-
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -90,7 +89,7 @@ function Page() {
                     onClick={handleClickPayment}
                     className="min-w-[150px] px-6 py-3.5 text-sm bg-blue-600 text-fontColor rounded-xl hover:bg-blue-700"
                   >
-                    Confirm payment QR
+                    Xác nhận thanh toán QR
                   </Button>
                 )}
                 {paymentMethod === 'creditCard' && (
@@ -98,16 +97,9 @@ function Page() {
                     onClick={handleClickPayment}
                     className="min-w-[150px] px-6 py-3.5 text-sm bg-blue-600 text-fontColor rounded-xl hover:bg-blue-700"
                   >
-                    Confirm payment Credit Card
+                    Xác nhận thanh toán bằng thẻ tín dụng
                   </Button>
                 )}
-                <div className="flex flex-wrap gap-4 mt-8">
-                  <Button
-                    className="min-w-[150px] px-6 py-3.5 text-sm bg-gray-200 text-fontColor rounded-xl hover:bg-gray-300"
-                  >
-                    Back
-                  </Button>
-                </div>
               </form>
             </div>
             <div className="bg-mainContent xl:h-screen xl:sticky xl:top-0 mt-8">
@@ -128,14 +120,14 @@ function Page() {
       </div>
 
       <Modal
-        title="QR Code for Payment"
+        title="Mã QR cho Thanh toán"
         visible={isModalVisible}
         onCancel={handleCloseModal}
         footer={null}
         centered
       >
         {qrCode ? (
-          <img src={qrCode} alt="QR Code" className="mx-auto" style={{ maxWidth: '100%' }} />
+          <img src={qrCode} alt="Mã QR" className="mx-auto" style={{ maxWidth: '100%' }} />
         ) : (
           <p className="text-center">Không tìm thấy mã QR</p>
         )}
