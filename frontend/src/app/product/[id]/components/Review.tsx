@@ -100,7 +100,7 @@ const Reviews: React.FC<any> = ({ productId }) => {
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-bold text-gray-800">Reviews ({reviewsByProductId?.length})</h3>
+      <h3 className="text-xl font-bold text-gray-800">Đánh giá ({reviewsByProductId?.length})</h3>
       {isLoadingByProductId ? (
         <section className="grid grid-cols-1 gap-3">
           {Array.from({ length: 5 }).map((_, index) => (
@@ -130,7 +130,7 @@ const Reviews: React.FC<any> = ({ productId }) => {
         className="w-full mt-8 px-4 py-2.5 bg-transparent border border-orange-400 text-gray-800 font-semibold rounded-lg"
         onClick={showAllReviews}
       >
-        Read all reviews
+        Đọc tất cả đánh giá
       </Button>
 
       {/* Button to open Add Review modal */}
@@ -139,12 +139,12 @@ const Reviews: React.FC<any> = ({ productId }) => {
           className="w-full mt-4 px-4 py-2.5 bg-blue-500 text-white font-semibold rounded-lg"
           onClick={showAddModal}
         >
-          Add Review
+          Thêm đánh giá
         </Button>
       )}
 
       {/* Modal hiển thị tất cả các review */}
-      <Modal title="All Reviews" visible={isModalVisible} onCancel={handleCancel} footer={null} width={800}>
+      <Modal title="Tất cả đánh giá" visible={isModalVisible} onCancel={handleCancel} footer={null} width={800}>
         <div className="space-y-1">
           {isLoadingByProductId ? (
             <section className="grid grid-cols-1 gap-3">
@@ -202,26 +202,26 @@ const Reviews: React.FC<any> = ({ productId }) => {
 
       {/* Add Review Modal */}
       <Modal
-        title="Add Review"
+        title="Thêm đánh giá"
         visible={isAddModalVisible}
         onCancel={handleAddCancel}
         footer={null}
         width={600}
       >
         <Form onFinish={handleAdd}>
-          <Form.Item name="rating" rules={[{ required: true, message: 'Please select a rating!' }]}>
+          <Form.Item name="rating" rules={[{ required: true, message: 'Vui lòng chọn một đánh giá!' }]}>
             <Rate />
           </Form.Item>
-          <Form.Item name="review_text" rules={[{ required: true, message: 'Please provide a review_text!' }]}>
-            <Input.TextArea rows={4} placeholder="Write your review" />
+          <Form.Item name="review_text" rules={[{ required: true, message: 'Vui lòng cung cấp nội dung đánh giá!' }]}>
+            <Input.TextArea rows={4} placeholder="Viết đánh giá của bạn" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" className="w-full bg-blue-500">Submit Review</Button>
+          <Button type="primary" htmlType="submit" className="w-full bg-blue-500">Gửi đánh giá</Button>
         </Form>
       </Modal>
 
       {/* Edit Review Modal */}
       <Modal
-        title="Edit Review"
+        title="Chỉnh sửa đánh giá"
         visible={isEditModalVisible}
         onCancel={handleEditCancel}
         footer={null}
@@ -231,13 +231,13 @@ const Reviews: React.FC<any> = ({ productId }) => {
           initialValues={{ rating: editingReview?.rating, review_text: editingReview?.review_text }}
           onFinish={handleEdit}
         >
-          <Form.Item name="rating" rules={[{ required: true, message: 'Please select a rating!' }]}>
+          <Form.Item name="rating" rules={[{ required: true, message: 'Vui lòng chọn một đánh giá!' }]}>
             <Rate />
           </Form.Item>
-          <Form.Item name="review_text" rules={[{ required: true, message: 'Please provide a review_text!' }]}>
-            <Input.TextArea rows={4} placeholder="Update your review" />
+          <Form.Item name="review_text" rules={[{ required: true, message: 'Vui lòng cung cấp nội dung đánh giá!' }]}>
+            <Input.TextArea rows={4} placeholder="Cập nhật đánh giá của bạn" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" className="w-full bg-blue-500">Update Review</Button>
+          <Button type="primary" htmlType="submit" className="w-full bg-blue-500">Cập nhật đánh giá</Button>
         </Form>
       </Modal>
     </div>
