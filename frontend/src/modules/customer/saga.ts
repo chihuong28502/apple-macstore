@@ -18,7 +18,10 @@ function* getCustomer({ payload }: PayloadAction<any>) {
     } else {
       onFail && onFail(res);
     }
-  } catch (e) { }
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
+  }
 }
 
 function* addShippingById({ payload }: PayloadAction<any>) {
@@ -35,8 +38,9 @@ function* addShippingById({ payload }: PayloadAction<any>) {
       message.error("Thêm địa chỉ ship thất bại")
       onFail(response);
     }
-  } catch (e) {
-    onFail(e);
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -65,7 +69,10 @@ function* updateShippingById({ payload }: PayloadAction<any>) {
     } else {
       message.error("Sửa địa chỉ ship hàng thất bại")
     }
-  } catch (e) { }
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
+  }
 }
 
 function* deleteShipping({ payload }: PayloadAction<any>) {
@@ -80,7 +87,10 @@ function* deleteShipping({ payload }: PayloadAction<any>) {
     } else {
       message.error("Xóa địa chỉ ship hàng thất bại")
     }
-  } catch (e) { }
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
+  }
 }
 export function* CustomerSaga() {
   yield takeLeading(CustomerActions.getCustomer, getCustomer);

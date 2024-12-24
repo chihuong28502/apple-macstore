@@ -8,7 +8,7 @@ import "slick-carousel/slick/slick.css";
 import AuthProvider from "./AuthProvider";
 import { RootStyleRegistry } from "./RootStyleRegistry";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-export async function Providers({ children }: { children: ReactNode }) {
+export  function Providers({ children }: { children: ReactNode }) {
   return (
     <ReduxProvider>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { SepayDto } from './dto/sepay.dto';
@@ -53,5 +53,28 @@ export class OrderController {
   async checkPayment(@Body() sePayDto: SepayDto, @Res() res: Response): Promise<Response> {
     const result = await this.orderService.checkPayment(sePayDto);
     return res.status(result.success ? 201 : 400).json(result);
+  }
+  @Get('/:orderId')
+  async findOrderById(@Param('orderId') orderId: string, @Res() res: Response): Promise<Response> {
+    const result = await this.orderService.findOrderById(orderId);
+    return res.status(result.success ? 200 : 400).json(result);
+  }
+
+  @Post('payment/stripe/:orderId')
+  async createStripePayment(
+    @Param('orderId') orderId: string,
+    @Res() res: Response
+  ): Promise<Response> {
+    const result = await this.orderService.createStripePayment(orderId);
+    return res.status(result.success ? 200 : 400).json(result);
+  }
+
+  @Get('payment/check/:sessionId')
+  async checkPaymentStatus(
+    @Param('sessionId') sessionId: string,
+    @Res() res: Response
+  ): Promise<Response> {
+    const result = await this.orderService.checkPaymentStatusStriper(sessionId);
+    return res.status(result.success ? 200 : 400).json(result);
   }
 }

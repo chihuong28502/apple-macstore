@@ -23,15 +23,19 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshToken, RefreshTokenDocument } from './schema/refreshToken.schema';
 import { CookieAge } from './utils/cookieAgeAuth.service';
 import { generatePassword } from './utils/genPassword';
+import { Otp, OtpDocument } from './schema/otp.schema';
+import { EmailService } from './email.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly transporter: nodemailer.Transporter;
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Otp.name) private otpModel: Model<OtpDocument>,
     @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
     @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshTokenDocument>,
     private jwtService: JwtService,
+    private readonly emailService: EmailService,
     private cookieAge: CookieAge,
     private configService: ConfigService,
     private notifyService: NotifyService,
@@ -91,7 +95,7 @@ export class AuthService {
     await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
     return {
-      message: 'Login success',
+      message: 'Đăng nhập thành công',
       success: true,
       data: {
         user: {
@@ -115,9 +119,9 @@ export class AuthService {
         role: 'admin',
       };
       await this.adminModel.create(adminUser);
-      this.logger.log('Admin account created');
+      this.logger.log('Tài khoản admin đã được tạo');
     } else {
-      this.logger.log('Admin account already exists');
+      this.logger.log('Tài khoản admin đã tồn tại');
     }
   }
 
@@ -129,66 +133,95 @@ export class AuthService {
     if (!createUserDto.password) {
       throw new BadRequestException('Password is required');
     }
+
     const code = await this.generateUniqueCode()
     const hashedPassword = await this.hashPassword(createUserDto.password);
     const createdUser = new this.userModel({
       ...createUserDto,
+      isVerify: false,
+      role: 'customer',
       password: hashedPassword,
       code: code
     });
     await createdUser.save();
     await this.cartService.createCartForUser(createdUser.id);
+    const token = this.generateVerificationToken(createUserDto.email);
+    const hostClient = this.configService.get('HOST_CLIENT') || "http://localhost:4000";
+    const verificationUrl = `${hostClient}/verify-email?token=${token}`;
+
+    this.emailService.sendVerificationEmail(createUserDto.email, verificationUrl);
     return {
-      message: 'Register success',
+      message: 'Kiểm tra email để xác minh tài khoản',
       success: true,
       data: createdUser,
     };
   }
 
- 
-async changePassword(changePassword: any): Promise<ResponseDto<User>> {
 
-  const user = await this.userModel.findOne({ email: changePassword.email });
-  if (!user) {
-    throw new BadRequestException('Email không tồn tại');
+  async changePassword(changePassword: any): Promise<ResponseDto<User>> {
+
+    const user = await this.userModel.findOne({ email: changePassword.email });
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+
+    // So sánh mật khẩu cũ với mật khẩu hiện tại trong cơ sở dữ liệu
+    const isOldPasswordValid = await bcrypt.compare(changePassword.oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      throw new BadRequestException('Mật khẩu cũ không chính xác');
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await this.hashPassword(changePassword.newPassword);
+
+    // Cập nhật mật khẩu người dùng
+    const updatedUser = await this.userModel.findOneAndUpdate(
+      { email: changePassword.email },
+      { password: hashedPassword },
+      { new: true } // Trả về tài liệu đã được cập nhật
+    );
+
+    if (!updatedUser) {
+      throw new BadRequestException('Không thể cập nhật mật khẩu');
+    }
+
+    return {
+      message: 'Mật khẩu đã được cập nhật thành công',
+      success: true,
+      data: updatedUser,
+    };
   }
-
-  // So sánh mật khẩu cũ với mật khẩu hiện tại trong cơ sở dữ liệu
-  const isOldPasswordValid = await bcrypt.compare(changePassword.oldPassword, user.password);
-  if (!isOldPasswordValid) {
-    throw new BadRequestException('Mật khẩu cũ không chính xác');
-  }
-
-  // Hash mật khẩu mới
-  const hashedPassword = await this.hashPassword(changePassword.newPassword);
-
-  // Cập nhật mật khẩu người dùng
-  const updatedUser = await this.userModel.findOneAndUpdate(
-    { email: changePassword.email },
-    { password: hashedPassword },
-    { new: true } // Trả về tài liệu đã được cập nhật
-  );
-
-  if (!updatedUser) {
-    throw new BadRequestException('Không thể cập nhật mật khẩu');
-  }
-
-  return {
-    message: 'Mật khẩu đã được cập nhật thành công',
-    success: true,
-    data: updatedUser,
-  };
-}
 
   async login(loginDto: LoginDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<User>> {
     const { email, password } = loginDto;
+    const checkEmail = await this.userModel.findOne({ email });
+
+    if (!checkEmail) {
+      throw new Error('Email not found');
+    }
+
+    // Nếu email chưa được xác minh, gửi email xác minh và return luôn
+    if (!checkEmail.isVerify) {
+      const token = this.generateVerificationToken(email);
+      const hostClient = this.configService.get('HOST_CLIENT') || "http://localhost:4000";
+      const verificationUrl = `${hostClient}/verify-email?token=${token}`;
+      await this.emailService.sendVerificationEmail(email, verificationUrl);
+      return {
+        message: 'Email chưa được xác minh. Vui lòng kiểm tra hộp thư để xác minh email.',
+        success: false,
+        data: null,
+      };
+    }
+
+    // Xác thực người dùng và xử lý đăng nhập
     const user = await this.validateUser(email, password);
     await this.refreshTokenModel.deleteMany({ userId: user._id, deviceInfo, ipAddress });
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
+
     return {
-      message: 'Login success',
+      message: 'Đăng nhập thành công',
       success: true,
       data: {
         user: {
@@ -201,6 +234,7 @@ async changePassword(changePassword: any): Promise<ResponseDto<User>> {
     };
   }
 
+
   async loginAdmin(loginAdminDto: LoginAdminDto, deviceInfo: string, ipAddress: string): Promise<ResponseDto<Admin>> {
     const { username, password } = loginAdminDto;
     const user = await this.validateAdmin(username, password);
@@ -209,7 +243,7 @@ async changePassword(changePassword: any): Promise<ResponseDto<User>> {
     const refreshToken = await this.generateRefreshToken(user);
     await this.saveRefreshToken(user._id, refreshToken, deviceInfo, ipAddress);
     return {
-      message: 'Login success',
+      message: 'Đăng nhập thành công',
       success: true,
       data: {
         user: {
@@ -270,7 +304,7 @@ async changePassword(changePassword: any): Promise<ResponseDto<User>> {
   async logout(): Promise<ResponseDto<User>> {
     return {
       success: true,
-      message: 'Logout success',
+      message: 'Đăng xuất thành công',
       data: null,
     };
   }
@@ -278,38 +312,39 @@ async changePassword(changePassword: any): Promise<ResponseDto<User>> {
   private async validateUser(email: string, password: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email });
     if (!user || user.role !== 'customer') {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     return user;
   }
+
 
   private async validateAdmin(username: string, password: string): Promise<AdminDocument> {
     const user = await this.adminModel.findOne({ username });
     if (!user || user.role !== 'admin') {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
     return user;
   }
 
-  private async validateRefreshToken(userId: string, refreshToken: string): Promise<RefreshTokenDocument> {
+  private async validateRefreshToken(userId: string, refreshToken: string) {
     const storedToken = await this.refreshTokenModel.findOne({ userId }).exec();
     if (!storedToken) {
-      throw new UnauthorizedException('Refresh token not found');
+      throw new UnauthorizedException('Không tìm thấy refresh token');
     }
     const isTokenValid = await bcrypt.compare(refreshToken, storedToken.token);
     if (!isTokenValid) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Refresh token không hợp lệ');
     }
     if (storedToken.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token has expired');
+      throw new UnauthorizedException('Refresh token đã hết hạn');
     }
     return storedToken;
   }
@@ -385,5 +420,140 @@ async changePassword(changePassword: any): Promise<ResponseDto<User>> {
       console.error('Error sending email:', error);
       throw new Error('Failed to send email');
     }
+  }
+
+  // service forget password
+
+  async verifyEmail(email: string): Promise<ResponseDto<any>> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại trong hệ thống');
+    }
+
+    // Tạo OTP 6 số
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Tính thời gian hết hạn (5 phút)
+    const exp = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
+    // Xóa OTP cũ nếu có
+    await this.otpModel.deleteMany({ email });
+
+    // Lưu OTP mới
+    await this.otpModel.create({
+      email,
+      otp,
+      exp
+    });
+
+    // Gửi email chứa OTP
+    await this.sendEmail(
+      email,
+      `
+      Chào bạn,
+  
+      Mã OTP để đặt lại mật khẩu của bạn là: ${otp}
+      
+      Mã này sẽ hết hạn sau 5 phút.
+      
+      Trân trọng!
+      `,
+      'Mã OTP đặt lại mật khẩu'
+    );
+
+    return {
+      message: 'Mã OTP đã được gửi đến email của bạn',
+      success: true,
+      data: null
+    };
+  }
+
+  async verifyOtp(data: any): Promise<ResponseDto<any>> {
+    const { email, otp } = data
+    const emailRecord = await this.otpModel.findOne({ email: email });
+
+    if (!emailRecord) {
+      throw new BadRequestException('Mã OTP không hợp lệ');
+    }
+    const otpRecord: any = otp
+
+    // Kiểm tra hết hạn
+    if (new Date(otpRecord.exp) < new Date()) {
+      await this.otpModel.deleteOne({ _id: emailRecord._id });
+      throw new BadRequestException('Mã OTP đã hết hạn');
+    }
+    const otpSecret = 'mstOtpSecret';
+    const token = this.jwtService.sign(
+      { email, otp },
+      { secret: otpSecret, expiresIn: '5m' },
+    );
+    return {
+      message: 'Xác thực OTP thành công',
+      success: true,
+      data: { token }
+    };
+  }
+
+  async verifyPassForget(email: string, newPassword: string, token: string): Promise<ResponseDto<any>> {
+    const user = await this.userModel.findOne({ email });
+    const otpSecret = 'mstOtpSecret';
+
+    if (!user) {
+      throw new BadRequestException('Không tìm thấy người dùng');
+    }
+
+    // Verify token và lấy thông tin
+    let decodedToken;
+    try {
+      decodedToken = this.jwtService.verify(token, { secret: otpSecret });
+    } catch (error) {
+      throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
+    }
+
+    // Kiểm tra email trong token có khớp với email được gửi lên
+    if (decodedToken.email !== email) {
+      throw new UnauthorizedException('Token không hợp lệ cho email này');
+    }
+    // Tìm và xóa OTP record
+    const otpRecord = await this.otpModel.findOneAndDelete({
+      email: decodedToken.email,
+      otp: decodedToken.otp
+    });
+    if (!otpRecord) {
+      throw new UnauthorizedException('OTP không tồn tại hoặc đã được sử dụng');
+    }
+
+    // Kiểm tra thời gian hết hạn của OTP
+    if (new Date(otpRecord.exp) < new Date()) {
+      throw new UnauthorizedException('OTP đã hết hạn');
+    }
+
+    // Hash và cập nhật mật khẩu mới
+    const hashedPassword = await this.hashPassword(newPassword);
+    await this.userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+
+    return {
+      message: 'Đặt lại mật khẩu thành công',
+      success: true,
+      data: null
+    };
+  }
+  generateVerificationToken(email: string): string {
+    return this.jwtService.sign({ email });
+  }
+  verifyToken(token: string) {
+    try {
+      return this.jwtService.verify(token);
+    } catch (err) {
+      throw new UnauthorizedException('Hãy thử yêu cầu lại');
+    }
+  }
+  async activateAccount(email: string) {
+    await this.userModel.findOneAndUpdate({ email }, { isVerify: true });
+    return {
+      message: 'Khởi động tài khoản thành công',
+      success: true,
+      data: null
+    };
   }
 }

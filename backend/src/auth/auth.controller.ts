@@ -14,13 +14,17 @@ import { Admin } from 'src/user/schema/admin.schema';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RulesGuard } from 'src/common/guards/auth.guard';
 import { LoginGoogleDto } from './dto/login-google.dto';
+import { EmailService } from './email.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
+    private readonly emailService: EmailService,
     private readonly cookiesService: CookiesService,
+    private configService: ConfigService,
   ) { }
 
   async onModuleInit() {
@@ -33,6 +37,7 @@ export class AuthController {
   async register(@Body() createUserDto: CreateUserDto): Promise<ResponseDto<User>> {
     return this.authService.register(createUserDto);
   }
+
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   async changePassword(@Body() changePassword: CreateUserDto): Promise<ResponseDto<User>> {
@@ -65,7 +70,9 @@ export class AuthController {
     const deviceInfo = req.headers['user-agent'] || 'Unknown Device';
     const ipAddress = req.ip || 'Unknown IP';
     const result = await this.authService.login(loginDto, deviceInfo, ipAddress);
-    this.cookiesService.setAuthCookies(res, result.data.accessToken, result.data.refreshToken);
+    if (result.success === true) {
+      this.cookiesService.setAuthCookies(res, result.data.accessToken, result.data.refreshToken);
+    }
     return result;
   }
 
@@ -130,5 +137,43 @@ export class AuthController {
     const result = await this.authService.logout();
     this.cookiesService.clearAuthCookies(res);
     return result;
+  }
+
+  // CHANGE PASSWORD
+
+
+  @Public()
+  @Post('forget-password/verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(
+    @Body('email') email: string
+  ): Promise<ResponseDto<any>> {
+    return this.authService.verifyEmail(email);
+  }
+
+  @Public()
+  @Post('forget-password/verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(
+    @Body('data') data: any
+  ): Promise<ResponseDto<any>> {
+    return this.authService.verifyOtp(data);
+  }
+
+  @Public()
+  @Post('forget-password/verify-password-forget')
+  @HttpCode(HttpStatus.OK)
+  async verifyPassForget(
+    @Body() body: { email: string; newPassword: string; token: string }
+  ): Promise<ResponseDto<any>> {
+    const { email, newPassword, token } = body;
+    return this.authService.verifyPassForget(email, newPassword, token);
+  }
+
+  @Get('verify-email')
+  @HttpCode(HttpStatus.OK)
+  async activeAccountByEmail(@Query('token') token: string) {
+    const verifiedEmail = this.authService.verifyToken(token);
+    return await this.authService.activateAccount(verifiedEmail.email);
   }
 }

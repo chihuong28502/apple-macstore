@@ -22,7 +22,6 @@ function Page() {
   const order = useSelector(OrderSelectors.order);
   const selectedShipping = useSelector(CartSelectors.shippingSelectedId);
 
-
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -52,6 +51,9 @@ function Page() {
       dispatch(OrderActions.setQr(qr))
       route.push('/qr')
     }
+    if (paymentMethod === 'creditCard') {
+      route.push(`/checkout-payment?id=${order._id}`)
+    }
   }
 
   const handleCloseModal = () => {
@@ -77,37 +79,27 @@ function Page() {
                 <div className="mt-4">
                   <h3 className="text-lg font-bold text-fontColor">Chọn phương thức thanh toán</h3>
                   <Radio.Group onChange={(e) => setPaymentMethod(e.target.value)} value={paymentMethod}>
-                    <Radio value="default">Thanh toán qua QR VCB</Radio>
+                    <Radio value="creditCard">Thanh toán bằng thẻ tín dụng</Radio>
                     <Radio value="qrmBBank">Thanh toán qua QR MB Bank</Radio>
                   </Radio.Group>
                 </div>
 
                 {paymentMethod === 'qrmBBank' && (
-                  <div className="mt-4">
-                    Nhấn tiếp tục để lấy QR
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-4 mt-8">
-                  <Button
-                    className="min-w-[150px] px-6 py-3.5 text-sm bg-gray-200 text-fontColor rounded-xl hover:bg-gray-300"
-                  >
-                    Back
-                  </Button>
                   <Button
                     onClick={handleClickPayment}
                     className="min-w-[150px] px-6 py-3.5 text-sm bg-blue-600 text-fontColor rounded-xl hover:bg-blue-700"
                   >
-                    Confirm payment
+                    Xác nhận thanh toán QR
                   </Button>
+                )}
+                {paymentMethod === 'creditCard' && (
                   <Button
-                    onClick={handleGetQrCode}
-                    className="min-w-[150px] px-6 py-3.5 text-sm bg-green-600 text-fontColor rounded-xl hover:bg-green-700"
-                    disabled={loading}
+                    onClick={handleClickPayment}
+                    className="min-w-[150px] px-6 py-3.5 text-sm bg-blue-600 text-fontColor rounded-xl hover:bg-blue-700"
                   >
-                    {loading ? 'Loading QR Code...' : 'Get QR Code'}
+                    Xác nhận thanh toán bằng thẻ tín dụng
                   </Button>
-                </div>
+                )}
               </form>
             </div>
             <div className="bg-mainContent xl:h-screen xl:sticky xl:top-0 mt-8">
@@ -128,14 +120,14 @@ function Page() {
       </div>
 
       <Modal
-        title="QR Code for Payment"
+        title="Mã QR cho Thanh toán"
         visible={isModalVisible}
         onCancel={handleCloseModal}
         footer={null}
         centered
       >
         {qrCode ? (
-          <img src={qrCode} alt="QR Code" className="mx-auto" style={{ maxWidth: '100%' }} />
+          <img src={qrCode} alt="Mã QR" className="mx-auto" style={{ maxWidth: '100%' }} />
         ) : (
           <p className="text-center">Không tìm thấy mã QR</p>
         )}

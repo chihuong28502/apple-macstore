@@ -17,8 +17,9 @@ function* fetchdCartById({ payload }: PayloadAction<any>) {
     } else {
       onFail(response);
     }
-  } catch (e) {
-    onFail(e);
+  } catch (error: any) {
+    console.log("🚀 ~ error:", error)
+    message.error(error.response.data.message)
   }
 }
 
@@ -36,8 +37,9 @@ function* addItemtByCart({ payload }: PayloadAction<any>) {
     } else {
       onFail(response);
     }
-  } catch (e) {
-    onFail(e);
+  } catch (error: any) {
+    console.log("🚀 ~ error:", error)
+    message.error(error.response.data.message)
   }
 }
 
@@ -55,9 +57,9 @@ function* updateCartItemQuantity({ payload }: PayloadAction<any>) {
       message.success("Giỏ hàng tăng giảm thành công")
     } else {
     }
-  } catch (error) {
-    message.error("Giỏ hàng tăng giảm thất bại")
-
+  } catch (error: any) {
+    console.log("🚀 ~ error:", error)
+    message.error(error.response.data.message)
   }
 }
 
@@ -75,9 +77,9 @@ function* deleteItemCard({ payload }: PayloadAction<any>) {
       message.success("Giỏ hàng xóa thành công")
     } else {
     }
-  } catch (error) {
-    message.error("Giỏ hàng xóa thất bại")
-
+  } catch (error: any) {
+    console.log("🚀 ~ error:", error)
+    message.error(error.response.data.message)
   }
 }
 export function* CartSaga() {

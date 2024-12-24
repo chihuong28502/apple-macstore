@@ -29,13 +29,13 @@ export class NotifyService {
 
       return {
         success: true,
-        message: 'Notification created successfully',
+        message: 'Tạo thông báo thành công',
         data: savedNotify,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create notification: ' + error.message,
+        message: 'Tạo thông báo thất bại: ' + error.message,
         data: null,
       };
     }
@@ -49,7 +49,7 @@ export class NotifyService {
     if (cachedNotifications) {
       return {
         success: true,
-        message: 'Notifications retrieved from cache',
+        message: 'Lấy danh sách thông báo từ cache thành công',
         data: cachedNotifications,
       };
     }
@@ -62,13 +62,13 @@ export class NotifyService {
 
       return {
         success: true,
-        message: 'Notifications retrieved successfully',
+        message: 'Lấy danh sách thông báo thành công',
         data: notifications,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve notifications: ' + error.message,
+        message: 'Lấy danh sách thông báo thất bại: ' + error.message,
         data: null,
       };
     }
@@ -82,7 +82,7 @@ export class NotifyService {
     if (cachedNotifications) {
       return {
         success: true,
-        message: 'User notifications retrieved from cache',
+        message: 'Lấy thông tin thông báo từ cache thành công',
         data: cachedNotifications,
       };
     }
@@ -98,13 +98,13 @@ export class NotifyService {
 
       return {
         success: true,
-        message: 'User notifications retrieved successfully',
+        message: 'Lấy thông tin thông báo thành công',
         data: notifications,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve user notifications: ' + error.message,
+        message: 'Lấy thông tin thông báo thất bại: ' + error.message,
         data: null,
       };
     }
@@ -118,7 +118,7 @@ export class NotifyService {
     if (cachedNotification) {
       return {
         success: true,
-        message: 'Notification retrieved from cache',
+        message: 'Lấy thông báo thành công',
         data: cachedNotification,
       };
     }
@@ -132,20 +132,20 @@ export class NotifyService {
 
         return {
           success: true,
-          message: 'Notification retrieved successfully',
+          message: 'Lấy thông báo thành công',
           data: notification,
         };
       } else {
         return {
           success: false,
-          message: 'Notification not found',
+          message: 'Không tìm thấy thông báo',
           data: null,
         };
       }
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve notification: ' + error.message,
+        message: 'Lấy thông báo thất bại: ' + error.message,
         data: null,
       };
     }
@@ -163,20 +163,20 @@ export class NotifyService {
 
         return {
           success: true,
-          message: 'Notification updated successfully',
+          message: 'Cập nhật thông báo thành công',
           data: updatedNotify,
         };
       } else {
         return {
           success: false,
-          message: 'Notification not found',
+          message: 'Không tìm thấy thông báo',
           data: null,
         };
       }
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to update notification: ' + error.message,
+        message: 'Cập nhật thông báo thất bại: ' + error.message,
         data: null,
       };
     }
@@ -194,20 +194,20 @@ export class NotifyService {
 
         return {
           success: true,
-          message: 'Notification deleted successfully',
+          message: 'Xóa thông báo thành công',
           data: deletedNotify,
         };
       } else {
         return {
           success: false,
-          message: 'Notification not found',
+          message: 'Không tìm thấy thông báo',
           data: null,
         };
       }
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to delete notification: ' + error.message,
+        message: 'Xóa thông báo thất bại: ' + error.message,
         data: null,
       };
     }

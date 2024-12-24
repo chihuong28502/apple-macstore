@@ -28,13 +28,13 @@ export class CartService {
       const savedCart = await newCart.save();
       return {
         success: true,
-        message: 'Cart created successfully',
+        message: 'Tạo giỏ hàng thành công',
         data: savedCart,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create cart: ' + error.message,
+        message: 'Tạo giỏ hàng thất bại: ' + error.message,
         data: null,
       };
     }
@@ -78,13 +78,13 @@ export class CartService {
 
       return {
         success: true,
-        message: 'Item added to cart successfully',
+        message: 'Thêm sản phẩm vào giỏ hàng thành công',
         data: updatedCart,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to add item to cart: ' + error.message,
+        message: 'Thêm sản phẩm vào giỏ hàng thất bại: ' + error.message,
         data: null,
       };
     }
@@ -99,7 +99,7 @@ export class CartService {
     if (cachedCart) {
       return {
         success: true,
-        message: 'Cart retrieved from cache',
+        message: 'Lấy thông tin giỏ hàng từ cache thành công',
         data: cachedCart,
       };
     }
@@ -112,7 +112,7 @@ export class CartService {
       if (!cart) {
         return {
           success: false,
-          message: 'Cart not found for user',
+          message: 'Không tìm thấy giỏ hàng',
           data: null,
         };
       }
@@ -120,13 +120,13 @@ export class CartService {
       await this.redisService.setCache(cacheKey, cart, this.CACHE_TTL);
       return {
         success: true,
-        message: 'Cart retrieved successfully',
+        message: 'Lấy thông tin giỏ hàng thành công',
         data: cart,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve cart: ' + error.message,
+        message: 'Lấy thông tin giỏ hàng thất bại: ' + error.message,
         data: null,
       };
     }
@@ -140,7 +140,7 @@ export class CartService {
       if (!cart) {
         return {
           success: false,
-          message: 'Cart not found',
+          message: 'Không tìm thấy giỏ hàng',
           data: null,
         };
       }
@@ -155,7 +155,7 @@ export class CartService {
       if (!item) {
         return {
           success: false,
-          message: 'Item not found in cart',
+          message: 'Không tìm thấy sản phẩm trong giỏ hàng',
           data: null,
         };
       }
@@ -166,13 +166,13 @@ export class CartService {
       this.redisService.clearCache(cacheKey)
       return {
         success: true,
-        message: 'Quantity updated successfully',
+        message: 'Cập nhật số lượng thành công',
         data: cart,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to update cart: ' + error.message,
+        message: 'Cập nhật giỏ hàng thất bại: ' + error.message,
         data: null,
       };
     }
@@ -185,7 +185,7 @@ export class CartService {
       if (!Array.isArray(items)) {
         return {
           success: false,
-          message: 'Invalid items format. Expected an array.',
+          message: 'Định dạng sản phẩm không hợp lệ. Yêu cầu một mảng.',
           data: null,
         };
       }
@@ -195,7 +195,7 @@ export class CartService {
       if (!cart) {
         return {
           success: false,
-          message: 'Cart not found',
+          message: 'Không tìm thấy giỏ hàng',
           data: null,
         };
       }

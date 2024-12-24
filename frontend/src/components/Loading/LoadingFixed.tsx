@@ -23,7 +23,7 @@ const LoadingFixed = ({isOpenProps}:Props) => {
           <div className={styles.ring}></div>
           <div className={styles.ring}></div>
           <div id="h3" className={styles.h3}>
-            Loading...
+            APPLE
           </div>
         </div>
       </div>

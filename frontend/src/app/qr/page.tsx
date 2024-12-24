@@ -47,17 +47,6 @@ function QrScan() {
   return (
     <div>
       <img src={order?.qr} alt="QR Code" />
-      {/* {isModalVisible && (
-        <Modal
-          title="QR Code for Payment"
-          visible={isModalVisible}
-          footer={null}
-          onCancel={() => setIsModalVisible(false)}
-          centered
-        >
-          <p className="text-center">Không tìm thấy mã QR</p>
-        </Modal>
-      )} */}
       {showFullScreen && (
         <FullScreenLoading
           isLoading={true}

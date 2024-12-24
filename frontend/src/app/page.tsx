@@ -14,6 +14,22 @@ function Page() {
     slidesToScroll: 1, // Chuyển 1 ảnh mỗi lần
     autoplay: true, // Tự động chuyển đổi
     autoplaySpeed: 5000,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        }
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        }
+      }
+    ]
   };
   const slides = [
     {
@@ -52,24 +68,23 @@ function Page() {
       <Slider {...sliderSettings}>
         {slides.map((slide, index) => (
           <div key={index} className="relative flex justify-center">
-            {/* Hình ảnh */}
             <img
               src={slide.image}
               alt={slide.title}
-              className="object-contain"
+              className="w-full h-auto object-cover md:object-contain"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
             />
-            {/* Lớp phủ màu với nội dung */}
-            <div className="absolute inset-0 flex flex-col justify-end items-center text-black bottom-6">
-              <h1 className="text-5xl leading-[1.07143] font-semibold tracking-[-0.005em] mb-4">
+            <div className="absolute inset-0 flex flex-col justify-end items-center text-black bottom-6 px-4">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl leading-tight md:leading-[1.07143] font-semibold tracking-[-0.005em] mb-2 md:mb-4 text-center">
                 {slide.title}
               </h1>
-              <p className="text-[28px] leading-[1.10722] font-normal mb-6">
+              <p className="text-lg md:text-2xl lg:text-[28px] leading-snug md:leading-[1.10722] font-normal mb-4 md:mb-6 text-center">
                 {slide.subtitle}
               </p>
               <Button
                 type="primary"
                 href="#"
-                className="h-[36px] px-[17px] bg-[#0071e3] hover:bg-[#0077ED] rounded-[980px] text-[17px] leading-[1.17648] font-normal"
+                className="h-[36px] px-4 md:px-[17px] bg-[#0071e3] hover:bg-[#0077ED] rounded-[980px] text-base md:text-[17px] leading-[1.17648] font-normal"
               >
                 Mua sắm quà tặng
               </Button>

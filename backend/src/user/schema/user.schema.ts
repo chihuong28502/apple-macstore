@@ -20,6 +20,9 @@ export class User {
   @Prop({ required: true, enum: ['customer', 'admin', 'support'] })
   role: string;
 
+  @Prop({ required: true })
+  isVerify: boolean;
+
   @Prop({
     type: {
       firstName: { type: String },

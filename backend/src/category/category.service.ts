@@ -23,13 +23,13 @@ export class CategoryService {
       await this.redisService.clearCache('categories_all');
       return {
         success: true,
-        message: 'Category created successfully',
+        message: 'Tạo danh mục thành công',
         data: createdCategory,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to create category',
+        message: 'Tạo danh mục thất bại',
         data: null,
       };
     }
@@ -45,7 +45,7 @@ export class CategoryService {
       if (cachedCategories) {
         return {
           success: true,
-          message: 'Categories retrieved from cache',
+          message: 'Lấy danh sách danh mục từ cache thành công',
           data: cachedCategories,
         };
       }
@@ -53,13 +53,13 @@ export class CategoryService {
       await this.redisService.setCache(cacheKey, categories, this.CACHE_TTL);
       return {
         success: true,
-        message: 'Categories retrieved successfully',
+        message: 'Lấy danh sách danh mục thành công',
         data: categories,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve categories',
+        message: 'Lấy danh sách danh mục thất bại',
         data: [],
       };
     }
@@ -73,7 +73,7 @@ export class CategoryService {
       if (cachedCategory) {
         return {
           success: true,
-          message: 'Category retrieved from cache',
+          message: 'Lấy thông tin danh mục từ cache thành công',
           data: cachedCategory,
         };
       }
@@ -81,20 +81,20 @@ export class CategoryService {
       if (!category) {
         return {
           success: false,
-          message: `Category with ID "${id}" not found`,
+          message: `Không tìm thấy danh mục với ID "${id}"`,
           data: null,
         };
       }
       await this.redisService.setCache(cacheKey, category, this.CACHE_TTL);
       return {
         success: true,
-        message: 'Category retrieved successfully',
+        message: 'Lấy thông tin danh mục thành công',
         data: category,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to retrieve category',
+        message: 'Lấy thông tin danh mục thất bại',
         data: null,
       };
     }
@@ -114,7 +114,7 @@ export class CategoryService {
       if (!updatedCategory) {
         return {
           success: false,
-          message: `Category with ID "${id}" not found`,
+          message: `Không tìm thấy danh mục với ID "${id}"`,
           data: null,
         };
       }
@@ -122,13 +122,13 @@ export class CategoryService {
       await this.redisService.clearCache(cacheKeyAllCate);
       return {
         success: true,
-        message: 'Category updated successfully',
+        message: 'Cập nhật danh mục thành công',
         data: updatedCategory,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to update category',
+        message: 'Cập nhật danh mục thất bại',
         data: null,
       };
     }
@@ -152,14 +152,14 @@ export class CategoryService {
       await this.redisService.clearCache(cacheKeyAllCate);
       return {
         success: true,
-        message: 'Category deleted successfully',
+        message: 'Xóa danh mục thành công',
         data: [],
       };
     } catch (error) {
       console.error("Error deleting category:", error);
       return {
         success: false,
-        message: 'Failed to delete category',
+        message: 'Xóa danh mục thất bại',
         data: null,
       };
     }

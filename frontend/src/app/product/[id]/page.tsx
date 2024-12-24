@@ -128,7 +128,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
             {/* Colors */}
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">Colors</h3>
+              <h3 className="font-semibold mb-2">Màu sắc</h3>
               {isLoadingProductById ? (
                 <div className="skeleton-container">
                   {Array.from({ length: 4 }).map((_, index) => (
@@ -166,7 +166,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   transition={{ duration: 0.3 }}
                   className="mb-4 overflow-hidden"
                 >
-                  <h3 className="font-semibold mb-2">Available RAM</h3>
+                  <h3 className="font-semibold mb-2">RAM</h3>
                   <div className="flex gap-2">
                     {availableRams.map((ram: any, index) => (
                       <Button
@@ -192,7 +192,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   transition={{ duration: 0.3 }}
                   className="mb-4 overflow-hidden"
                 >
-                  <h3 className="font-semibold mb-2">Available Storage</h3>
+                  <h3 className="font-semibold mb-2">Lưu trữ (SSD)</h3>
                   <div className="flex gap-2">
                     {availableStorages.map((ssd: any, index) => (
                       <Button
@@ -219,13 +219,13 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   className="mt-4 overflow-hidden"
                 >
                   <p className="text-lg font-bold">
-                    Price:{" "}
+                    Giá:{" "}
                     {selectedVariant.price.toLocaleString("vi-VN", {
                       style: "currency",
                       currency: "VND",
                     })}
                   </p>
-                  <p>Available Stock: {selectedVariant.availableStock}</p>
+                  <p>Còn hàng: {selectedVariant.availableStock}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -242,7 +242,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 onClick={handleAddToCart}
                 disabled={!selectedColor || !selectedRam || !selectedStorage}
               >
-                Add to Cart
+                Thêm vào giỏ hàng
               </Button>
             </div>
             <Reviews productId={productId} />

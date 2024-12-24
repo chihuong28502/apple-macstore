@@ -1,11 +1,11 @@
 "use client";
 import { AuthActions } from "@/modules/auth/slice";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import { Button, Input, message } from "antd";
+import { EyeInvisibleOutlined, EyeOutlined, LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Form, Input, message } from "antd";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { RiErrorWarningLine } from "react-icons/ri";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import LoginGoogleButton from "../components/LoginGoogle";
@@ -22,7 +22,7 @@ const registerSchema = Yup.object().shape({
     .required('Confirm Password is required'),
 });
 
-function Register() {
+function ChangePassword() {
   const route = useRouter();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
@@ -46,6 +46,7 @@ function Register() {
   });
 
   const [isSubmitDisabled, setSubmitDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const validateForm = async () => {
@@ -78,24 +79,20 @@ function Register() {
 
   const handleRegister = () => {
     if (!isSubmitDisabled) {
+      setLoading(true);
       dispatch(
         AuthActions.register({
           ...formData,
           onSuccess: () => {
-            message.success("Đăng ký thành công");
-            route.push('/auth/login')
+            message.success("Registration successful");
+            route.push('/auth/login');
           },
           onFail: () => {
-            message.error("Đăng ký thất bại");
+            message.error("Registration failed");
+            setLoading(false);
           },
         })
       );
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleRegister();
     }
   };
 
@@ -104,58 +101,22 @@ function Register() {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const InputField = ({ name, label, type = "text", placeholder }: { name: keyof typeof formData; label: string; type?: string; placeholder: string }) => (
-    <div className="space-y-1">
-      <label className="text-sm font-medium text-gray-400">{label}</label>
-      <Input
-        name={name}
-        type={type}
-        value={formData[name]}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="h-8 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
-        status={errors[name] ? "error" : ""}
-      />
-      {errors[name] && (
-        <div className="text-red-500 flex items-center mt-1">
-          <RiErrorWarningLine className="w-4 h-4 mr-1" />
-          <div className="text-xs">{errors[name]}</div>
-        </div>
-      )}
-    </div>
-  );
-
-  const PasswordInput = ({ name, label, placeholder }: { name: "password" | "confirmPassword"; label: string; placeholder: string }) => (
-    <div className="space-y-1">
-      <label className="text-sm font-medium text-gray-400">{label}</label>
-      <Input.Password
-        name={name}
-        value={formData[name]}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="h-8 border-gray-800 bg-transparent text-fontColor placeholder:text-gray-600 transition-all focus:ring-2 focus:ring-blue-500"
-        status={errors[name] ? "error" : ""}
-        iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-      />
-      {errors[name] && (
-        <div className="text-red-500 flex items-center mt-1">
-          <RiErrorWarningLine className="w-4 h-4 mr-1" />
-          <div className="text-xs">{errors[name]}</div>
-        </div>
-      )}
-    </div>
-  );
-
   return (
-    <div className="">
-      <div className="flex min-h-[84vh] shadow-lg rounded-lg overflow-hidden">
-        {/* Left Column */}
-        <div className="flex w-full flex-col bg-background lg:w-1/2">
-          <div className="flex flex-1 flex-col justify-between p-4 sm:p-4 lg:p-4">
-            {/* Logo */}
-            <div className="flex items-center gap-2 text-fontColor">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="bg-gradient-to-br h-[88vh] dark:from-gray-900 dark:to-gray-800 from-gray-50 to-gray-100 p-4 sm:p-6 lg:p-2"
+    >
+      <div className="flex shadow-2xl h-full rounded-xl overflow-hidden backdrop-blur-sm bg-white/80 dark:bg-gray-800/80">
+        <div className="flex w-full flex-col lg:w-1/2 bg-white dark:bg-gray-900">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-1 flex-col p-8 sm:p-4 lg:p-8"
+          >
+            <div className="flex items-center gap-2 text-gray-800 dark:text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -173,79 +134,198 @@ function Register() {
               </svg>
               <span className="text-lg font-semibold">APPLE</span>
             </div>
+
             {/* Form */}
-            <div className="mx-auto w-full max-w-sm space-y-8">
-              <div className="space-y-1 text-center">
-                <h1 className="text-3xl font-bold text-fontColor">Create an Account</h1>
-                <p className="text-sm text-gray-400">
-                  Sign up to get started with our service
-                </p>
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mx-auto w-full max-w-sm space-y-2"
+            >
+              <div className="space-y-2 text-center">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create an Account</h1>
+                <p className="text-gray-500 dark:text-gray-400">Sign up to get started with our service</p>
               </div>
-              <div className="space-y-4">
-                {/* Registration Form */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <InputField name="firstName" label="First Name" placeholder="Enter your first name" />
-                  <InputField name="lastName" label="Last Name" placeholder="Enter your last name" />
-                  <InputField name="phone" label="Phone" placeholder="Enter your phone number" />
-                  <InputField name="email" label="Email" type="email" placeholder="Enter your email" />
-                  <InputField name="username" label="Username" placeholder="Choose a username" />
-                  <PasswordInput name="password" label="Password" placeholder="Enter your password" />
-                  <PasswordInput name="confirmPassword" label="Confirm Password" placeholder="Confirm your password" />
+
+              {/* Google Login */}
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <LoginGoogleButton />
+              </motion.div>
+
+              {/* Registration Form */}
+              <Form layout="vertical" onFinish={handleRegister}>
+                <div className="space-y-3 mb-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Form.Item
+                      name="firstName"
+                      validateStatus={errors.firstName ? "error" : ""}
+                      help={errors.firstName}
+                      className=" mb-1"
+                    >
+                      <Input
+                        prefix={<UserOutlined className="text-gray-400" />}
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        placeholder="First Name"
+                        className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="lastName"
+                      validateStatus={errors.lastName ? "error" : ""}
+                      help={errors.lastName}
+                      className=" mb-1"
+                    >
+                      <Input
+                        prefix={<UserOutlined className="text-gray-400" />}
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="Last Name"
+                        className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                      />
+                    </Form.Item>
+                  </div>
+                  <Form.Item
+                    name="phone"
+                    validateStatus={errors.phone ? "error" : ""}
+                    help={errors.phone}
+                  >
+                    <Input
+                      prefix={<PhoneOutlined className="text-gray-400" />}
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Phone Number"
+                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="email"
+                    validateStatus={errors.email ? "error" : ""}
+                    help={errors.email}
+                  >
+                    <Input
+                      prefix={<MailOutlined className="text-gray-400" />}
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Email"
+                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="username"
+                    validateStatus={errors.username ? "error" : ""}
+                    help={errors.username}
+                  >
+                    <Input
+                      prefix={<UserOutlined className="text-gray-400" />}
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="Username"
+                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="password"
+                    validateStatus={errors.password ? "error" : ""}
+                    help={errors.password}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined className="text-gray-400" />}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Password"
+                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                      iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="confirmPassword"
+                    validateStatus={errors.confirmPassword ? "error" : ""}
+                    help={errors.confirmPassword}
+                  >
+                    <Input.Password
+                      prefix={<LockOutlined className="text-gray-400" />}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm Password"
+                      className="rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                      iconRender={(visible) => (visible ? <EyeOutlined /> : <EyeInvisibleOutlined />)}
+                    />
+                  </Form.Item>
                 </div>
-                <Button
-                  onClick={handleRegister}
-                  disabled={isSubmitDisabled}
-                  className="h-8 w-full bg-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 transition-all text-white font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+                {/* Register Button */}
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={isSubmitDisabled || loading}
+                    className="h-12 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg"
+                  >
+                    {loading ? 'Registering...' : 'Register'}
+                  </Button>
+                </motion.div>
+              </Form>
+
+              {/* Login Link */}
+              <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+                Already have an account?
+                <Link 
+                  href="/auth/login"
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
-                  Register
-                </Button>
-                <div className="w-full bg-transparent text-fontColor hover:bg-white/10">
-                  <LoginGoogleButton />
-                </div>
-                <p className="text-center text-sm text-gray-400">
-                  Already have an account?{" "}
-                  <Link href="/auth/login" className="text-blue-500 hover:text-blue-400">
-                    Log In
-                  </Link>
-                </p>
-              </div>
-            </div>
-          </div>
+                  Log In
+                </Link>
+              </p>
+            </motion.div>
+          </motion.div>
         </div>
-        {/* Right Column (Image) */}
-        <div className="hidden lg:block lg:w-1/2">
-          <div className="relative flex h-full items-end bg-white">
+
+        {/* Right Column */}
+        <motion.div
+          initial={{ x: 100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="hidden lg:block lg:w-1/2"
+        >
+          <div className="relative h-full">
             <img
               src="https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/white-building.jpg"
               alt="Modern architecture"
-              width={"1080"}
-              height={"1080"}
               className="absolute inset-0 h-full w-full object-cover"
             />
-            <div className="relative space-y-4 p-16">
-              <blockquote className="text-lg font-medium italic text-gray-900">
-                "Join our community and experience the future of technology today."
-              </blockquote>
-              <figcaption className="flex items-center gap-4">
-                <img
-                  src="https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/white-building.jpg"
-                  alt="John Doe"
-                  width={"40"}
-                  height={"40"}
-                  className="rounded-full"
-                />
-                <div>
-                  <div className="font-medium">John Doe</div>
-                  <div className="text-sm text-gray-600">Chief Innovation Officer</div>
-                </div>
-              </figcaption>
+            <div className="relative h-full bg-gradient-to-t from-gray-900/50 to-transparent p-12 flex items-end">
+              <div className="space-y-4">
+                <blockquote className="text-lg font-medium italic text-white">
+                  "Join our community and experience the future of technology today."
+                </blockquote>
+                <figcaption className="flex items-center gap-4">
+                  <img
+                    src="https://randomuser.me/api/portraits/men/32.jpg"
+                    alt="John Doe"
+                    className="h-10 w-10 rounded-full border-2 border-white"
+                  />
+                  <div className="text-white">
+                    <div className="font-medium">John Doe</div>
+                    <div className="text-sm opacity-80">Chief Innovation Officer</div>
+                  </div>
+                </figcaption>
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-export default Register;
+export default ChangePassword;
 

@@ -6,6 +6,7 @@ import { CartRequest } from "../cart/request";
 import { CartActions } from "../cart/slice";
 import { OrderRequest } from "./request";
 import { OrderActions } from "./slice";
+import { AxiosError } from "axios";
 
 function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
   try {
@@ -19,8 +20,9 @@ function* getAllOrderById({ payload }: PayloadAction<{ id: string; data: any }>)
       yield put(OrderActions.setAllOrder(res.data));
     } else {
     }
-  } catch (e) {
-    message.error("Thao tác thất bại!");
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -48,8 +50,9 @@ function* addOrder({ payload }: PayloadAction<{
       message.error("Thêm order thất bại");
       onFail(res.data)
     }
-  } catch (e) {
-    message.error("Thao tác thất bại!");
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -67,10 +70,10 @@ function* updateStatus({ payload }: PayloadAction<{ id: string; data: any, userI
       const res = yield OrderRequest.getOrderById(userId);
       yield put(OrderActions.setAllOrder(res.data));
     } else {
-      message.error("Thao tác thất bại!");
     }
   } catch (error: any) {
-    message.error("Thao tác thất bại!");
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -87,7 +90,8 @@ function* updateOrder({ payload }: PayloadAction<{ id: string; data: any }>): Ge
       message.error("Sửa thông tin người dùng thất bại");
     }
   } catch (error: any) {
-    message.error("Thao tác thất bại!");
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
@@ -104,14 +108,70 @@ function* deleteOrder({ payload }: any): Generator<any, void, any> {
       message.error("Xóa danh mục thất bại");
     }
   } catch (error: any) {
-    message.error("Xóa danh mục thất bại Catch");
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
   }
 }
 
+function* getCreditCardPayment({ payload }: PayloadAction<any>) {
+  try {
+    yield put(AppAction.showLoading());
+    const res: { success: boolean; data: any; message: any } = yield OrderRequest.creditCardPayment(payload);
+    if (res.success) {
+      yield put(OrderActions.setCreditCardPayment(res.data));
+    }
+    yield put(AppAction.hideLoading());
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      message.error("Thao tác thất bại!");
+    }
+  }
+}
+
+function* getStatusCreditCardPayment({ payload }: PayloadAction<any>) {
+  try {
+    const { sessionId, onSuccess, onFail } = payload;
+    const res: { success: boolean; data: any; message: any } =
+      yield OrderRequest.checkCreditCardPayment(sessionId);
+    if (res.success) {
+      yield put(OrderActions.setStatusCreditCardPayment(res.success));
+      onSuccess && onSuccess()
+    } else {
+      yield put(OrderActions.setStatusCreditCardPayment(res.success));
+      onFail && onFail()
+      message.error(res?.message);
+    }
+    yield put(AppAction.hideLoading());
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      message.error("Thao tác thất bại!");
+    }
+  }
+}
+
+
+function* getOrderById({ payload }: PayloadAction<{ id: string; data: any }>): Generator<any, void, any> {
+  try {
+    const res: { success: boolean; data: any } =
+      yield OrderRequest.getOrderById(payload);
+    if (res.success) {
+
+      yield put(OrderActions.setOrderById(res.data));
+    } else {
+    }
+  } catch (error: any) {
+    message.error(error.response.data.message)
+    console.log("🚀 ~ error:", error)
+  }
+}
 export function* OrderSaga() {
   yield takeLeading(OrderActions.addOrder, addOrder);
   yield takeLeading(OrderActions.deleteOrder, deleteOrder);
   yield takeLeading(OrderActions.getAllOrderById, getAllOrderById);
   yield takeLeading(OrderActions.updateOrder, updateOrder);
   yield takeLeading(OrderActions.updateStatus, updateStatus);
+  yield takeLeading(OrderActions.getCreditCardPayment, getCreditCardPayment);
+  yield takeLeading(OrderActions.getStatusCreditCardPayment, getStatusCreditCardPayment);
+  yield takeLeading(OrderActions.getOrderById, getOrderById);
+
 }
