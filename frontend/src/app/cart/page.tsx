@@ -29,7 +29,6 @@ function CartCheckout() {
   const [suggestions, setSuggestions] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [placeId, setPlaceId] = useState("");
-  console.log("🚀 ~ suggestions:", suggestions)
   const [shippingData, setShippingData] = useState({
     firstName: "",
     lastName: "",
@@ -64,7 +63,6 @@ function CartCheckout() {
   }
 
   const handleClickBtnAddress = (data: any) => {
-    console.log("🚀 ~ data:", data)
     setShippingData({
       ...shippingData,
       city: data.compound.province,
@@ -418,12 +416,6 @@ function CartCheckout() {
               </li>
             </ul>
             <div className="mt-8 space-y-2">
-              <button
-                type="button"
-                className="text-sm px-4 py-2.5 w-full font-semibold tracking-wide bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-              >
-                Checkout
-              </button>
               <button
                 type="button"
                 onClick={handleContinueShopping}

@@ -17,7 +17,6 @@ export class GoongService {
     try {
       const cachedData = await this.redisService.getCache(cacheKey);
       if (cachedData) {
-        console.log('🚀 ~ Cache hit:', cachedData);
         return {
           success: true,
           message: 'Lấy dữ liệu thành công',
@@ -30,7 +29,6 @@ export class GoongService {
           input: address,
         },
       });
-      console.log("🚀 ~ GoongService ~ response.data:", response.data)
       await this.redisService.setCache(cacheKey, response.data, this.CACHE_TTL);
       return {
         success: true,
@@ -53,7 +51,6 @@ export class GoongService {
       // Kiểm tra cache
       const cachedData = await this.redisService.getCache(cacheKey);
       if (cachedData) {
-        console.log('🚀 ~ Cache hit:', cachedData);
         return {
           success: true,
           message: 'Lấy dữ liệu từ cache thành công',
@@ -68,8 +65,6 @@ export class GoongService {
           api_key: api_key,
         },
       });
-
-      console.log('🚀 ~ GoongService ~ response.data:', response.data);
 
       // Lưu dữ liệu vào cache
       await this.redisService.setCache(cacheKey, response.data, this.CACHE_TTL);
