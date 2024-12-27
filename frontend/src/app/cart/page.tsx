@@ -4,9 +4,11 @@ import { AuthActions, AuthSelectors } from "@/modules/auth/slice";
 import { CartActions, CartSelectors } from "@/modules/cart/slice";
 import { CustomerActions, CustomerSelectors } from "@/modules/customer/slice";
 import { OrderActions } from "@/modules/order/slice";
-import { Button, Card, Checkbox, Col, Empty, Input, List, message, Modal, Row, Space, Tooltip } from "antd";
+import { Button, Card, Checkbox, Col, Dropdown, Empty, Input, List, Menu, message, Modal, Row, Space, Tooltip } from "antd";
+import axios from "axios";
+import { debounce } from "lodash";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 
@@ -22,6 +24,10 @@ function CartCheckout() {
   const [selectedShipping, setSelectedShipping] = useState<string | null>(null);
   const [editShippingData, setEditShippingData] = useState<any | null>(null);
   const [isShippingModalVisible, setIsShippingModalVisible] = useState(false);
+  const [inputShippingData, setInputShippingData] = useState();
+  const [suggestions, setSuggestions] = useState([]);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  console.log("🚀 ~ suggestions:", suggestions)
   const [shippingData, setShippingData] = useState({
     firstName: "",
     lastName: "",
@@ -30,6 +36,41 @@ function CartCheckout() {
     address: "",
     description: ""
   });
+  const fetchSuggestions = useCallback(
+    debounce(async (address) => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5001/goong/location-suggestions?address=${address}`
+        );
+        setSuggestions(response?.data?.data?.predictions || []);
+        setDropdownVisible(response?.data?.data?.predictions.length > 0);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    }, 500), // Delay 500ms
+    []
+  );
+  const onChangeInputShippingData = (e: any) => {
+    const value = e.target.value;
+    setInputShippingData(value);
+    if (value) {
+      fetchSuggestions(value);
+    } else {
+      setSuggestions([]);
+      setDropdownVisible(false);
+    }
+  }
+
+  const handleClickBtnAddress = (data: any) => {
+    console.log("🚀 ~ data:", data)
+    setShippingData({
+      ...shippingData,
+      city: data.compound.province,
+      address: data.compound.district,
+      description: data.compound.commune,
+    })
+    setDropdownVisible(false);
+  }
 
   useEffect(() => {
     if (auth?._id) {
@@ -250,7 +291,6 @@ function CartCheckout() {
     }
   };
 
-
   const handleSaveShipping = () => {
     setIsShippingModalVisible(false);
     if (editShippingData) {
@@ -290,6 +330,27 @@ function CartCheckout() {
   const handleSelectShipping = (shippingId: string) => {
     setSelectedShipping(shippingId);
   };
+  const menu = (
+    <Menu>
+      {suggestions.map((suggestion: any, index: any) => (
+        <Menu.Item
+          key={index}
+          onClick={() => handleClickBtnAddress(suggestion)}
+          className="hover:bg-gray-200 transition duration-200"
+        >
+          {suggestion.description}
+        </Menu.Item>
+      ))}
+      {/* Nút đóng dropdown */}
+      <Menu.Divider />
+      <Menu.Item
+        onClick={() => setDropdownVisible(false)}
+        className="text-center text-red-500 hover:text-red-700 cursor-pointer"
+      >
+        Đóng
+      </Menu.Item>
+    </Menu>
+  );
   return (
     <>
       <div className="font-sans mx-auto bg-bgColor py-4">
@@ -406,20 +467,40 @@ function CartCheckout() {
                   onChange={(e) => setShippingData({ ...shippingData, phoneNumber: e.target.value })}
                 />
               </label>
-              <label>
-                Thành phố:
-                <Input
-                  value={shippingData.city}
-                  onChange={(e) => setShippingData({ ...shippingData, city: e.target.value })}
-                />
-              </label>
-              <label>
-                Địa chỉ:
-                <Input
-                  value={shippingData.address}
-                  onChange={(e) => setShippingData({ ...shippingData, address: e.target.value })}
-                />
-              </label>
+              <div className="">
+                <label className="block text-gray-700 font-medium mb-2">
+                  Địa chỉ:
+                </label>
+                <Dropdown
+                  overlay={menu}
+                  visible={dropdownVisible}
+                  placement="bottom"
+                  onVisibleChange={(visible) => setDropdownVisible(visible)}
+                >
+                  <Input
+                    value={inputShippingData}
+                    onChange={onChangeInputShippingData}
+                    placeholder="Nhập địa chỉ"
+                    className="rounded-md shadow-sm border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  />
+                </Dropdown>
+              </div>
+              <div className="">
+                <label>
+                  Thành phố:
+                  <Input
+                    value={shippingData.city}
+                    onChange={(e) => setShippingData({ ...shippingData, city: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Địa chỉ:
+                  <Input
+                    value={shippingData.address}
+                    onChange={(e) => setShippingData({ ...shippingData, address: e.target.value })}
+                  />
+                </label>
+              </div>
               <label>
                 Chi Tiết:
                 <Input

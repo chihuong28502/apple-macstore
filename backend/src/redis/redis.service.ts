@@ -11,7 +11,7 @@ export class RedisService {
   }
 
   async setCache<T>(key: string, value: T, ttl: number): Promise<void> {
-    await this.redisClient.setex(key, ttl, JSON.stringify(value));
+    await this.redisClient.set(key, JSON.stringify(value),'EX',ttl);
   }
 
   async clearCache(key: string): Promise<void> {
