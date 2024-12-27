@@ -11,7 +11,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-
+import dynamic from "next/dynamic";
+const MapComponent = dynamic(() => import('./components/MyMaps'), { ssr: false });
 function CartCheckout() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -24,9 +25,10 @@ function CartCheckout() {
   const [selectedShipping, setSelectedShipping] = useState<string | null>(null);
   const [editShippingData, setEditShippingData] = useState<any | null>(null);
   const [isShippingModalVisible, setIsShippingModalVisible] = useState(false);
-  const [inputShippingData, setInputShippingData] = useState();
+  const [inputShippingData, setInputShippingData] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [placeId, setPlaceId] = useState("");
   console.log("🚀 ~ suggestions:", suggestions)
   const [shippingData, setShippingData] = useState({
     firstName: "",
@@ -69,6 +71,7 @@ function CartCheckout() {
       address: data.compound.district,
       description: data.compound.commune,
     })
+    setPlaceId(data.place_id)
     setDropdownVisible(false);
   }
 
@@ -330,7 +333,7 @@ function CartCheckout() {
   const handleSelectShipping = (shippingId: string) => {
     setSelectedShipping(shippingId);
   };
-  const menu = (
+  const menu = inputShippingData ? (
     <Menu>
       {suggestions.map((suggestion: any, index: any) => (
         <Menu.Item
@@ -343,14 +346,25 @@ function CartCheckout() {
       ))}
       {/* Nút đóng dropdown */}
       <Menu.Divider />
-      <Menu.Item
-        onClick={() => setDropdownVisible(false)}
-        className="text-center text-red-500 hover:text-red-700 cursor-pointer"
-      >
+      <Menu.Item key="close" onClick={() => setDropdownVisible(false)}>
         Đóng
       </Menu.Item>
     </Menu>
-  );
+  ) : <> </>;
+
+  const handleCancel = () => {
+    setIsShippingModalVisible(false)
+    setPlaceId("")
+    setInputShippingData("")
+    setShippingData({
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      city: "",
+      address: "",
+      description: ""
+    })
+  }
   return (
     <>
       <div className="font-sans mx-auto bg-bgColor py-4">
@@ -449,7 +463,7 @@ function CartCheckout() {
           <Modal
             title={editShippingData ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ"}
             visible={isShippingModalVisible}
-            onCancel={() => setIsShippingModalVisible(false)}
+            onCancel={handleCancel}
             onOk={handleSaveShipping}
           >
             <form>
@@ -508,10 +522,11 @@ function CartCheckout() {
                   onChange={(e) => setShippingData({ ...shippingData, description: e.target.value })}
                 />
               </label>
+              {placeId && <MapComponent placeId={placeId} />}
             </form>
           </Modal>
         </Space>
-      </div>
+      </div >
     </>
   );
 }

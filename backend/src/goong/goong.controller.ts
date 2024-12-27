@@ -12,4 +12,8 @@ export class GoongController {
     }
     return this.goongService.getLocationSuggestions(address);
   }
+  @Get('coordinates')
+  async getCoordinates(@Query('placeId') placeId: string) {
+    return this.goongService.getCoordinates(placeId);
+  }
 }

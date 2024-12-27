@@ -43,4 +43,51 @@ export class GoongService {
       };
     }
   }
+
+  async getCoordinates(placeId: string): Promise<any> {
+    const cacheKey = `coordinates_${placeId}`;
+    const url = `${this.configService.getOrThrow('API_URL_GOONG_MAP')}/geocode`;
+    const api_key = this.configService.getOrThrow('API_KEY_GOONG_MAP');
+
+    try {
+      // Kiểm tra cache
+      const cachedData = await this.redisService.getCache(cacheKey);
+      if (cachedData) {
+        console.log('🚀 ~ Cache hit:', cachedData);
+        return {
+          success: true,
+          message: 'Lấy dữ liệu từ cache thành công',
+          data: cachedData,
+        };
+      }
+
+      // Gọi API Goong
+      const response = await axios.get(url, {
+        params: {
+          place_id: placeId,
+          api_key: api_key,
+        },
+      });
+
+      console.log('🚀 ~ GoongService ~ response.data:', response.data);
+
+      // Lưu dữ liệu vào cache
+      await this.redisService.setCache(cacheKey, response.data, this.CACHE_TTL);
+
+      return {
+        success: true,
+        message: 'Lấy dữ liệu từ API thành công',
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('🚀 ~ Lỗi khi gọi API Goong:', error.message);
+
+      return {
+        success: false,
+        message: 'Không thể lấy dữ liệu từ API Goong',
+        error: error.response?.data || error.message,
+      };
+    }
+  }
+
 }
