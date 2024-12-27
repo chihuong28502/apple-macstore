@@ -3,6 +3,7 @@
     "lib": ["dom", "dom.iterable", "esnext","ES2023"],
     "allowJs": true,
     "target": "ES2023",
+    "typeRoots": ["./node_modules/@types", "./src/@types"],
     "downlevelIteration": true,
     "skipLibCheck": true,
     "strict": true,

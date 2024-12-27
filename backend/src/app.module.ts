@@ -21,6 +21,7 @@ import { CartModule } from './cart/cart.module';
 import { RedisModule } from './redis/redis.module';
 import { IntroductionModule } from './introduction/introduction.module';
 import { ReviewsModule } from './reviews/review.module';
+import { GoongModule } from './goong/goong.module';
 
 @Module({
   imports: [
@@ -58,7 +59,8 @@ import { ReviewsModule } from './reviews/review.module';
     CartModule,
     IntroductionModule,
     ReviewsModule,
-    RedisModule
+    RedisModule,
+    GoongModule
   ],
   providers: [
     AppService,
