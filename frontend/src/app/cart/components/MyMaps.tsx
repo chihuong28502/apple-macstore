@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import GoongMap from '@goongmaps/goong-js';
 import axios from 'axios';
+import MSTFetch from '@/core/services/fetch';
 
 const MapComponent = ({ placeId }: { placeId: string }) => {
   useEffect(() => {
@@ -16,9 +17,9 @@ const MapComponent = ({ placeId }: { placeId: string }) => {
     // Hàm gọi API để lấy tọa độ từ Goong
     const fetchCoordinates = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/goong/coordinates', { params: { placeId } });
+        const response = await MSTFetch.get('/goong/coordinates', { params: { placeId } });
 
-        const location = response.data?.data?.results?.[0]?.geometry?.location;
+        const location = response.data?.results?.[0]?.geometry?.location;
 
         if (location) {
           const { lat, lng } = location;

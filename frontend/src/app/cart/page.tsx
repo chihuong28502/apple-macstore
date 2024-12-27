@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import dynamic from "next/dynamic";
+import MSTFetch from "@/core/services/fetch";
 const MapComponent = dynamic(() => import('./components/MyMaps'), { ssr: false });
 function CartCheckout() {
   const dispatch = useDispatch();
@@ -40,11 +41,11 @@ function CartCheckout() {
   const fetchSuggestions = useCallback(
     debounce(async (address) => {
       try {
-        const response = await axios.get(
-          `http://localhost:5001/goong/location-suggestions?address=${address}`
+        const response = await MSTFetch.get(
+          `/goong/location-suggestions?address=${address}`
         );
-        setSuggestions(response?.data?.data?.predictions || []);
-        setDropdownVisible(response?.data?.data?.predictions.length > 0);
+        setSuggestions(response?.data?.predictions || []);
+        setDropdownVisible(response?.data?.predictions.length > 0);
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
