@@ -368,7 +368,7 @@ function CartCheckout() {
       <div className="font-sans mx-auto bg-bgColor py-4">
         <div className="grid md:grid-cols-4 gap-4">
           <div className="md:col-span-2 bg-bgColor p-4 rounded-md">
-            <h2 className="text-2xl font-bold text-fontColor">Cart</h2>
+            <h2 className="text-2xl font-bold text-fontColor">Giỏ hàng</h2>
             <hr className="border-gray-300 mt-4 mb-8" />
             <div className="flex items-center mb-4">
               <Checkbox
@@ -514,7 +514,7 @@ function CartCheckout() {
                   onChange={(e) => setShippingData({ ...shippingData, description: e.target.value })}
                 />
               </label>
-              {placeId && <MapComponent placeId={placeId} />}
+              {/* {placeId && <MapComponent placeId={placeId} />} */}
             </form>
           </Modal>
         </Space>
