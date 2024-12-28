@@ -36,9 +36,7 @@ export class OrderService {
     private readonly ordersGateway: OrdersGateway,
     private readonly cartsGateway: CartsGateway
   ) {
-    this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {
-      apiVersion: '2024-11-20.acacia',
-    });
+    this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'));
   }
 
   async create(createOrderDto: CreateOrderDto): Promise<ResponseDto<Order>> {
