@@ -1,16 +1,16 @@
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 
 export const CustomerRequest = {
   getAllCustomer() {
-    return MSTFetch.get("/user");
+    return APPLEFetch.get("/user");
   },
   getCustomerById(id: any) {
-    return MSTFetch.get(`/user/${id}`);
+    return APPLEFetch.get(`/user/${id}`);
   },
   updateCustomerById(id: string, data: any) {
-    return MSTFetch.put(`/user/update/${id}`, data);
+    return APPLEFetch.put(`/user/update/${id}`, data);
   }, 
   deleteCustomer(id: string) {
-    return MSTFetch.delete(`/user/delete/${id}`);
+    return APPLEFetch.delete(`/user/delete/${id}`);
   },
 };

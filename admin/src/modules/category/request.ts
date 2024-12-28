@@ -1,21 +1,21 @@
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 
 import { CategoryType } from "./type";
 
 export const CategoryRequest = {
   getAllCategories() {
-    return MSTFetch.get("/categories");
+    return APPLEFetch.get("/categories");
   },
   createCategory(data: CategoryType) {
-    return MSTFetch.post("/categories", data);
+    return APPLEFetch.post("/categories", data);
   },
   getCategoryById(id: string) {
   },
 
   updateCategory(id: string, data: any) {
-    return MSTFetch.put(`/categories/update/${id}`, data);
+    return APPLEFetch.put(`/categories/update/${id}`, data);
   },
   deleteCategory(id: string) {
-    return MSTFetch.delete(`/categories/delete/${id}`);
+    return APPLEFetch.delete(`/categories/delete/${id}`);
   },
 };

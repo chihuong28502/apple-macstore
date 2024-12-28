@@ -1,20 +1,20 @@
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 
 export const ProductRequest = {
   createProduct(data: any) {
-    return MSTFetch.post("/products", data);
+    return APPLEFetch.post("/products", data);
   },
 
   getProductById(id: string) {
-    return MSTFetch.get(`/products/${id}`);
+    return APPLEFetch.get(`/products/${id}`);
   },
 
   updateProduct(id: string, data: any) {
-    return MSTFetch.put(`/products/update/${id}`, data);
+    return APPLEFetch.put(`/products/update/${id}`, data);
   },
 
   deleteProduct(id: string) {
-    return MSTFetch.delete(`/products/delete/${id}`);
+    return APPLEFetch.delete(`/products/delete/${id}`);
   },
 
   getAllProducts({ page, limit, categoryId, minPrice, maxPrice }: { page: number; limit: number; categoryId?: string; minPrice?: number; maxPrice?: number }) {
@@ -22,19 +22,19 @@ export const ProductRequest = {
     if (categoryId) {
       url += `&categoryId=${categoryId}`;
     }
-    return MSTFetch.get(url);
+    return APPLEFetch.get(url);
   },
   /// VARIANTS
   addVariantByProduct(data: any) {
-    return MSTFetch.post(`/products/variant`, data);
+    return APPLEFetch.post(`/products/variant`, data);
   },
   updateVariant(id: string, data: any) {
-    return MSTFetch.put(`/products/variant/update/${id}`, data);
+    return APPLEFetch.put(`/products/variant/update/${id}`, data);
   },
   getVariantByProduct(productId: string) {
-    return MSTFetch.get(`/products/variant?productId=${productId}`);
+    return APPLEFetch.get(`/products/variant?productId=${productId}`);
   },
   deleteVariant(id: string) {
-    return MSTFetch.delete(`/products/variant/delete/${id}`);
+    return APPLEFetch.delete(`/products/variant/delete/${id}`);
   },
 };

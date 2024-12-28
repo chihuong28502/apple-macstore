@@ -1,22 +1,22 @@
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 
 export const OrderRequest = {
   addOrder(item: any) {
-    return MSTFetch.post("/order", item);
+    return APPLEFetch.post("/order", item);
   },
   getAllOrder() {
-    return MSTFetch.get("/order");
+    return APPLEFetch.get("/order");
   },
   getOrderById(id: any) {
-    return MSTFetch.get(`/order/user/${id}`);
+    return APPLEFetch.get(`/order/user/${id}`);
   },
   updateStatusOrderById(id: string, data: any) {
-    return MSTFetch.put(`/order/update/status/${id}`, data);
+    return APPLEFetch.put(`/order/update/status/${id}`, data);
   },
   updateOrderById(id: string, data: any) {
-    return MSTFetch.put(`/order/update/${id}`, data);
+    return APPLEFetch.put(`/order/update/${id}`, data);
   },
   deleteOrder(id: string) {
-    return MSTFetch.delete(`/order/delete/${id}`);
+    return APPLEFetch.delete(`/order/delete/${id}`);
   },
 };
