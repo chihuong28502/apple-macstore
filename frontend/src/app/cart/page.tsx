@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import dynamic from "next/dynamic";
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 const MapComponent = dynamic(() => import('./components/MyMaps'), { ssr: false });
 function CartCheckout() {
   const dispatch = useDispatch();
@@ -41,7 +41,7 @@ function CartCheckout() {
   const fetchSuggestions = useCallback(
     debounce(async (address) => {
       try {
-        const response = await MSTFetch.get(
+        const response = await APPLEFetch.get(
           `/goong/location-suggestions?address=${address}`
         );
         setSuggestions(response?.data?.predictions || []);

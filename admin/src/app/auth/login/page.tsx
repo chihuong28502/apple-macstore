@@ -8,9 +8,11 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import { InputField } from "./components/InputField";
+import { useRouter } from "next/navigation";
 
 function Page() {
   const dispatch = useDispatch();
+  const router = useRouter()
   const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ username: "", password: "" });
@@ -31,7 +33,7 @@ function Page() {
             password,
             onSuccess: (rs: any) => {
               message.success("Đăng nhập thành công");
-              window.location.replace("/");
+              router.push("/product");
             },
             onFail: (message: any, data: any) => {
               message.error("Đăng nhập thất bại");

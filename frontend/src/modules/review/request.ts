@@ -1,15 +1,15 @@
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 export const ReviewRequest = {
   addReview(data: any) {
-    return MSTFetch.post(`/reviews/create`, data);
+    return APPLEFetch.post(`/reviews/create`, data);
   },
   getAllReviews(productId: any) {
-    return MSTFetch.get(`/reviews/${productId}`);
+    return APPLEFetch.get(`/reviews/${productId}`);
   },
   deleteReview(id: any) {
-    return MSTFetch.delete(`/reviews/delete/${id}`);
+    return APPLEFetch.delete(`/reviews/delete/${id}`);
   },
   updateReview(id: string, payload: any) {
-    return MSTFetch.patch(`/reviews/update/${id}`, payload);
+    return APPLEFetch.patch(`/reviews/update/${id}`, payload);
   }
 };

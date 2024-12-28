@@ -7,14 +7,14 @@ import { FaCalculator, FaUser, } from "react-icons/fa";
 import { FaCartShopping, FaShirt } from "react-icons/fa6";
 import { MdDashboardCustomize } from "react-icons/md";
 import { IoReceipt } from "react-icons/io5";
-
+import { BiSolidCategory } from "react-icons/bi";
 type MenuItem = Required<MenuProps>["items"][number];
 
 type Props = {
   collapsed?: boolean;
 };
 
-const   MenuSidebarDashboard = ({ collapsed = false }: Props) => {
+const MenuSidebarDashboard = ({ collapsed = false }: Props) => {
   const { resolvedTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
@@ -24,17 +24,17 @@ const   MenuSidebarDashboard = ({ collapsed = false }: Props) => {
   };
 
   const items: MenuItem[] = [
-    {
-      key: "",
-      icon: (
-        <Tooltip title="Dashboard" placement="bottom">
-          <div className="flex items-center w-full px-2 h-full cursor-pointer">
-            <MdDashboardCustomize />
-          </div>
-        </Tooltip>
-      ),
-      onClick: () => handleOnclickPush(""),
-    },
+    // {
+    //   key: "",
+    //   icon: (
+    //     <Tooltip title="Dashboard" placement="bottom">
+    //       <div className="flex items-center w-full px-2 h-full cursor-pointer">
+    //         <MdDashboardCustomize />
+    //       </div>
+    //     </Tooltip>
+    //   ),
+    //   onClick: () => handleOnclickPush(""),
+    // },
     {
       key: "/product",
       icon: (
@@ -62,7 +62,7 @@ const   MenuSidebarDashboard = ({ collapsed = false }: Props) => {
       icon: (
         <Tooltip title="Categories" placement="bottom">
           <div className="w-full px-2">
-            <FaCalculator />
+            <BiSolidCategory />
           </div>
         </Tooltip>
       ),
@@ -78,7 +78,7 @@ const   MenuSidebarDashboard = ({ collapsed = false }: Props) => {
         </Tooltip>
       ),
       onClick: () => handleOnclickPush("/introduction"),
-    },{
+    }, {
       key: "/orders",
       icon: (
         <Tooltip title="Orders" placement="bottom">

@@ -1,6 +1,6 @@
-import MSTFetch from "@/core/services/fetch";
+import APPLEFetch from "@/core/services/fetch";
 export const NotifyRequest = {
   getAllNotifys(id: any) {
-    return MSTFetch.get(`/notify/${id}`);
+    return APPLEFetch.get(`/notify/${id}`);
   },
 };

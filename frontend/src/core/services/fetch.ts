@@ -96,7 +96,7 @@ const del = (url: string, config = {}) => {
   return AxiosClient.delete(url, config);
 };
 
-const MSTFetch = {
+const APPLEFetch = {
   post,
   get,
   put,
@@ -104,4 +104,4 @@ const MSTFetch = {
   delete: del,
 };
 
-export default MSTFetch;
+export default APPLEFetch;

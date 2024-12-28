@@ -40,6 +40,7 @@ function Orders() {
   const auth = useAppSelector(AuthSelectors.user);
   const allOrder: Order[] = useAppSelector(OrderSelectors.allOrder);
   const users = useAppSelector(CustomerSelectors.customer) || [];
+  console.log("🚀 ~ users:", users)
   const [selectedUser, setSelectedUser] = useState<string | "all">("all");
 
   useEffect(() => {
@@ -174,7 +175,7 @@ function Orders() {
             options={[
               { label: "All", value: "all" },
               ...users.map((user: any) => ({
-                label: `${user.profile.firstName} ${user.profile.lastName}`,
+                label: `${user.email}`,
                 value: user._id,
               })),
             ]}
